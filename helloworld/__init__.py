@@ -1,5 +1,5 @@
 bl_info = {
-    "name": "My Blender Addon",
+    "name": "Mastodon Blender Addon",
     "author": "Matthias Arzt",
     "version": (0, 1, 0),
     "blender": (2, 93, 8),
@@ -11,8 +11,10 @@ bl_info = {
 
 from . import my_blender_addon
 
+
 def register():
     my_blender_addon.register()
+
 
 def unregister():
     my_blender_addon.unregister()
