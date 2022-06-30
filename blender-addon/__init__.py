@@ -1,12 +1,12 @@
 bl_info = {
-    "name": "Mastodon Blender Addon",
+    "name": "Mastodon Blender View",
     "author": "Matthias Arzt",
     "version": (0, 1, 0),
     "blender": (2, 93, 8),
-    "location": "View3D > NewTab",
+    "location": "View3D > Mastodon",
     "warning": "",
     "wiki_url": "",
-    "category": "Add Mesh"
+    "category": "3D View"
 }
 
 from . import my_blender_addon
