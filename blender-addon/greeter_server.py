@@ -14,7 +14,6 @@
 """The Python implementation of the GRPC helloworld.Greeter server."""
 
 from concurrent import futures
-import logging
 
 import bpy
 import grpc
@@ -22,7 +21,6 @@ from . import helloworld_pb2
 from . import helloworld_pb2_grpc
 from functools import partial
 import queue
-
 
 
 class ManySpheres:
@@ -75,24 +73,10 @@ class Greeter(helloworld_pb2_grpc.GreeterServicer):
     def __init__(self):
         self.many_spheres = ManySpheres()
 
-    def SayHello(self, request, context):
-        return helloworld_pb2.HelloReply(message='Hello, %s!' % request.name)
-
-    def SayHelloAgain(self, request, context):
-        return helloworld_pb2.HelloReply(
-            message='Hello again, %s!' % request.name)
-
     def addSphere(self, request, context):
         run_in_main_thread(partial(self.many_spheres.add_sphere,
                                    request.x, request.y, request.z))
         return helloworld_pb2.Empty()
-
-
-def addSphere(x, y, z):
-    bpy.ops.mesh.primitive_ico_sphere_add(enter_editmode=False, align='WORLD',
-                                          location=(x, y, z), scale=(1, 1, 1))
-    bpy.ops.object.shade_smooth()
-    return None
 
 
 # Implement run in main thread
