@@ -49,25 +49,47 @@ class ManySpheres:
 
         def init_reference_sphere():
             bpy.ops.mesh.primitive_ico_sphere_add(enter_editmode=False,
-                                                  align='WORLD', location=(0, 0, 0),
+                                                  align='WORLD',
+                                                  location=(0, 0, 0),
                                                   scale=(1, 1, 1))
             bpy.ops.object.shade_smooth()
             self.reference_sphere = bpy.context.active_object
             bpy.ops.collection.objects_remove_all()  # remove the sphere from its collection
-            self.reference_objects_collection.objects.link(self.reference_sphere)
+            self.reference_objects_collection.objects.link(
+                self.reference_sphere)
 
         init_collection()
         init_parent_object()
         init_reference_objects_collection()
         init_reference_sphere()
 
-
-    def add_sphere(self, x, y, z):
+    def add_spot(self, id, time, location):
         sphere = self.reference_sphere.copy()
-        sphere.location = (x, y, z)
+        sphere.name = id
+        sphere.location = location
         sphere.parent = self.parent_object
+        self.keyframe_set_visible(sphere, time, True)
         self.collection.objects.link(sphere)
+        sphere.keyframe_insert(data_path="location", frame=time)
         return
+
+    def move_spot(self, id, time, location):
+        sphere = self.collection.objects[id]
+        sphere.location = location
+        sphere.keyframe_insert(data_path="location", frame=time)
+        return
+
+    def hide_spot(self, id, time):
+        sphere = self.collection.objects[id]
+        self.keyframe_set_visible(sphere, time, False)
+        return
+
+    def keyframe_set_visible(self, sphere, time, visible):
+        sphere.hide_viewport = not visible
+        sphere.hide_render = not visible
+        sphere.keyframe_insert(data_path="hide_viewport", frame=time)
+        sphere.keyframe_insert(data_path="hide_render", frame=time)
+
 
 
 class Greeter(helloworld_pb2_grpc.GreeterServicer):
@@ -75,10 +97,30 @@ class Greeter(helloworld_pb2_grpc.GreeterServicer):
     def __init__(self):
         self.many_spheres = ManySpheres()
 
-    def addSphere(self, request, context):
-        run_in_main_thread(partial(self.many_spheres.add_sphere,
-                                   request.x, request.y, request.z))
+    def addSpot(self, request, context):
+        run_in_main_thread(partial(self.many_spheres.add_spot,
+                                   request.id,
+                                   request.time,
+                                   self.parse_coordinates(request.coordinates)))
         return helloworld_pb2.Empty()
+
+    def moveSpot(self, request, context):
+        run_in_main_thread(partial(self.many_spheres.move_spot,
+                                   request.id,
+                                   request.time,
+                                   self.parse_coordinates(request.coordinates)))
+        return helloworld_pb2.Empty()
+
+    def hideSpot(self, request, context):
+        run_in_main_thread(partial(self.many_spheres.hide_spot,
+                                   request.id,
+                                   request.time
+                                   ))
+        return helloworld_pb2.Empty()
+
+    @staticmethod
+    def parse_coordinates(coordinates):
+        return coordinates.x, coordinates.y, coordinates.z
 
 
 # Implement run in main thread

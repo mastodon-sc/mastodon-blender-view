@@ -23,7 +23,28 @@ package helloworld;
 
 service Greeter {
 
-  rpc addSphere (Coordinates) returns (Empty) {}
+  rpc addSpot(AddSpotRequest) returns (Empty) {}
+
+  rpc moveSpot(MoveSpotRequest) returns (Empty) {}
+
+  rpc hideSpot(HideSpotRequest) returns (Empty) {}
+}
+
+message AddSpotRequest {
+  string id = 1;
+  int64 time = 2;
+  Coordinates coordinates = 3;
+}
+
+message MoveSpotRequest {
+  string id = 1;
+  int64 time = 2;
+  Coordinates coordinates = 3;
+}
+
+message HideSpotRequest {
+  string id = 1;
+  int64 time = 2;
 }
 
 message Coordinates {

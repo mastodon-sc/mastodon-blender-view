@@ -14,9 +14,19 @@ class GreeterStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.addSphere = channel.unary_unary(
-                '/helloworld.Greeter/addSphere',
-                request_serializer=helloworld__pb2.Coordinates.SerializeToString,
+        self.addSpot = channel.unary_unary(
+                '/helloworld.Greeter/addSpot',
+                request_serializer=helloworld__pb2.AddSpotRequest.SerializeToString,
+                response_deserializer=helloworld__pb2.Empty.FromString,
+                )
+        self.moveSpot = channel.unary_unary(
+                '/helloworld.Greeter/moveSpot',
+                request_serializer=helloworld__pb2.MoveSpotRequest.SerializeToString,
+                response_deserializer=helloworld__pb2.Empty.FromString,
+                )
+        self.hideSpot = channel.unary_unary(
+                '/helloworld.Greeter/hideSpot',
+                request_serializer=helloworld__pb2.HideSpotRequest.SerializeToString,
                 response_deserializer=helloworld__pb2.Empty.FromString,
                 )
 
@@ -24,7 +34,19 @@ class GreeterStub(object):
 class GreeterServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def addSphere(self, request, context):
+    def addSpot(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def moveSpot(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def hideSpot(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -33,9 +55,19 @@ class GreeterServicer(object):
 
 def add_GreeterServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'addSphere': grpc.unary_unary_rpc_method_handler(
-                    servicer.addSphere,
-                    request_deserializer=helloworld__pb2.Coordinates.FromString,
+            'addSpot': grpc.unary_unary_rpc_method_handler(
+                    servicer.addSpot,
+                    request_deserializer=helloworld__pb2.AddSpotRequest.FromString,
+                    response_serializer=helloworld__pb2.Empty.SerializeToString,
+            ),
+            'moveSpot': grpc.unary_unary_rpc_method_handler(
+                    servicer.moveSpot,
+                    request_deserializer=helloworld__pb2.MoveSpotRequest.FromString,
+                    response_serializer=helloworld__pb2.Empty.SerializeToString,
+            ),
+            'hideSpot': grpc.unary_unary_rpc_method_handler(
+                    servicer.hideSpot,
+                    request_deserializer=helloworld__pb2.HideSpotRequest.FromString,
                     response_serializer=helloworld__pb2.Empty.SerializeToString,
             ),
     }
@@ -49,7 +81,7 @@ class Greeter(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def addSphere(request,
+    def addSpot(request,
             target,
             options=(),
             channel_credentials=None,
@@ -59,8 +91,42 @@ class Greeter(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/helloworld.Greeter/addSphere',
-            helloworld__pb2.Coordinates.SerializeToString,
+        return grpc.experimental.unary_unary(request, target, '/helloworld.Greeter/addSpot',
+            helloworld__pb2.AddSpotRequest.SerializeToString,
+            helloworld__pb2.Empty.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def moveSpot(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/helloworld.Greeter/moveSpot',
+            helloworld__pb2.MoveSpotRequest.SerializeToString,
+            helloworld__pb2.Empty.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def hideSpot(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/helloworld.Greeter/hideSpot',
+            helloworld__pb2.HideSpotRequest.SerializeToString,
             helloworld__pb2.Empty.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

@@ -30,9 +30,35 @@ public class HelloWorldClient {
 		blockingStub = GreeterGrpc.newBlockingStub(channel);
 	}
 
-	public void addSphere(float x, float y, float z) {
+	public void addSphere(String id, long time, Coordinates coordinates) {
+		blockingStub.addSpot( AddSpotRequest.newBuilder()
+				.setId( id )
+				.setTime( time )
+				.setCoordinates( coordinates )
+		.build());
+	}
+
+	private void moveSphere( String id, int time, Coordinates coordinates )
+	{
+		blockingStub.moveSpot( MoveSpotRequest.newBuilder()
+				.setId( id )
+				.setTime( time )
+				.setCoordinates( coordinates )
+				.build());
+	}
+
+	private void hideSphere( String id, int time )
+	{
+		blockingStub.hideSpot( HideSpotRequest.newBuilder()
+				.setId( id )
+				.setTime( time )
+				.build());
+	}
+
+	private static Coordinates coordinates( float x, float y, float z )
+	{
 		Coordinates coordinates = Coordinates.newBuilder().setX( x ).setY( y ).setZ( z ).build();
-		blockingStub.addSphere( coordinates );
+		return coordinates;
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -40,17 +66,15 @@ public class HelloWorldClient {
 		try {
 			HelloWorldClient client = new HelloWorldClient(channel);
 			Stopwatch stopwatch = Stopwatch.createStarted();
-			int n = 20;
-
-			for ( int x = 0; x < n; x++ )
-				for ( int y = 0; y < n; y++ )
-					for ( int z = 0; z < n; z++ )
-						client.addSphere( x, y, z );
-
+			client.addSphere("id", 0, coordinates(0, 0, 0));
+			for ( int i = 0; i < 100; i++ )
+				client.moveSphere( "id", i, coordinates(i / 10.f, 0, 0) );
+			client.hideSphere("id", 100);
 			System.out.println(stopwatch.toString());
 		}
 		finally {
 			channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
 		}
 	}
+
 }
