@@ -16,6 +16,7 @@
 
 package org.mastodon;
 
+import com.google.common.base.Stopwatch;
 import io.grpc.Channel;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -63,6 +64,11 @@ public class HelloWorldClient {
 		logger.info("Greeting: " + response.getMessage());
 	}
 
+	public void addSphere(float x, float y, float z) {
+		Coordinates coordinates = Coordinates.newBuilder().setX( x ).setY( y ).setZ( z ).build();
+		blockingStub.addSphere( coordinates );
+	}
+
 	/**
 	 * Greet server. If provided, the first element of {@code args} is the name to
 	 * use in the greeting. The second argument is the target server.
@@ -101,6 +107,15 @@ public class HelloWorldClient {
 		try {
 			HelloWorldClient client = new HelloWorldClient(channel);
 			client.greet(user);
+			Stopwatch stopwatch = Stopwatch.createStarted();
+			int n = 20;
+
+			for ( int x = 0; x < n; x++ )
+				for ( int y = 0; y < n; y++ )
+					for ( int z = 0; z < n; z++ )
+						client.addSphere( x, y, z );
+
+			System.out.println(stopwatch.toString());
 		}
 		finally {
 			// ManagedChannels use resources like threads and TCP connections. To

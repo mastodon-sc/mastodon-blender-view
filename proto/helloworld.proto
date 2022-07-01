@@ -27,7 +27,17 @@ service Greeter {
   rpc SayHello (HelloRequest) returns (HelloReply) {}
   // Sends another greeting
   rpc SayHelloAgain (HelloRequest) returns (HelloReply) {}
+
+  rpc addSphere (Coordinates) returns (Empty) {}
 }
+
+message Coordinates {
+  float x = 1;
+  float y = 2;
+  float z = 3;
+}
+
+message Empty {}
 
 // The request message containing the user's name.
 message HelloRequest {

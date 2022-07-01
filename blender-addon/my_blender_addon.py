@@ -23,8 +23,12 @@ my_greeter_server = None
 
 
 def register():
-    global my_greeter_server
     bpy.utils.register_class(TestPanel)
+    bpy.app.timers.register(start_server, first_interval=1)
+
+
+def start_server():
+    global my_greeter_server
     my_greeter_server = greeter_server.serve()
 
 
