@@ -27,38 +27,40 @@ class ManySpheres:
     collection = None
     parent_object = None
     reference_sphere = None
-    reference_object_connection = None
+    reference_objects_collection = None
 
     def __init__(self):
-        self.init_collection()
-        self.init_parent_object()
-        self.init_reference_objects_collection()
-        self.init_reference_sphere()
+        def init_collection():
+            self.collection = bpy.data.collections.new("mastodon_blender_view")
+            bpy.context.scene.collection.children.link(self.collection)
 
-    def init_collection(self):
-        self.collection = bpy.data.collections.new("mastodon_blender_view")
-        bpy.context.scene.collection.children.link(self.collection)
+        def init_parent_object():
+            bpy.ops.object.empty_add(type='PLAIN_AXES', align='WORLD',
+                                     location=(0, 0, 0), scale=(1, 1, 1))
+            self.parent_object = bpy.context.active_object
+            bpy.ops.collection.objects_remove_all()  # remove the sphere from its collection
+            self.collection.objects.link(self.parent_object)
 
-    def init_parent_object(self):
-        bpy.ops.object.empty_add(type='PLAIN_AXES', align='WORLD',
-                                 location=(0, 0, 0), scale=(1, 1, 1))
-        self.parent_object = bpy.context.active_object
-        bpy.ops.collection.objects_remove_all()  # remove the sphere from its collection
-        self.collection.objects.link(self.parent_object)
+        def init_reference_objects_collection():
+            self.reference_objects_collection = bpy.data.collections.new(
+                "mastodon_reference_objects")
+            bpy.context.scene.collection.children.link(
+                self.reference_objects_collection)
 
-    def init_reference_objects_collection(self):
-        self.reference_objects_collection = bpy.data.collections.new(
-            "mastodon_reference_objects")
-        bpy.context.scene.collection.children.link(self.reference_objects_collection)
+        def init_reference_sphere():
+            bpy.ops.mesh.primitive_ico_sphere_add(enter_editmode=False,
+                                                  align='WORLD', location=(0, 0, 0),
+                                                  scale=(1, 1, 1))
+            bpy.ops.object.shade_smooth()
+            self.reference_sphere = bpy.context.active_object
+            bpy.ops.collection.objects_remove_all()  # remove the sphere from its collection
+            self.reference_objects_collection.objects.link(self.reference_sphere)
 
-    def init_reference_sphere(self):
-        bpy.ops.mesh.primitive_ico_sphere_add(enter_editmode=False,
-                                              align='WORLD', location=(0, 0, 0),
-                                              scale=(1, 1, 1))
-        bpy.ops.object.shade_smooth()
-        self.reference_sphere = bpy.context.active_object
-        bpy.ops.collection.objects_remove_all()  # remove the sphere from its collection
-        self.reference_objects_collection.objects.link(self.reference_sphere)
+        init_collection()
+        init_parent_object()
+        init_reference_objects_collection()
+        init_reference_sphere()
+
 
     def add_sphere(self, x, y, z):
         sphere = self.reference_sphere.copy()
