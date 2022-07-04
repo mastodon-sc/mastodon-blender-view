@@ -27,7 +27,6 @@ class ManySpheres:
     collection = None
     parent_object = None
     reference_sphere = None
-    reference_objects_collection = None
 
     def __init__(self):
         def init_collection():
@@ -41,12 +40,6 @@ class ManySpheres:
             bpy.ops.collection.objects_remove_all()  # remove the sphere from its collection
             self.collection.objects.link(self.parent_object)
 
-        def init_reference_objects_collection():
-            self.reference_objects_collection = bpy.data.collections.new(
-                "mastodon_reference_objects")
-            bpy.context.scene.collection.children.link(
-                self.reference_objects_collection)
-
         def init_reference_sphere():
             bpy.ops.mesh.primitive_ico_sphere_add(enter_editmode=False,
                                                   align='WORLD',
@@ -55,12 +48,9 @@ class ManySpheres:
             bpy.ops.object.shade_smooth()
             self.reference_sphere = bpy.context.active_object
             bpy.ops.collection.objects_remove_all()  # remove the sphere from its collection
-            self.reference_objects_collection.objects.link(
-                self.reference_sphere)
 
         init_collection()
         init_parent_object()
-        init_reference_objects_collection()
         init_reference_sphere()
 
     def add_moving_spot(self, request):
