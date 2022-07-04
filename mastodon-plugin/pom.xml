@@ -101,6 +101,8 @@
 		<jackson-dataformat-yaml.version>2.11.1</jackson-dataformat-yaml.version>
 
 		<labkit-pixel-classification.version>0.1.13</labkit-pixel-classification.version>
+
+		<mastodon.version>1.0.0-beta-20/mastodon.version>
 	</properties>
 
 	<build>
@@ -135,6 +137,11 @@
 	</build>
 
 	<dependencies>
+		<dependency>
+			<groupId>org.mastodon</groupId>
+			<artifactId>mastodon</artifactId>
+			<version>${mastodon.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>io.grpc</groupId>
 			<artifactId>grpc-netty-shaded</artifactId>
