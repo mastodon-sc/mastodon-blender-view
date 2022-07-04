@@ -63,33 +63,28 @@ class ManySpheres:
         init_reference_objects_collection()
         init_reference_sphere()
 
-    def add_spot(self, id, time, location):
+    def add_moving_spot(self, request):
         sphere = self.reference_sphere.copy()
-        sphere.name = id
-        sphere.location = location
+        sphere.name = request.id
         sphere.parent = self.parent_object
-        self.keyframe_set_visible(sphere, time, True)
+        self.keyframe_set_visible(sphere, request.coordinates[0].time, True)
+
+        last_time = 0
+        for spot in request.coordinates:
+            sphere.location = (spot.x, spot.y, spot.z)
+            sphere.keyframe_insert(data_path="location", frame=spot.time)
+            last_time = spot.time
+
+        self.keyframe_set_visible(sphere, last_time + 1, False)
         self.collection.objects.link(sphere)
-        sphere.keyframe_insert(data_path="location", frame=time)
         return
 
-    def move_spot(self, id, time, location):
-        sphere = self.collection.objects[id]
-        sphere.location = location
-        sphere.keyframe_insert(data_path="location", frame=time)
-        return
-
-    def hide_spot(self, id, time):
-        sphere = self.collection.objects[id]
-        self.keyframe_set_visible(sphere, time, False)
-        return
-
-    def keyframe_set_visible(self, sphere, time, visible):
+    @staticmethod
+    def keyframe_set_visible(sphere, time, visible):
         sphere.hide_viewport = not visible
         sphere.hide_render = not visible
         sphere.keyframe_insert(data_path="hide_viewport", frame=time)
         sphere.keyframe_insert(data_path="hide_render", frame=time)
-
 
 
 class Greeter(helloworld_pb2_grpc.GreeterServicer):
@@ -97,25 +92,8 @@ class Greeter(helloworld_pb2_grpc.GreeterServicer):
     def __init__(self):
         self.many_spheres = ManySpheres()
 
-    def addSpot(self, request, context):
-        run_in_main_thread(partial(self.many_spheres.add_spot,
-                                   request.id,
-                                   request.time,
-                                   self.parse_coordinates(request.coordinates)))
-        return helloworld_pb2.Empty()
-
-    def moveSpot(self, request, context):
-        run_in_main_thread(partial(self.many_spheres.move_spot,
-                                   request.id,
-                                   request.time,
-                                   self.parse_coordinates(request.coordinates)))
-        return helloworld_pb2.Empty()
-
-    def hideSpot(self, request, context):
-        run_in_main_thread(partial(self.many_spheres.hide_spot,
-                                   request.id,
-                                   request.time
-                                   ))
+    def addMovingSpot(self, request, context):
+        run_in_main_thread(partial(self.many_spheres.add_moving_spot, request))
         return helloworld_pb2.Empty()
 
     @staticmethod

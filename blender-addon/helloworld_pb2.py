@@ -19,38 +19,31 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'\n\014org.mastodonB\017HelloWorldProtoP\001\242\002\003HLW',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x10helloworld.proto\x12\nhelloworld\"X\n\x0e\x41\x64\x64SpotRequest\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04time\x18\x02 \x01(\x03\x12,\n\x0b\x63oordinates\x18\x03 \x01(\x0b\x32\x17.helloworld.Coordinates\"Y\n\x0fMoveSpotRequest\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04time\x18\x02 \x01(\x03\x12,\n\x0b\x63oordinates\x18\x03 \x01(\x0b\x32\x17.helloworld.Coordinates\"+\n\x0fHideSpotRequest\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04time\x18\x02 \x01(\x03\".\n\x0b\x43oordinates\x12\t\n\x01x\x18\x01 \x01(\x02\x12\t\n\x01y\x18\x02 \x01(\x02\x12\t\n\x01z\x18\x03 \x01(\x02\"\x07\n\x05\x45mpty2\xc1\x01\n\x07Greeter\x12:\n\x07\x61\x64\x64Spot\x12\x1a.helloworld.AddSpotRequest\x1a\x11.helloworld.Empty\"\x00\x12<\n\x08moveSpot\x12\x1b.helloworld.MoveSpotRequest\x1a\x11.helloworld.Empty\"\x00\x12<\n\x08hideSpot\x12\x1b.helloworld.HideSpotRequest\x1a\x11.helloworld.Empty\"\x00\x42\'\n\x0corg.mastodonB\x0fHelloWorldProtoP\x01\xa2\x02\x03HLWb\x06proto3'
+  serialized_pb=b'\n\x10helloworld.proto\x12\nhelloworld\"Q\n\x15\x41\x64\x64MovingSportRequest\x12\n\n\x02id\x18\x01 \x01(\t\x12,\n\x0b\x63oordinates\x18\x02 \x03(\x0b\x32\x17.helloworld.Coordinates\"<\n\x0b\x43oordinates\x12\t\n\x01x\x18\x02 \x01(\x02\x12\t\n\x01y\x18\x03 \x01(\x02\x12\t\n\x01z\x18\x04 \x01(\x02\x12\x0c\n\x04time\x18\x01 \x01(\x05\"\x07\n\x05\x45mpty2R\n\x07Greeter\x12G\n\raddMovingSpot\x12!.helloworld.AddMovingSportRequest\x1a\x11.helloworld.Empty\"\x00\x42\'\n\x0corg.mastodonB\x0fHelloWorldProtoP\x01\xa2\x02\x03HLWb\x06proto3'
 )
 
 
 
 
-_ADDSPOTREQUEST = _descriptor.Descriptor(
-  name='AddSpotRequest',
-  full_name='helloworld.AddSpotRequest',
+_ADDMOVINGSPORTREQUEST = _descriptor.Descriptor(
+  name='AddMovingSportRequest',
+  full_name='helloworld.AddMovingSportRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='id', full_name='helloworld.AddSpotRequest.id', index=0,
+      name='id', full_name='helloworld.AddMovingSportRequest.id', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='time', full_name='helloworld.AddSpotRequest.time', index=1,
-      number=2, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='coordinates', full_name='helloworld.AddSpotRequest.coordinates', index=2,
-      number=3, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
+      name='coordinates', full_name='helloworld.AddMovingSportRequest.coordinates', index=1,
+      number=2, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
@@ -67,92 +60,7 @@ _ADDSPOTREQUEST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=32,
-  serialized_end=120,
-)
-
-
-_MOVESPOTREQUEST = _descriptor.Descriptor(
-  name='MoveSpotRequest',
-  full_name='helloworld.MoveSpotRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='id', full_name='helloworld.MoveSpotRequest.id', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='time', full_name='helloworld.MoveSpotRequest.time', index=1,
-      number=2, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='coordinates', full_name='helloworld.MoveSpotRequest.coordinates', index=2,
-      number=3, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=122,
-  serialized_end=211,
-)
-
-
-_HIDESPOTREQUEST = _descriptor.Descriptor(
-  name='HideSpotRequest',
-  full_name='helloworld.HideSpotRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='id', full_name='helloworld.HideSpotRequest.id', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='time', full_name='helloworld.HideSpotRequest.time', index=1,
-      number=2, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=213,
-  serialized_end=256,
+  serialized_end=113,
 )
 
 
@@ -166,22 +74,29 @@ _COORDINATES = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='x', full_name='helloworld.Coordinates.x', index=0,
-      number=1, type=2, cpp_type=6, label=1,
-      has_default_value=False, default_value=float(0),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='y', full_name='helloworld.Coordinates.y', index=1,
       number=2, type=2, cpp_type=6, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='z', full_name='helloworld.Coordinates.z', index=2,
+      name='y', full_name='helloworld.Coordinates.y', index=1,
       number=3, type=2, cpp_type=6, label=1,
       has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='z', full_name='helloworld.Coordinates.z', index=2,
+      number=4, type=2, cpp_type=6, label=1,
+      has_default_value=False, default_value=float(0),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='time', full_name='helloworld.Coordinates.time', index=3,
+      number=1, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
@@ -197,8 +112,8 @@ _COORDINATES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=258,
-  serialized_end=304,
+  serialized_start=115,
+  serialized_end=175,
 )
 
 
@@ -222,39 +137,22 @@ _EMPTY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=306,
-  serialized_end=313,
+  serialized_start=177,
+  serialized_end=184,
 )
 
-_ADDSPOTREQUEST.fields_by_name['coordinates'].message_type = _COORDINATES
-_MOVESPOTREQUEST.fields_by_name['coordinates'].message_type = _COORDINATES
-DESCRIPTOR.message_types_by_name['AddSpotRequest'] = _ADDSPOTREQUEST
-DESCRIPTOR.message_types_by_name['MoveSpotRequest'] = _MOVESPOTREQUEST
-DESCRIPTOR.message_types_by_name['HideSpotRequest'] = _HIDESPOTREQUEST
+_ADDMOVINGSPORTREQUEST.fields_by_name['coordinates'].message_type = _COORDINATES
+DESCRIPTOR.message_types_by_name['AddMovingSportRequest'] = _ADDMOVINGSPORTREQUEST
 DESCRIPTOR.message_types_by_name['Coordinates'] = _COORDINATES
 DESCRIPTOR.message_types_by_name['Empty'] = _EMPTY
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
-AddSpotRequest = _reflection.GeneratedProtocolMessageType('AddSpotRequest', (_message.Message,), {
-  'DESCRIPTOR' : _ADDSPOTREQUEST,
+AddMovingSportRequest = _reflection.GeneratedProtocolMessageType('AddMovingSportRequest', (_message.Message,), {
+  'DESCRIPTOR' : _ADDMOVINGSPORTREQUEST,
   '__module__' : 'helloworld_pb2'
-  # @@protoc_insertion_point(class_scope:helloworld.AddSpotRequest)
+  # @@protoc_insertion_point(class_scope:helloworld.AddMovingSportRequest)
   })
-_sym_db.RegisterMessage(AddSpotRequest)
-
-MoveSpotRequest = _reflection.GeneratedProtocolMessageType('MoveSpotRequest', (_message.Message,), {
-  'DESCRIPTOR' : _MOVESPOTREQUEST,
-  '__module__' : 'helloworld_pb2'
-  # @@protoc_insertion_point(class_scope:helloworld.MoveSpotRequest)
-  })
-_sym_db.RegisterMessage(MoveSpotRequest)
-
-HideSpotRequest = _reflection.GeneratedProtocolMessageType('HideSpotRequest', (_message.Message,), {
-  'DESCRIPTOR' : _HIDESPOTREQUEST,
-  '__module__' : 'helloworld_pb2'
-  # @@protoc_insertion_point(class_scope:helloworld.HideSpotRequest)
-  })
-_sym_db.RegisterMessage(HideSpotRequest)
+_sym_db.RegisterMessage(AddMovingSportRequest)
 
 Coordinates = _reflection.GeneratedProtocolMessageType('Coordinates', (_message.Message,), {
   'DESCRIPTOR' : _COORDINATES,
@@ -280,35 +178,15 @@ _GREETER = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=316,
-  serialized_end=509,
+  serialized_start=186,
+  serialized_end=268,
   methods=[
   _descriptor.MethodDescriptor(
-    name='addSpot',
-    full_name='helloworld.Greeter.addSpot',
+    name='addMovingSpot',
+    full_name='helloworld.Greeter.addMovingSpot',
     index=0,
     containing_service=None,
-    input_type=_ADDSPOTREQUEST,
-    output_type=_EMPTY,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='moveSpot',
-    full_name='helloworld.Greeter.moveSpot',
-    index=1,
-    containing_service=None,
-    input_type=_MOVESPOTREQUEST,
-    output_type=_EMPTY,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='hideSpot',
-    full_name='helloworld.Greeter.hideSpot',
-    index=2,
-    containing_service=None,
-    input_type=_HIDESPOTREQUEST,
+    input_type=_ADDMOVINGSPORTREQUEST,
     output_type=_EMPTY,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,

@@ -16,65 +16,55 @@
 
 package org.mastodon;
 
-import com.google.common.base.Stopwatch;
 import io.grpc.Channel;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import java.util.concurrent.TimeUnit;
 
-public class HelloWorldClient {
+import java.util.ArrayList;
+import java.util.List;
+
+public class HelloWorldClient
+{
 
 	private final GreeterGrpc.GreeterBlockingStub blockingStub;
 
-	public HelloWorldClient(Channel channel) {
-		blockingStub = GreeterGrpc.newBlockingStub(channel);
-	}
-
-	public void addSphere(String id, long time, Coordinates coordinates) {
-		blockingStub.addSpot( AddSpotRequest.newBuilder()
-				.setId( id )
-				.setTime( time )
-				.setCoordinates( coordinates )
-		.build());
-	}
-
-	private void moveSphere( String id, int time, Coordinates coordinates )
+	public HelloWorldClient( Channel channel )
 	{
-		blockingStub.moveSpot( MoveSpotRequest.newBuilder()
-				.setId( id )
-				.setTime( time )
-				.setCoordinates( coordinates )
-				.build());
+		blockingStub = GreeterGrpc.newBlockingStub( channel );
 	}
 
-	private void hideSphere( String id, int time )
+	public void addSphere( String id, List<Coordinates> coordinates )
 	{
-		blockingStub.hideSpot( HideSpotRequest.newBuilder()
+		blockingStub.addMovingSpot( AddMovingSportRequest.newBuilder()
 				.setId( id )
-				.setTime( time )
-				.build());
+				.addAllCoordinates( coordinates )
+				.build() );
 	}
 
-	private static Coordinates coordinates( float x, float y, float z )
+	private static Coordinates coordinates( float x, float y, float z, int time )
 	{
-		Coordinates coordinates = Coordinates.newBuilder().setX( x ).setY( y ).setZ( z ).build();
-		return coordinates;
+		return Coordinates.newBuilder()
+				.setX( x )
+				.setY( y )
+				.setZ( z )
+				.setTime( time )
+				.build();
 	}
 
-	public static void main(String[] args) throws Exception {
+	public static void main( String... args )
+	{
 		ManagedChannel channel = ManagedChannelBuilder.forTarget( "localhost:50051" ).usePlaintext().build();
-		try {
-			HelloWorldClient client = new HelloWorldClient(channel);
-			Stopwatch stopwatch = Stopwatch.createStarted();
-			client.addSphere("id", 0, coordinates(0, 0, 0));
-			for ( int i = 0; i < 100; i++ )
-				client.moveSphere( "id", i, coordinates(i / 10.f, 0, 0) );
-			client.hideSphere("id", 100);
-			System.out.println(stopwatch.toString());
+		try
+		{
+			HelloWorldClient client = new HelloWorldClient( channel );
+			List<Coordinates> coordinates = new ArrayList<>( 100 );
+			for ( int i = 0; i <= 100; i++ )
+				coordinates.add( coordinates( i / 10.f, 0, 0, i ) );
+			client.addSphere( "sphere_label", coordinates );
 		}
-		finally {
-			channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
+		finally
+		{
+			channel.shutdownNow(); //.awaitTermination( 5, TimeUnit.SECONDS );
 		}
 	}
-
 }
