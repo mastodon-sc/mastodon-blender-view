@@ -57,6 +57,7 @@ class ManySpheres:
         sphere = self.reference_sphere.copy()
         sphere.name = request.id
         sphere.parent = self.parent_object
+        self.keyframe_set_visible(sphere, 0, False)
         self.keyframe_set_visible(sphere, request.coordinates[0].time, True)
 
         last_time = 0
