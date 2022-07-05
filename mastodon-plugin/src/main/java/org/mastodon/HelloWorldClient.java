@@ -57,6 +57,10 @@ public class HelloWorldClient
 
 	public static void main( String... args ) throws Exception
 	{
+		// TODO: if we can transfer more efficiently
+		// TODO: show multiple embryos
+		// TODO: visualize tag colors
+		// TODO: synchronize selection between blender and Mastodon
 		transferEmbryo();
 	}
 
