@@ -23,10 +23,10 @@ package helloworld;
 
 service Greeter {
 
-  rpc addMovingSpot(AddMovingSportRequest) returns (Empty) {}
+  rpc addMovingSpot(AddMovingSpotRequest) returns (Empty) {}
 }
 
-message AddMovingSportRequest {
+message AddMovingSpotRequest {
   string id = 1;
   repeated Coordinates coordinates = 2;
 }

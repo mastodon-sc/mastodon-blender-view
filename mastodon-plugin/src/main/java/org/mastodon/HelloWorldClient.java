@@ -47,7 +47,7 @@ public class HelloWorldClient
 	public void addSphere( String id, List<Coordinates> coordinates )
 	{
 		System.out.println( "label: " + id + ", " + coordinates.size() + " coordinates" );
-		blockingStub.addMovingSpot( AddMovingSportRequest.newBuilder().setId( id ).addAllCoordinates( coordinates ).build() );
+		blockingStub.addMovingSpot( AddMovingSpotRequest.newBuilder().setId( id ).addAllCoordinates( coordinates ).build() );
 	}
 
 	private static Coordinates coordinates( float x, float y, float z, int time )
