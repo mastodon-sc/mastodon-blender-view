@@ -31,8 +31,6 @@ import org.mastodon.mamut.project.MamutProjectIO;
 import org.scijava.Context;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class HelloWorldClient
 {
@@ -42,17 +40,6 @@ public class HelloWorldClient
 	public HelloWorldClient( Channel channel )
 	{
 		blockingStub = GreeterGrpc.newBlockingStub( channel );
-	}
-
-	public void addSphere( String id, List<Coordinates> coordinates )
-	{
-		System.out.println( "label: " + id + ", " + coordinates.size() + " coordinates" );
-		blockingStub.addMovingSpot( AddMovingSpotRequest.newBuilder().setId( id ).addAllCoordinates( coordinates ).build() );
-	}
-
-	private static Coordinates coordinates( float x, float y, float z, int time )
-	{
-		return Coordinates.newBuilder().setX( x ).setY( y ).setZ( z ).setTime( time ).build();
 	}
 
 	public static void main( String... args ) throws Exception
@@ -93,17 +80,18 @@ public class HelloWorldClient
 		Spot spot = graph.vertexRef();
 		try
 		{
-			List<Coordinates> tracklet = new ArrayList<>();
+			AddMovingSpotRequest.Builder request = AddMovingSpotRequest.newBuilder();
+			request.setId( start.getLabel() );
 			spot.refTo( start );
-			tracklet.add( coordinates( spot ) );
+			coordinates( request, spot );
 			while ( spot.outgoingEdges().size() == 1 )
 			{
 				spot.outgoingEdges().iterator().next().getTarget( spot );
 				if ( spot.incomingEdges().size() != 1 )
 					break;
-				tracklet.add( coordinates( spot ) );
+				coordinates( request, spot );
 			}
-			client.addSphere( start.getLabel(), tracklet );
+			client.blockingStub.addMovingSpot( request.build() );
 		}
 		finally
 		{
@@ -111,14 +99,13 @@ public class HelloWorldClient
 		}
 	}
 
-	private static Coordinates coordinates( Spot spot )
+	private static void coordinates( AddMovingSpotRequest.Builder request, Spot spot )
 	{
 		float s = 0.05f;
-		return Coordinates.newBuilder()
-				.setX( s * spot.getFloatPosition( 0 ) )
-				.setY( s * spot.getFloatPosition( 1 ) )
-				.setZ( s * spot.getFloatPosition( 2 ) )
-				.setTime( spot.getTimepoint() ).build();
+		request.addCoordinates( s * spot.getFloatPosition( 0 ) );
+		request.addCoordinates( s * spot.getFloatPosition( 1 ) );
+		request.addCoordinates( s * spot.getFloatPosition( 2 ) );
+		request.addTimepoints( spot.getTimepoint() );
 	}
 
 	private static void transferChildTracklets( ModelGraph graph, Spot spot, HelloWorldClient client )
@@ -138,10 +125,16 @@ public class HelloWorldClient
 		try
 		{
 			HelloWorldClient client = new HelloWorldClient( channel );
-			List<Coordinates> coordinates = new ArrayList<>( 100 );
+			AddMovingSpotRequest.Builder request = AddMovingSpotRequest.newBuilder();
+			request.setId( "lineage" );
 			for ( int i = 0; i <= 100; i++ )
-				coordinates.add( coordinates( i / 10.f, 1, 1, i ) );
-			client.addSphere( "sphere_label", coordinates );
+			{
+				request.addCoordinates( i / 10.f );
+				request.addCoordinates( 1 );
+				request.addCoordinates( 1 );
+				request.addTimepoints( i );
+			}
+			client.blockingStub.addMovingSpot( request.build() );
 		}
 		finally
 		{

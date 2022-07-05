@@ -28,14 +28,8 @@ service Greeter {
 
 message AddMovingSpotRequest {
   string id = 1;
-  repeated Coordinates coordinates = 2;
-}
-
-message Coordinates {
-  float x = 2;
-  float y = 3;
-  float z = 4;
-  int32 time = 1;
+  repeated float coordinates = 2;
+  repeated int32 timepoints = 3;
 }
 
 message Empty {}

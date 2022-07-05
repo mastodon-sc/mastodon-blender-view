@@ -58,13 +58,14 @@ class ManySpheres:
         sphere.name = request.id
         sphere.parent = self.parent_object
         self.keyframe_set_visible(sphere, 0, False)
-        self.keyframe_set_visible(sphere, request.coordinates[0].time, True)
+        self.keyframe_set_visible(sphere, request.timepoints[0], True)
 
         last_time = 0
-        for spot in request.coordinates:
-            sphere.location = (spot.x, spot.y, spot.z)
-            sphere.keyframe_insert(data_path="location", frame=spot.time)
-            last_time = spot.time
+        for i in range(len(request.timepoints)):
+            time = request.timepoints[i];
+            sphere.location = (request.coordinates[i*3], request.coordinates[i*3 + 1], request.coordinates[i*3 + 2])
+            sphere.keyframe_insert(data_path="location", frame=time)
+            last_time = time
 
         self.keyframe_set_visible(sphere, last_time + 1, False)
         self.collection.objects.link(sphere)

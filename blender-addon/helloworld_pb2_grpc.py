@@ -16,7 +16,7 @@ class GreeterStub(object):
         """
         self.addMovingSpot = channel.unary_unary(
                 '/helloworld.Greeter/addMovingSpot',
-                request_serializer=helloworld__pb2.AddMovingSportRequest.SerializeToString,
+                request_serializer=helloworld__pb2.AddMovingSpotRequest.SerializeToString,
                 response_deserializer=helloworld__pb2.Empty.FromString,
                 )
 
@@ -35,7 +35,7 @@ def add_GreeterServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'addMovingSpot': grpc.unary_unary_rpc_method_handler(
                     servicer.addMovingSpot,
-                    request_deserializer=helloworld__pb2.AddMovingSportRequest.FromString,
+                    request_deserializer=helloworld__pb2.AddMovingSpotRequest.FromString,
                     response_serializer=helloworld__pb2.Empty.SerializeToString,
             ),
     }
@@ -60,7 +60,7 @@ class Greeter(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/helloworld.Greeter/addMovingSpot',
-            helloworld__pb2.AddMovingSportRequest.SerializeToString,
+            helloworld__pb2.AddMovingSpotRequest.SerializeToString,
             helloworld__pb2.Empty.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
