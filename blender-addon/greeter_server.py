@@ -95,21 +95,30 @@ class Greeter(helloworld_pb2_grpc.GreeterServicer):
 
 # Implement run in main thread
 
-execution_queue = queue.Queue()
+class MainThreadQueue:
+    execution_queue = queue.Queue()
+    waiting = False
+
+    def enqueue(self, function):
+        self.execution_queue.put(function)
+        if not self.waiting:
+            self.waiting = True
+            bpy.app.timers.register(self.execute_queued_functions)
+
+    def execute_queued_functions(self):
+        self.waiting = False
+        while not self.execution_queue.empty():
+            function = self.execution_queue.get()
+            function()
+        return None
+
+
+main_thread_queue = MainThreadQueue()
 
 
 def run_in_main_thread(function):
-    execution_queue.put(function)
-
-
-def execute_queued_functions():
-    while not execution_queue.empty():
-        function = execution_queue.get()
-        function()
-    return 1.0
-
-
-bpy.app.timers.register(execute_queued_functions)
+    global main_thread_queue
+    main_thread_queue.enqueue(function)
 
 
 def serve():
