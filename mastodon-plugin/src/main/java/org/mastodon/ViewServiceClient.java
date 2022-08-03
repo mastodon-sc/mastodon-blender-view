@@ -36,10 +36,10 @@ import org.scijava.Context;
 import java.io.IOException;
 import java.util.Collection;
 
-public class HelloWorldClient
+public class ViewServiceClient
 {
 
-	private final GreeterGrpc.GreeterBlockingStub blockingStub;
+	private final ViewServiceGrpc.ViewServiceBlockingStub blockingStub;
 
 	private static final AffineTransform3D transform = new AffineTransform3D();
 
@@ -48,9 +48,9 @@ public class HelloWorldClient
 		transform.scale( 0.05 );
 	}
 
-	public HelloWorldClient( Channel channel )
+	public ViewServiceClient( Channel channel )
 	{
-		blockingStub = GreeterGrpc.newBlockingStub( channel );
+		blockingStub = ViewServiceGrpc.newBlockingStub( channel );
 	}
 
 	public static void main( String... args ) throws Exception
@@ -119,7 +119,7 @@ public class HelloWorldClient
 			//Model embryoA = openAppModel( context, "/home/arzt/Datasets/DeepLineage/Johannes/2022-01-27_Ml_NL45xNL26_fused_part5_2022-07-06_Matthias.mastodon" );
 			transform.set(getNormalizingTransform( embryoA.getGraph().vertices() ));
 			ModelGraph graph = embryoA.getGraph();
-			HelloWorldClient client = new HelloWorldClient( channel );
+			ViewServiceClient client = new ViewServiceClient( channel );
 			StopWatch watch = StopWatch.createAndStart();
 			for ( Spot spot : graph.vertices() )
 			{
@@ -136,7 +136,7 @@ public class HelloWorldClient
 		}
 	}
 
-	private static void transferTracklet( ModelGraph graph, Spot start, HelloWorldClient client )
+	private static void transferTracklet( ModelGraph graph, Spot start, ViewServiceClient client )
 	{
 		Spot spot = graph.vertexRef();
 		try
@@ -171,7 +171,7 @@ public class HelloWorldClient
 		request.addTimepoints( spot.getTimepoint() );
 	}
 
-	private static void transferChildTracklets( ModelGraph graph, Spot spot, HelloWorldClient client )
+	private static void transferChildTracklets( ModelGraph graph, Spot spot, ViewServiceClient client )
 	{
 		Spot ref = graph.vertexRef();
 		for ( Link link : spot.outgoingEdges() )
@@ -187,7 +187,7 @@ public class HelloWorldClient
 		ManagedChannel channel = ManagedChannelBuilder.forTarget( "localhost:50051" ).usePlaintext().build();
 		try
 		{
-			HelloWorldClient client = new HelloWorldClient( channel );
+			ViewServiceClient client = new ViewServiceClient( channel );
 			AddMovingSpotRequest.Builder request = AddMovingSpotRequest.newBuilder();
 			request.setId( "lineage" );
 			for ( int i = 0; i <= 100; i++ )

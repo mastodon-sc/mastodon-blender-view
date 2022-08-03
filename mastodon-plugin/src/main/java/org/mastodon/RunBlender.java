@@ -9,7 +9,7 @@ public class RunBlender
 	{
 		start_blender();
 		Thread.sleep( 2000 );
-		HelloWorldClient.main();
+		ViewServiceClient.main();
 	}
 
 	private static void start_blender() throws IOException

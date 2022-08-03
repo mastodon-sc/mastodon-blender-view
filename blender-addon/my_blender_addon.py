@@ -1,5 +1,5 @@
 import bpy
-from . import greeter_server
+from . import view_service_server
 
 
 def update_sphere_size(properties_group, context):
@@ -34,7 +34,7 @@ my_greeter_server = None
 
 def start_server():
     global my_greeter_server
-    my_greeter_server = greeter_server.MastodonBlenderServer()
+    my_greeter_server = view_service_server.MastodonBlenderServer()
 
 
 classes = [TestPanel, BlenderMastodonViewProperties]

@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""The Python implementation of the GRPC helloworld.Greeter server."""
+"""The Python implementation of the GRPC helloworld.ViewService server."""
 
 from concurrent import futures
 
@@ -86,7 +86,7 @@ class ManySpheres:
         sphere.keyframe_insert(data_path="hide_render", frame=time)
 
 
-class Greeter(mastodon_blender_view_pb2_grpc.GreeterServicer):
+class ViewService(mastodon_blender_view_pb2_grpc.ViewServiceServicer):
     many_spheres = None
 
     def __init__(self, many_spheres):
@@ -135,8 +135,8 @@ class MastodonBlenderServer:
     def __init__(self):
         self.many_spheres = ManySpheres()
         self.server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-        greeter = Greeter(self.many_spheres)
-        mastodon_blender_view_pb2_grpc.add_GreeterServicer_to_server(greeter, self.server)
+        greeter = ViewService(self.many_spheres)
+        mastodon_blender_view_pb2_grpc.add_ViewServiceServicer_to_server(greeter, self.server)
         self.server.add_insecure_port('[::]:50051')
         self.server.start()
 

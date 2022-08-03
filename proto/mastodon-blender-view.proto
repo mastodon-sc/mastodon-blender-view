@@ -21,7 +21,7 @@ option objc_class_prefix = "HLW";
 
 package mastodon_blender_view;
 
-service Greeter {
+service ViewService {
 
   rpc addMovingSpot(AddMovingSpotRequest) returns (Empty) {}
 }

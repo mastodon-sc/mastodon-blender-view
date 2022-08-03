@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'\n\014org.mastodonB\017HelloWorldProtoP\001\242\002\003HLW',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x1bmastodon-blender-view.proto\x12\x15mastodon_blender_view\"K\n\x14\x41\x64\x64MovingSpotRequest\x12\n\n\x02id\x18\x01 \x01(\t\x12\x13\n\x0b\x63oordinates\x18\x02 \x03(\x02\x12\x12\n\ntimepoints\x18\x03 \x03(\x05\"\x07\n\x05\x45mpty2g\n\x07Greeter\x12\\\n\raddMovingSpot\x12+.mastodon_blender_view.AddMovingSpotRequest\x1a\x1c.mastodon_blender_view.Empty\"\x00\x42\'\n\x0corg.mastodonB\x0fHelloWorldProtoP\x01\xa2\x02\x03HLWb\x06proto3'
+  serialized_pb=b'\n\x1bmastodon-blender-view.proto\x12\x15mastodon_blender_view\"K\n\x14\x41\x64\x64MovingSpotRequest\x12\n\n\x02id\x18\x01 \x01(\t\x12\x13\n\x0b\x63oordinates\x18\x02 \x03(\x02\x12\x12\n\ntimepoints\x18\x03 \x03(\x05\"\x07\n\x05\x45mpty2k\n\x0bViewService\x12\\\n\raddMovingSpot\x12+.mastodon_blender_view.AddMovingSpotRequest\x1a\x1c.mastodon_blender_view.Empty\"\x00\x42\'\n\x0corg.mastodonB\x0fHelloWorldProtoP\x01\xa2\x02\x03HLWb\x06proto3'
 )
 
 
@@ -116,19 +116,19 @@ _sym_db.RegisterMessage(Empty)
 
 DESCRIPTOR._options = None
 
-_GREETER = _descriptor.ServiceDescriptor(
-  name='Greeter',
-  full_name='mastodon_blender_view.Greeter',
+_VIEWSERVICE = _descriptor.ServiceDescriptor(
+  name='ViewService',
+  full_name='mastodon_blender_view.ViewService',
   file=DESCRIPTOR,
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
   serialized_start=140,
-  serialized_end=243,
+  serialized_end=247,
   methods=[
   _descriptor.MethodDescriptor(
     name='addMovingSpot',
-    full_name='mastodon_blender_view.Greeter.addMovingSpot',
+    full_name='mastodon_blender_view.ViewService.addMovingSpot',
     index=0,
     containing_service=None,
     input_type=_ADDMOVINGSPOTREQUEST,
@@ -137,8 +137,8 @@ _GREETER = _descriptor.ServiceDescriptor(
     create_key=_descriptor._internal_create_key,
   ),
 ])
-_sym_db.RegisterServiceDescriptor(_GREETER)
+_sym_db.RegisterServiceDescriptor(_VIEWSERVICE)
 
-DESCRIPTOR.services_by_name['Greeter'] = _GREETER
+DESCRIPTOR.services_by_name['ViewService'] = _VIEWSERVICE
 
 # @@protoc_insertion_point(module_scope)

@@ -5,7 +5,7 @@ import grpc
 from . import mastodon_blender_view_pb2 as mastodon__blender__view__pb2
 
 
-class GreeterStub(object):
+class ViewServiceStub(object):
     """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
@@ -15,13 +15,13 @@ class GreeterStub(object):
             channel: A grpc.Channel.
         """
         self.addMovingSpot = channel.unary_unary(
-                '/mastodon_blender_view.Greeter/addMovingSpot',
+                '/mastodon_blender_view.ViewService/addMovingSpot',
                 request_serializer=mastodon__blender__view__pb2.AddMovingSpotRequest.SerializeToString,
                 response_deserializer=mastodon__blender__view__pb2.Empty.FromString,
                 )
 
 
-class GreeterServicer(object):
+class ViewServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
     def addMovingSpot(self, request, context):
@@ -31,7 +31,7 @@ class GreeterServicer(object):
         raise NotImplementedError('Method not implemented!')
 
 
-def add_GreeterServicer_to_server(servicer, server):
+def add_ViewServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'addMovingSpot': grpc.unary_unary_rpc_method_handler(
                     servicer.addMovingSpot,
@@ -40,12 +40,12 @@ def add_GreeterServicer_to_server(servicer, server):
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'mastodon_blender_view.Greeter', rpc_method_handlers)
+            'mastodon_blender_view.ViewService', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
 
  # This class is part of an EXPERIMENTAL API.
-class Greeter(object):
+class ViewService(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
@@ -59,7 +59,7 @@ class Greeter(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/mastodon_blender_view.Greeter/addMovingSpot',
+        return grpc.experimental.unary_unary(request, target, '/mastodon_blender_view.ViewService/addMovingSpot',
             mastodon__blender__view__pb2.AddMovingSpotRequest.SerializeToString,
             mastodon__blender__view__pb2.Empty.FromString,
             options, channel_credentials,
