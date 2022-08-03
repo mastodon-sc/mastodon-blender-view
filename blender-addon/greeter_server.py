@@ -44,7 +44,7 @@ class ManySpheres:
             bpy.ops.mesh.primitive_ico_sphere_add(enter_editmode=False,
                                                   align='WORLD',
                                                   location=(0, 0, 0),
-                                                  scale=(1, 1, 1))
+                                                  scale=(0.1, 0.1, 0.1))
             bpy.ops.object.shade_smooth()
             self.reference_sphere = bpy.context.active_object
             bpy.ops.collection.objects_remove_all()  # remove the sphere from its collection
@@ -74,6 +74,10 @@ class ManySpheres:
         self.collection.objects.link(sphere)
         return
 
+    def set_sphere_size(self, size):
+        for sphere in self.parent_object.children:
+            sphere.scale = [size, size, size]
+
     @staticmethod
     def insert_visibility_keyframe(sphere, time, visible):
         sphere.hide_viewport = not visible
@@ -81,10 +85,12 @@ class ManySpheres:
         sphere.keyframe_insert(data_path="hide_viewport", frame=time)
         sphere.keyframe_insert(data_path="hide_render", frame=time)
 
-class Greeter(helloworld_pb2_grpc.GreeterServicer):
 
-    def __init__(self):
-        self.many_spheres = ManySpheres()
+class Greeter(helloworld_pb2_grpc.GreeterServicer):
+    many_spheres = None
+
+    def __init__(self, many_spheres):
+        self.many_spheres = many_spheres
 
     def addMovingSpot(self, request, context):
         run_in_main_thread(partial(self.many_spheres.add_moving_spot, request))
@@ -123,9 +129,16 @@ def run_in_main_thread(function):
     main_thread_queue.enqueue(function)
 
 
-def serve():
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    helloworld_pb2_grpc.add_GreeterServicer_to_server(Greeter(), server)
-    server.add_insecure_port('[::]:50051')
-    server.start()
-    return server
+class MastodonBlenderServer:
+    many_spheres = None
+
+    def __init__(self):
+        self.many_spheres = ManySpheres()
+        self.server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+        greeter = Greeter(self.many_spheres)
+        helloworld_pb2_grpc.add_GreeterServicer_to_server(greeter, self.server)
+        self.server.add_insecure_port('[::]:50051')
+        self.server.start()
+
+    def stop(self):
+        self.server.stop()
