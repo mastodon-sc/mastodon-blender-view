@@ -116,6 +116,7 @@ public class HelloWorldClient
 		try (Context context = new Context())
 		{
 			Model embryoA = openAppModel( context, "/home/arzt/Datasets/Mette/E1.mastodon" );
+			//Model embryoA = openAppModel( context, "/home/arzt/Datasets/DeepLineage/Johannes/2022-01-27_Ml_NL45xNL26_fused_part5_2022-07-06_Matthias.mastodon" );
 			transform.set(getNormalizingTransform( embryoA.getGraph().vertices() ));
 			ModelGraph graph = embryoA.getGraph();
 			HelloWorldClient client = new HelloWorldClient( channel );
