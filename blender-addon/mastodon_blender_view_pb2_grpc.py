@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-from . import helloworld_pb2 as helloworld__pb2
+from . import mastodon_blender_view_pb2 as mastodon__blender__view__pb2
 
 
 class GreeterStub(object):
@@ -15,9 +15,9 @@ class GreeterStub(object):
             channel: A grpc.Channel.
         """
         self.addMovingSpot = channel.unary_unary(
-                '/helloworld.Greeter/addMovingSpot',
-                request_serializer=helloworld__pb2.AddMovingSpotRequest.SerializeToString,
-                response_deserializer=helloworld__pb2.Empty.FromString,
+                '/mastodon_blender_view.Greeter/addMovingSpot',
+                request_serializer=mastodon__blender__view__pb2.AddMovingSpotRequest.SerializeToString,
+                response_deserializer=mastodon__blender__view__pb2.Empty.FromString,
                 )
 
 
@@ -35,12 +35,12 @@ def add_GreeterServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'addMovingSpot': grpc.unary_unary_rpc_method_handler(
                     servicer.addMovingSpot,
-                    request_deserializer=helloworld__pb2.AddMovingSpotRequest.FromString,
-                    response_serializer=helloworld__pb2.Empty.SerializeToString,
+                    request_deserializer=mastodon__blender__view__pb2.AddMovingSpotRequest.FromString,
+                    response_serializer=mastodon__blender__view__pb2.Empty.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'helloworld.Greeter', rpc_method_handlers)
+            'mastodon_blender_view.Greeter', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
 
@@ -59,8 +59,8 @@ class Greeter(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/helloworld.Greeter/addMovingSpot',
-            helloworld__pb2.AddMovingSpotRequest.SerializeToString,
-            helloworld__pb2.Empty.FromString,
+        return grpc.experimental.unary_unary(request, target, '/mastodon_blender_view.Greeter/addMovingSpot',
+            mastodon__blender__view__pb2.AddMovingSpotRequest.SerializeToString,
+            mastodon__blender__view__pb2.Empty.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

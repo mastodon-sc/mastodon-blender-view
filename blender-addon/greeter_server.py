@@ -17,8 +17,8 @@ from concurrent import futures
 
 import bpy
 import grpc
-from . import helloworld_pb2
-from . import helloworld_pb2_grpc
+from . import mastodon_blender_view_pb2
+from . import mastodon_blender_view_pb2_grpc
 from functools import partial
 import queue
 
@@ -86,7 +86,7 @@ class ManySpheres:
         sphere.keyframe_insert(data_path="hide_render", frame=time)
 
 
-class Greeter(helloworld_pb2_grpc.GreeterServicer):
+class Greeter(mastodon_blender_view_pb2_grpc.GreeterServicer):
     many_spheres = None
 
     def __init__(self, many_spheres):
@@ -94,7 +94,7 @@ class Greeter(helloworld_pb2_grpc.GreeterServicer):
 
     def addMovingSpot(self, request, context):
         run_in_main_thread(partial(self.many_spheres.add_moving_spot, request))
-        return helloworld_pb2.Empty()
+        return mastodon_blender_view_pb2.Empty()
 
     @staticmethod
     def parse_coordinates(coordinates):
@@ -136,7 +136,7 @@ class MastodonBlenderServer:
         self.many_spheres = ManySpheres()
         self.server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
         greeter = Greeter(self.many_spheres)
-        helloworld_pb2_grpc.add_GreeterServicer_to_server(greeter, self.server)
+        mastodon_blender_view_pb2_grpc.add_GreeterServicer_to_server(greeter, self.server)
         self.server.add_insecure_port('[::]:50051')
         self.server.start()
 

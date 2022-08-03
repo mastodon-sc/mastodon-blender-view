@@ -2,5 +2,5 @@
 # python 3.9
 # conda install grpcio
 # conda install grpcio-tools
-python -m grpc_tools.protoc -I. --python_out=../blender-addon --grpc_python_out=../blender-addon helloworld.proto
-sed -e "s/^import helloworld_pb2 as helloworld__pb2$/from . import helloworld_pb2 as helloworld__pb2/" -i ../blender-addon/helloworld_pb2_grpc.py
+python -m grpc_tools.protoc -I. --python_out=../blender-addon --grpc_python_out=../blender-addon mastodon-blender-view.proto
+sed -e "s/^import mastodon_blender_view_pb2 as mastodon__blender__view__pb2$/from . import mastodon_blender_view_pb2 as mastodon__blender__view__pb2/" -i ../blender-addon/mastodon_blender_view_pb2_grpc.py

@@ -19,7 +19,7 @@ option java_package = "org.mastodon";
 option java_outer_classname = "HelloWorldProto";
 option objc_class_prefix = "HLW";
 
-package helloworld;
+package mastodon_blender_view;
 
 service Greeter {
 
