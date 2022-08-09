@@ -1,12 +1,12 @@
 import bpy
-from . import view_service_server
+from . import mb_server
 
 
 def update_sphere_size(properties_group, context):
     sphere_size = properties_group.sphere_size
-    global my_greeter_server
-    if my_greeter_server is not None:
-        my_greeter_server.many_spheres.set_sphere_size(sphere_size)
+    if mb_server.mastodon_blender_server is not None:
+        mb_server.mastodon_blender_server.many_spheres.set_sphere_size(
+            sphere_size)
 
 
 class BlenderMastodonViewProperties(bpy.types.PropertyGroup):
@@ -16,25 +16,18 @@ class BlenderMastodonViewProperties(bpy.types.PropertyGroup):
 
 
 class TestPanel(bpy.types.Panel):
-    bl_label = "MyTestPanel"
-    bl_idname = "PT MyTestPanel"
+    bl_label = "Mastodon 3D View"
+    bl_idname = "_PT_ Mastodon 3D View"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
-    bl_category = 'NewTab'
+    bl_category = 'Mastodon 3D View'
 
     def draw(self, context):
         layout = self.layout
         layout.prop(context.scene.blender_mastodon_view_properties,
                     "sphere_size")
         row = layout.row()
-        row.label(text="gRPC Hello World Example 3", icon='CUBE',
-                  )
-
-my_greeter_server = None
-
-def start_server():
-    global my_greeter_server
-    my_greeter_server = view_service_server.MastodonBlenderServer()
+        row.label(text="gRPC Hello World Example 3", icon='CUBE')
 
 
 classes = [TestPanel, BlenderMastodonViewProperties]
@@ -45,15 +38,9 @@ def register():
         bpy.utils.register_class(cls)
     bpy.types.Scene.blender_mastodon_view_properties = \
         bpy.props.PointerProperty(type=BlenderMastodonViewProperties)
-    bpy.app.timers.register(start_server, first_interval=1)
 
 
 def unregister():
-    global my_greeter_server
-    if my_greeter_server is not None:
-        my_greeter_server.stop(None)
-        my_greeter_server = None
-
     for cls in classes:
         bpy.utils.unregister_class(cls)
     del bpy.types.Scene.blender_mastodon_view_properties

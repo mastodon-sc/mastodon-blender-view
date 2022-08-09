@@ -9,12 +9,15 @@ bl_info = {
     "category": "3D View"
 }
 
-from . import my_blender_addon
+from . import mb_panel
+from . import mb_server
 
 
 def register():
-    my_blender_addon.register()
+    mb_panel.register()
+    mb_server.register()
 
 
 def unregister():
-    my_blender_addon.unregister()
+    mb_panel.unregister()
+    mb_server.unregister()
