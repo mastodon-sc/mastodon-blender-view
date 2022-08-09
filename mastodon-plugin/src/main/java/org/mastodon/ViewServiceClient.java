@@ -51,6 +51,10 @@ import java.util.Collection;
 public class ViewServiceClient
 {
 
+	private static final String projectPath = "/home/arzt/Datasets/Mette/E1.mastodon";
+
+	//private static final String projectPath = "/home/arzt/Datasets/DeepLineage/Johannes/2022-01-27_Ml_NL45xNL26_fused_part5_2022-07-06_Matthias.mastodon";
+
 	private final ViewServiceGrpc.ViewServiceBlockingStub blockingStub;
 
 	private static final AffineTransform3D transform = new AffineTransform3D();
@@ -127,8 +131,7 @@ public class ViewServiceClient
 		ManagedChannel channel = ManagedChannelBuilder.forTarget( "localhost:50051" ).usePlaintext().build();
 		try (Context context = new Context())
 		{
-			Model embryoA = openAppModel( context, "/home/arzt/Datasets/Mette/E1.mastodon" );
-			//Model embryoA = openAppModel( context, "/home/arzt/Datasets/DeepLineage/Johannes/2022-01-27_Ml_NL45xNL26_fused_part5_2022-07-06_Matthias.mastodon" );
+			Model embryoA = openAppModel( context, projectPath );
 			transform.set(getNormalizingTransform( embryoA.getGraph().vertices() ));
 			ModelGraph graph = embryoA.getGraph();
 			ViewServiceClient client = new ViewServiceClient( channel );
