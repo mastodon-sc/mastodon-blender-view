@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'\n\014org.mastodonB\017HelloWorldProtoP\001\242\002\003HLW',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x1bmastodon-blender-view.proto\x12\x15mastodon_blender_view\"K\n\x14\x41\x64\x64MovingSpotRequest\x12\n\n\x02id\x18\x01 \x01(\t\x12\x13\n\x0b\x63oordinates\x18\x02 \x03(\x02\x12\x12\n\ntimepoints\x18\x03 \x03(\x05\"\x07\n\x05\x45mpty2k\n\x0bViewService\x12\\\n\raddMovingSpot\x12+.mastodon_blender_view.AddMovingSpotRequest\x1a\x1c.mastodon_blender_view.Empty\"\x00\x42\'\n\x0corg.mastodonB\x0fHelloWorldProtoP\x01\xa2\x02\x03HLWb\x06proto3'
+  serialized_pb=b'\n\x1bmastodon-blender-view.proto\x12\x15mastodon_blender_view\"Z\n\x14\x41\x64\x64MovingSpotRequest\x12\n\n\x02id\x18\x01 \x01(\r\x12\r\n\x05label\x18\x02 \x01(\t\x12\x13\n\x0b\x63oordinates\x18\x03 \x03(\x02\x12\x12\n\ntimepoints\x18\x04 \x03(\x05\"3\n\x14SetSpotColorsRequest\x12\x0b\n\x03ids\x18\x01 \x03(\r\x12\x0e\n\x06\x63olors\x18\x02 \x03(\r\"\x07\n\x05\x45mpty2\xc9\x01\n\x0bViewService\x12\\\n\raddMovingSpot\x12+.mastodon_blender_view.AddMovingSpotRequest\x1a\x1c.mastodon_blender_view.Empty\"\x00\x12\\\n\rsetSpotColors\x12+.mastodon_blender_view.SetSpotColorsRequest\x1a\x1c.mastodon_blender_view.Empty\"\x00\x42\'\n\x0corg.mastodonB\x0fHelloWorldProtoP\x01\xa2\x02\x03HLWb\x06proto3'
 )
 
 
@@ -35,21 +35,28 @@ _ADDMOVINGSPOTREQUEST = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='id', full_name='mastodon_blender_view.AddMovingSpotRequest.id', index=0,
-      number=1, type=9, cpp_type=9, label=1,
+      number=1, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='label', full_name='mastodon_blender_view.AddMovingSpotRequest.label', index=1,
+      number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='coordinates', full_name='mastodon_blender_view.AddMovingSpotRequest.coordinates', index=1,
-      number=2, type=2, cpp_type=6, label=3,
+      name='coordinates', full_name='mastodon_blender_view.AddMovingSpotRequest.coordinates', index=2,
+      number=3, type=2, cpp_type=6, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='timepoints', full_name='mastodon_blender_view.AddMovingSpotRequest.timepoints', index=2,
-      number=3, type=5, cpp_type=1, label=3,
+      name='timepoints', full_name='mastodon_blender_view.AddMovingSpotRequest.timepoints', index=3,
+      number=4, type=5, cpp_type=1, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -67,7 +74,46 @@ _ADDMOVINGSPOTREQUEST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=54,
-  serialized_end=129,
+  serialized_end=144,
+)
+
+
+_SETSPOTCOLORSREQUEST = _descriptor.Descriptor(
+  name='SetSpotColorsRequest',
+  full_name='mastodon_blender_view.SetSpotColorsRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='ids', full_name='mastodon_blender_view.SetSpotColorsRequest.ids', index=0,
+      number=1, type=13, cpp_type=3, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='colors', full_name='mastodon_blender_view.SetSpotColorsRequest.colors', index=1,
+      number=2, type=13, cpp_type=3, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=146,
+  serialized_end=197,
 )
 
 
@@ -91,11 +137,12 @@ _EMPTY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=131,
-  serialized_end=138,
+  serialized_start=199,
+  serialized_end=206,
 )
 
 DESCRIPTOR.message_types_by_name['AddMovingSpotRequest'] = _ADDMOVINGSPOTREQUEST
+DESCRIPTOR.message_types_by_name['SetSpotColorsRequest'] = _SETSPOTCOLORSREQUEST
 DESCRIPTOR.message_types_by_name['Empty'] = _EMPTY
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -105,6 +152,13 @@ AddMovingSpotRequest = _reflection.GeneratedProtocolMessageType('AddMovingSpotRe
   # @@protoc_insertion_point(class_scope:mastodon_blender_view.AddMovingSpotRequest)
   })
 _sym_db.RegisterMessage(AddMovingSpotRequest)
+
+SetSpotColorsRequest = _reflection.GeneratedProtocolMessageType('SetSpotColorsRequest', (_message.Message,), {
+  'DESCRIPTOR' : _SETSPOTCOLORSREQUEST,
+  '__module__' : 'mastodon_blender_view_pb2'
+  # @@protoc_insertion_point(class_scope:mastodon_blender_view.SetSpotColorsRequest)
+  })
+_sym_db.RegisterMessage(SetSpotColorsRequest)
 
 Empty = _reflection.GeneratedProtocolMessageType('Empty', (_message.Message,), {
   'DESCRIPTOR' : _EMPTY,
@@ -123,8 +177,8 @@ _VIEWSERVICE = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=140,
-  serialized_end=247,
+  serialized_start=209,
+  serialized_end=410,
   methods=[
   _descriptor.MethodDescriptor(
     name='addMovingSpot',
@@ -132,6 +186,16 @@ _VIEWSERVICE = _descriptor.ServiceDescriptor(
     index=0,
     containing_service=None,
     input_type=_ADDMOVINGSPOTREQUEST,
+    output_type=_EMPTY,
+    serialized_options=None,
+    create_key=_descriptor._internal_create_key,
+  ),
+  _descriptor.MethodDescriptor(
+    name='setSpotColors',
+    full_name='mastodon_blender_view.ViewService.setSpotColors',
+    index=1,
+    containing_service=None,
+    input_type=_SETSPOTCOLORSREQUEST,
     output_type=_EMPTY,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,

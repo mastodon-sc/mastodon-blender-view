@@ -46,7 +46,7 @@ class ManySpheres:
 
     def add_moving_spot(self, request):
         sphere = self.reference_sphere.copy()
-        sphere.name = request.id
+        sphere.name = request.label
         sphere.parent = self.parent_object
         sphere.scale = (0.1, 0.1, 0.1)
         sphere.color = (random.random(), random.random(), random.random(), 1)

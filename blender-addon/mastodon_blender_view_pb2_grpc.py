@@ -19,6 +19,11 @@ class ViewServiceStub(object):
                 request_serializer=mastodon__blender__view__pb2.AddMovingSpotRequest.SerializeToString,
                 response_deserializer=mastodon__blender__view__pb2.Empty.FromString,
                 )
+        self.setSpotColors = channel.unary_unary(
+                '/mastodon_blender_view.ViewService/setSpotColors',
+                request_serializer=mastodon__blender__view__pb2.SetSpotColorsRequest.SerializeToString,
+                response_deserializer=mastodon__blender__view__pb2.Empty.FromString,
+                )
 
 
 class ViewServiceServicer(object):
@@ -30,12 +35,23 @@ class ViewServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def setSpotColors(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_ViewServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'addMovingSpot': grpc.unary_unary_rpc_method_handler(
                     servicer.addMovingSpot,
                     request_deserializer=mastodon__blender__view__pb2.AddMovingSpotRequest.FromString,
+                    response_serializer=mastodon__blender__view__pb2.Empty.SerializeToString,
+            ),
+            'setSpotColors': grpc.unary_unary_rpc_method_handler(
+                    servicer.setSpotColors,
+                    request_deserializer=mastodon__blender__view__pb2.SetSpotColorsRequest.FromString,
                     response_serializer=mastodon__blender__view__pb2.Empty.SerializeToString,
             ),
     }
@@ -61,6 +77,23 @@ class ViewService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/mastodon_blender_view.ViewService/addMovingSpot',
             mastodon__blender__view__pb2.AddMovingSpotRequest.SerializeToString,
+            mastodon__blender__view__pb2.Empty.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def setSpotColors(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/mastodon_blender_view.ViewService/setSpotColors',
+            mastodon__blender__view__pb2.SetSpotColorsRequest.SerializeToString,
             mastodon__blender__view__pb2.Empty.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

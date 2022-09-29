@@ -71,9 +71,8 @@ public class ViewServiceClient
 
 	public static void main( String... args ) throws Exception
 	{
-		// TODO: if we can transfer more efficiently
-		// TODO: show multiple embryos
 		// TODO: visualize tag colors
+		// TODO: show multiple embryos
 		// TODO: synchronize selection between blender and Mastodon
 		transferEmbryo();
 	}
@@ -157,7 +156,8 @@ public class ViewServiceClient
 		try
 		{
 			AddMovingSpotRequest.Builder request = AddMovingSpotRequest.newBuilder();
-			request.setId( start.getLabel() );
+			request.setId( start.getInternalPoolIndex() );
+			request.setLabel( start.getLabel() );
 			spot.refTo( start );
 			coordinates( request, spot );
 			while ( spot.outgoingEdges().size() == 1 )
@@ -195,29 +195,6 @@ public class ViewServiceClient
 			transferTracklet( graph, child, client );
 		}
 		graph.releaseRef( ref );
-	}
-
-	private static void runClient()
-	{
-		ManagedChannel channel = ManagedChannelBuilder.forTarget( "localhost:50051" ).usePlaintext().build();
-		try
-		{
-			ViewServiceClient client = new ViewServiceClient( channel );
-			AddMovingSpotRequest.Builder request = AddMovingSpotRequest.newBuilder();
-			request.setId( "lineage" );
-			for ( int i = 0; i <= 100; i++ )
-			{
-				request.addCoordinates( i / 10.f );
-				request.addCoordinates( 1 );
-				request.addCoordinates( 1 );
-				request.addTimepoints( i );
-			}
-			client.blockingStub.addMovingSpot( request.build() );
-		}
-		finally
-		{
-			channel.shutdownNow(); //.awaitTermination( 5, TimeUnit.SECONDS );
-		}
 	}
 
 	private static Model openAppModel( Context context, String projectPath )

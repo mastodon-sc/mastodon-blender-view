@@ -24,12 +24,20 @@ package mastodon_blender_view;
 service ViewService {
 
   rpc addMovingSpot(AddMovingSpotRequest) returns (Empty) {}
+
+  rpc setSpotColors(SetSpotColorsRequest) returns (Empty) {}
 }
 
 message AddMovingSpotRequest {
-  string id = 1;
-  repeated float coordinates = 2;
-  repeated int32 timepoints = 3;
+  uint32 id = 1;
+  string label = 2;
+  repeated float coordinates = 3;
+  repeated int32 timepoints = 4;
+}
+
+message SetSpotColorsRequest {
+  repeated uint32 ids = 1;
+  repeated uint32 colors = 2;
 }
 
 message Empty {}
