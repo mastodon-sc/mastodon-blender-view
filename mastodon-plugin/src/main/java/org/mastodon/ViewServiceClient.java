@@ -45,10 +45,14 @@ import org.mastodon.mamut.model.ModelGraph;
 import org.mastodon.mamut.model.Spot;
 import org.mastodon.mamut.project.MamutProject;
 import org.mastodon.mamut.project.MamutProjectIO;
+import org.mastodon.model.tag.ObjTagMap;
+import org.mastodon.model.tag.TagSetModel;
+import org.mastodon.model.tag.TagSetStructure;
 import org.scijava.Context;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.NoSuchElementException;
 
 public class ViewServiceClient
 {
@@ -136,6 +140,7 @@ public class ViewServiceClient
 			Model embryoA = openAppModel( context, projectPath );
 			StopWatch watch = StopWatch.createAndStart();
 			transferCoordinates( client, embryoA );
+			transferColors( client, embryoA );
 			System.out.println( watch );
 		}
 		finally
@@ -144,12 +149,37 @@ public class ViewServiceClient
 		}
 	}
 
-	private static void transferCoordinates( ViewServiceClient client, Model embryoA )
+	private static void transferCoordinates( ViewServiceClient client, Model model )
 	{
-		ModelGraph graph = embryoA.getGraph();
+		ModelGraph graph = model.getGraph();
 		transform.set(getNormalizingTransform( graph.vertices() ));
 		for ( Spot spot : getTrackletStarts( graph ) )
 			transferTracklet( graph, spot, client );
+	}
+
+	private static void transferColors( ViewServiceClient client, Model model )
+	{
+		int defaultColor = 0x444444;
+		TagSetStructure.TagSet tagSet = getTagSet( model, "2d112_many_colors" );
+		SetSpotColorsRequest.Builder request = SetSpotColorsRequest.newBuilder();
+		ObjTagMap<Spot, TagSetStructure.Tag> spotToTag = model.getTagSetModel().getVertexTags().tags( tagSet );
+		RefSet<Spot> trackletStarts = getTrackletStarts( model.getGraph() );
+		for ( Spot spot : trackletStarts ) {
+			TagSetStructure.Tag tag = spotToTag.get( spot );
+			request.addIds( spot.getInternalPoolIndex() );
+			request.addColors( tag == null ? defaultColor : tag.color() );
+		}
+		client.blockingStub.setSpotColors( request.build() );
+	}
+
+	private static TagSetStructure.TagSet getTagSet( Model model, String name ) {
+		TagSetModel<Spot, Link> tagSetModel = model.getTagSetModel();
+		TagSetStructure tagSetStructure = tagSetModel.getTagSetStructure();
+		for( TagSetStructure.TagSet tagSet : tagSetStructure.getTagSets() ) {
+			if ( tagSet.getName().equals( name ))
+				return tagSet;
+		}
+		throw new NoSuchElementException();
 	}
 
 	private static RefSet<Spot> getTrackletStarts( ModelGraph graph )

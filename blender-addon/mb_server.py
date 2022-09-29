@@ -35,6 +35,11 @@ class ViewService(rpc.ViewServiceServicer):
             partial(self.many_spheres.add_moving_spot, request))
         return pb.Empty()
 
+    def setSpotColors(self, request, context):
+        mb_utils.run_in_main_thread(
+            partial(self.many_spheres.set_spot_colors, request))
+        return pb.Empty()
+
 
 class MastodonBlenderServer:
     many_spheres = None

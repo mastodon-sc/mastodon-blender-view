@@ -2,10 +2,23 @@ import bpy
 import random
 from . import mb_utils
 
+
+def get_color_channel(color_as_int, channel):
+    return float((color_as_int >> (8 * channel)) & 0xff) / 255
+
+
+def to_blender_color(color_as_int):
+    red = get_color_channel(color_as_int, 2)
+    green = get_color_channel(color_as_int, 1)
+    blue = get_color_channel(color_as_int, 0)
+    return red, green, blue, 1
+
+
 class ManySpheres:
     collection = None
     parent_object = None
     reference_sphere = None
+    ids_to_spheres = dict()
 
     def __init__(self):
         def init_collection():
@@ -65,8 +78,17 @@ class ManySpheres:
 
         mb_utils.hide_object(sphere, time=last_time + 1)
         self.collection.objects.link(sphere)
+        self.ids_to_spheres[request.id] = sphere
         return
 
     def set_sphere_size(self, size):
         for sphere in self.parent_object.children:
             sphere.scale = [size, size, size]
+
+    def set_spot_colors(self, request):
+        ids = request.ids
+        colors = request.colors
+        for i in range(len(ids)):
+            id = ids[i]
+            color = colors[i]
+            self.ids_to_spheres[id].color = to_blender_color(color)
