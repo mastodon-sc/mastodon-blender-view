@@ -35,6 +35,8 @@ import net.imglib2.RealLocalizable;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.util.StopWatch;
+import org.mastodon.collection.RefSet;
+import org.mastodon.collection.ref.RefSetImp;
 import org.mastodon.graph.io.RawGraphIO;
 import org.mastodon.mamut.feature.MamutRawFeatureModelIO;
 import org.mastodon.mamut.model.Link;
@@ -130,9 +132,10 @@ public class ViewServiceClient
 		ManagedChannel channel = ManagedChannelBuilder.forTarget( "localhost:50051" ).usePlaintext().build();
 		try (Context context = new Context())
 		{
+			ViewServiceClient client = new ViewServiceClient( channel );
 			Model embryoA = openAppModel( context, projectPath );
 			StopWatch watch = StopWatch.createAndStart();
-			transferCoordinates( channel, embryoA );
+			transferCoordinates( client, embryoA );
 			System.out.println( watch );
 		}
 		finally
@@ -141,17 +144,31 @@ public class ViewServiceClient
 		}
 	}
 
-	private static void transferCoordinates( ManagedChannel channel, Model embryoA )
+	private static void transferCoordinates( ViewServiceClient client, Model embryoA )
 	{
 		ModelGraph graph = embryoA.getGraph();
 		transform.set(getNormalizingTransform( graph.vertices() ));
-		ViewServiceClient client = new ViewServiceClient( channel );
-		for ( Spot spot : graph.vertices() )
-		{
-			if ( spot.incomingEdges().size() != 1 )
-				transferTracklet( graph, spot, client );
-			if ( spot.outgoingEdges().size() > 1 )
-				transferChildTracklets( graph, spot, client );
+		for ( Spot spot : getTrackletStarts( graph ) )
+			transferTracklet( graph, spot, client );
+	}
+
+	private static RefSet<Spot> getTrackletStarts( ModelGraph graph )
+	{
+		Spot ref = graph.vertexRef();
+		try {
+			RefSet<Spot> set = new RefSetImp<>( graph.vertices().getRefPool() );
+			for ( Spot spot : graph.vertices() )
+			{
+				if ( spot.incomingEdges().size() != 1 )
+					set.add( spot );
+				if ( spot.outgoingEdges().size() > 1 )
+					for ( Link link : spot.outgoingEdges() )
+						set.add(link.getTarget( ref ) );
+			}
+			return set;
+		}
+		finally {
+			graph.releaseRef( ref );
 		}
 	}
 
@@ -182,24 +199,12 @@ public class ViewServiceClient
 
 	private static void coordinates( AddMovingSpotRequest.Builder request, Spot spot )
 	{
-		float s = 0.05f;
 		RealPoint point = new RealPoint( 3 );
 		transform.apply( spot, point );
 		request.addCoordinates( point.getFloatPosition( 0 ) );
 		request.addCoordinates( point.getFloatPosition( 1 ) );
 		request.addCoordinates( point.getFloatPosition( 2 ) );
 		request.addTimepoints( spot.getTimepoint() );
-	}
-
-	private static void transferChildTracklets( ModelGraph graph, Spot spot, ViewServiceClient client )
-	{
-		Spot ref = graph.vertexRef();
-		for ( Link link : spot.outgoingEdges() )
-		{
-			Spot child = link.getTarget( ref );
-			transferTracklet( graph, child, client );
-		}
-		graph.releaseRef( ref );
 	}
 
 	private static Model openAppModel( Context context, String projectPath )
