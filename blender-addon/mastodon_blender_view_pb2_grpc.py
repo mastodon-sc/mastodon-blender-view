@@ -24,6 +24,11 @@ class ViewServiceStub(object):
                 request_serializer=mastodon__blender__view__pb2.SetSpotColorsRequest.SerializeToString,
                 response_deserializer=mastodon__blender__view__pb2.Empty.FromString,
                 )
+        self.setTimePoint = channel.unary_unary(
+                '/mastodon_blender_view.ViewService/setTimePoint',
+                request_serializer=mastodon__blender__view__pb2.SetTimePointRequest.SerializeToString,
+                response_deserializer=mastodon__blender__view__pb2.Empty.FromString,
+                )
 
 
 class ViewServiceServicer(object):
@@ -41,6 +46,12 @@ class ViewServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def setTimePoint(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_ViewServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -52,6 +63,11 @@ def add_ViewServiceServicer_to_server(servicer, server):
             'setSpotColors': grpc.unary_unary_rpc_method_handler(
                     servicer.setSpotColors,
                     request_deserializer=mastodon__blender__view__pb2.SetSpotColorsRequest.FromString,
+                    response_serializer=mastodon__blender__view__pb2.Empty.SerializeToString,
+            ),
+            'setTimePoint': grpc.unary_unary_rpc_method_handler(
+                    servicer.setTimePoint,
+                    request_deserializer=mastodon__blender__view__pb2.SetTimePointRequest.FromString,
                     response_serializer=mastodon__blender__view__pb2.Empty.SerializeToString,
             ),
     }
@@ -94,6 +110,23 @@ class ViewService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/mastodon_blender_view.ViewService/setSpotColors',
             mastodon__blender__view__pb2.SetSpotColorsRequest.SerializeToString,
+            mastodon__blender__view__pb2.Empty.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def setTimePoint(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/mastodon_blender_view.ViewService/setTimePoint',
+            mastodon__blender__view__pb2.SetTimePointRequest.SerializeToString,
             mastodon__blender__view__pb2.Empty.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

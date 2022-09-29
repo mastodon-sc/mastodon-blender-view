@@ -92,3 +92,7 @@ class ManySpheres:
             id = ids[i]
             color = colors[i]
             self.ids_to_spheres[id].color = to_blender_color(color)
+
+    def set_time_point(self, request):
+        time_point = request.timepoint
+        bpy.context.scene.frame_set(time_point)

@@ -141,12 +141,20 @@ public class ViewServiceClient
 			StopWatch watch = StopWatch.createAndStart();
 			transferCoordinates( client, embryoA );
 			transferColors( client, embryoA );
+			transferTimePoint( client, 42 );
 			System.out.println( watch );
 		}
 		finally
 		{
 			channel.shutdownNow(); //.awaitTermination( 5, TimeUnit.SECONDS );
 		}
+	}
+
+	private static void transferTimePoint( ViewServiceClient client, int timePoint )
+	{
+		client.blockingStub.setTimePoint(SetTimePointRequest.newBuilder()
+				.setTimepoint(timePoint)
+				.build());
 	}
 
 	private static void transferCoordinates( ViewServiceClient client, Model model )

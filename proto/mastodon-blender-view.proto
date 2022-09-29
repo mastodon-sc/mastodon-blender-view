@@ -26,6 +26,8 @@ service ViewService {
   rpc addMovingSpot(AddMovingSpotRequest) returns (Empty) {}
 
   rpc setSpotColors(SetSpotColorsRequest) returns (Empty) {}
+
+  rpc setTimePoint(SetTimePointRequest) returns (Empty) {}
 }
 
 message AddMovingSpotRequest {
@@ -38,6 +40,10 @@ message AddMovingSpotRequest {
 message SetSpotColorsRequest {
   repeated uint32 ids = 1;
   repeated uint32 colors = 2;
+}
+
+message SetTimePointRequest {
+  uint32 timepoint = 1;
 }
 
 message Empty {}
