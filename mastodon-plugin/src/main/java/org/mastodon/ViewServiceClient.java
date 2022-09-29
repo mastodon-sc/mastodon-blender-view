@@ -131,22 +131,27 @@ public class ViewServiceClient
 		try (Context context = new Context())
 		{
 			Model embryoA = openAppModel( context, projectPath );
-			transform.set(getNormalizingTransform( embryoA.getGraph().vertices() ));
-			ModelGraph graph = embryoA.getGraph();
-			ViewServiceClient client = new ViewServiceClient( channel );
 			StopWatch watch = StopWatch.createAndStart();
-			for ( Spot spot : graph.vertices() )
-			{
-				if ( spot.incomingEdges().size() != 1 )
-					transferTracklet( graph, spot, client );
-				if ( spot.outgoingEdges().size() > 1 )
-					transferChildTracklets( graph, spot, client );
-			}
+			transferCoordinates( channel, embryoA );
 			System.out.println( watch );
 		}
 		finally
 		{
 			channel.shutdownNow(); //.awaitTermination( 5, TimeUnit.SECONDS );
+		}
+	}
+
+	private static void transferCoordinates( ManagedChannel channel, Model embryoA )
+	{
+		ModelGraph graph = embryoA.getGraph();
+		transform.set(getNormalizingTransform( graph.vertices() ));
+		ViewServiceClient client = new ViewServiceClient( channel );
+		for ( Spot spot : graph.vertices() )
+		{
+			if ( spot.incomingEdges().size() != 1 )
+				transferTracklet( graph, spot, client );
+			if ( spot.outgoingEdges().size() > 1 )
+				transferChildTracklets( graph, spot, client );
 		}
 	}
 
