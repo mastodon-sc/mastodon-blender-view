@@ -1,6 +1,6 @@
 import bpy
+import random
 from . import mb_utils
-
 
 class ManySpheres:
     collection = None
@@ -28,15 +28,28 @@ class ManySpheres:
             self.reference_sphere = bpy.context.active_object
             bpy.ops.collection.objects_remove_all()  # remove the sphere from its collection
 
+        def init_sphere_material():
+            material = bpy.data.materials.new(name="Object Color")
+            material.use_nodes = True
+            principled_node = material.node_tree.nodes.get('Principled BSDF')
+            principled_node.inputs[0].default_value = (1, 0, 0, 1)
+            object_info_node = material.node_tree.nodes.new(
+                'ShaderNodeObjectInfo')
+            material.node_tree.links.new(object_info_node.outputs[1],
+                                         principled_node.inputs[0])
+            self.reference_sphere.active_material = material
+
         init_collection()
         init_parent_object()
         init_reference_sphere()
+        init_sphere_material()
 
     def add_moving_spot(self, request):
         sphere = self.reference_sphere.copy()
         sphere.name = request.id
         sphere.parent = self.parent_object
         sphere.scale = (0.1, 0.1, 0.1)
+        sphere.color = (random.random(), random.random(), random.random(), 1)
         mb_utils.hide_object(sphere, time=0)
         mb_utils.show_object(sphere, time=request.timepoints[0])
 
