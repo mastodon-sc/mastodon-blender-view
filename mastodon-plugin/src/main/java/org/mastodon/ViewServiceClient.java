@@ -37,20 +37,15 @@ import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.util.StopWatch;
 import org.mastodon.collection.RefSet;
 import org.mastodon.collection.ref.RefSetImp;
-import org.mastodon.graph.io.RawGraphIO;
-import org.mastodon.mamut.feature.MamutRawFeatureModelIO;
+import org.mastodon.mamut.MamutAppModel;
 import org.mastodon.mamut.model.Link;
 import org.mastodon.mamut.model.Model;
 import org.mastodon.mamut.model.ModelGraph;
 import org.mastodon.mamut.model.Spot;
-import org.mastodon.mamut.project.MamutProject;
-import org.mastodon.mamut.project.MamutProjectIO;
 import org.mastodon.model.tag.ObjTagMap;
 import org.mastodon.model.tag.TagSetModel;
 import org.mastodon.model.tag.TagSetStructure;
-import org.scijava.Context;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.NoSuchElementException;
 
@@ -77,10 +72,13 @@ public class ViewServiceClient
 
 	public static void main( String... args ) throws Exception
 	{
-		// TODO: visualize tag colors
+		// TODO: synchronize object selection between blender and Mastodon
+		// TODO: enable selecting the tag set
+		// TODO: enable setting tags
+		// TODO: synchronize time points between blender and Mastodon
 		// TODO: show multiple embryos
-		// TODO: synchronize selection between blender and Mastodon
-		transferEmbryo();
+		MamutAppModel appModel = MastodonUtils.showGuiAndGetAppModel( projectPath );
+		transferEmbryo( appModel.getModel() );
 	}
 
 	private static AffineTransform3D getNormalizingTransform( Collection<Spot> spots )
@@ -131,16 +129,15 @@ public class ViewServiceClient
 		return v * v;
 	}
 
-	private static void transferEmbryo() throws Exception
+	private static void transferEmbryo( Model model ) throws Exception
 	{
 		ManagedChannel channel = ManagedChannelBuilder.forTarget( "localhost:50051" ).usePlaintext().build();
-		try (Context context = new Context())
+		try
 		{
 			ViewServiceClient client = new ViewServiceClient( channel );
-			Model embryoA = openAppModel( context, projectPath );
 			StopWatch watch = StopWatch.createAndStart();
-			transferCoordinates( client, embryoA );
-			transferColors( client, embryoA );
+			transferCoordinates( client, model );
+			transferColors( client, model );
 			transferTimePoint( client, 42 );
 			System.out.println( watch );
 		}
@@ -245,31 +242,4 @@ public class ViewServiceClient
 		request.addTimepoints( spot.getTimepoint() );
 	}
 
-	private static Model openAppModel( Context context, String projectPath )
-	{
-		try
-		{
-			MamutProject project = new MamutProjectIO().load( projectPath );
-			final Model model = new Model( project.getSpaceUnits(), project.getTimeUnits() );
-			final boolean isNewProject = project.getProjectRoot() == null;
-			if ( !isNewProject )
-			{
-				try (final MamutProject.ProjectReader reader = project.openForReading())
-				{
-					final RawGraphIO.FileIdToGraphMap<Spot, Link> idmap = model.loadRaw( reader );
-					// Load features.
-					MamutRawFeatureModelIO.deserialize( context, model, idmap, reader );
-				}
-				catch ( final ClassNotFoundException e )
-				{
-					e.printStackTrace();
-				}
-			}
-			return model;
-		}
-		catch ( IOException e )
-		{
-			throw new RuntimeException( e );
-		}
-	}
 }
