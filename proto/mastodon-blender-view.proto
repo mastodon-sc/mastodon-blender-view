@@ -28,7 +28,11 @@ service ViewService {
   rpc setSpotColors(SetSpotColorsRequest) returns (Empty) {}
 
   rpc setTimePoint(SetTimePointRequest) returns (Empty) {}
+
+  rpc subscribeToActiveSpotChange(Empty) returns (stream ActiveSpotResponse) {}
 }
+
+message Empty {}
 
 message AddMovingSpotRequest {
   uint32 id = 1;
@@ -46,4 +50,6 @@ message SetTimePointRequest {
   uint32 timepoint = 1;
 }
 
-message Empty {}
+message ActiveSpotResponse {
+  uint32 id = 1;
+}

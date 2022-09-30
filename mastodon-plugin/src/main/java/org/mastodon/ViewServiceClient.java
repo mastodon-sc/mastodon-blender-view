@@ -31,22 +31,27 @@ package org.mastodon;
 import io.grpc.Channel;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import net.imglib2.RealLocalizable;
+import io.grpc.stub.StreamObserver;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.util.StopWatch;
 import org.mastodon.collection.RefSet;
 import org.mastodon.collection.ref.RefSetImp;
+import org.mastodon.graph.GraphIdBimap;
+import org.mastodon.grouping.GroupHandle;
 import org.mastodon.mamut.MamutAppModel;
 import org.mastodon.mamut.model.Link;
 import org.mastodon.mamut.model.Model;
 import org.mastodon.mamut.model.ModelGraph;
 import org.mastodon.mamut.model.Spot;
+import org.mastodon.model.AutoNavigateFocusModel;
+import org.mastodon.model.FocusModel;
+import org.mastodon.model.NavigationHandler;
 import org.mastodon.model.tag.ObjTagMap;
 import org.mastodon.model.tag.TagSetModel;
 import org.mastodon.model.tag.TagSetStructure;
 
-import java.util.Collection;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 public class ViewServiceClient
@@ -58,16 +63,12 @@ public class ViewServiceClient
 
 	private final ViewServiceGrpc.ViewServiceBlockingStub blockingStub;
 
-	private static final AffineTransform3D transform = new AffineTransform3D();
-
-	static
-	{
-		transform.scale( 0.05 );
-	}
+	private final ViewServiceGrpc.ViewServiceStub nonBlockingStub;
 
 	public ViewServiceClient( Channel channel )
 	{
 		blockingStub = ViewServiceGrpc.newBlockingStub( channel );
+		nonBlockingStub = ViewServiceGrpc.newStub( channel );
 	}
 
 	public static void main( String... args ) throws Exception
@@ -78,91 +79,84 @@ public class ViewServiceClient
 		// TODO: synchronize time points between blender and Mastodon
 		// TODO: show multiple embryos
 		MamutAppModel appModel = MastodonUtils.showGuiAndGetAppModel( projectPath );
-		transferEmbryo( appModel.getModel() );
+		transferEmbryo( appModel );
 	}
 
-	private static AffineTransform3D getNormalizingTransform( Collection<Spot> spots )
+	private void nonBlockingPrintActiveObject( MamutAppModel appModel )
 	{
-		RealLocalizable mean = getMean( spots );
-		double variance = getVariance( spots, mean );
-
-		double s = 1 / Math.sqrt( variance );
-		AffineTransform3D transform = new AffineTransform3D();
-		transform.translate( - mean.getDoublePosition( 0 ),
-				- mean.getDoublePosition( 1 ),
-				- mean.getDoublePosition( 2 ) );
-		transform.scale( s );
-		return transform;
-	}
-
-	private static RealLocalizable getMean( Collection<Spot> spots )
-	{
-		double x = 0;
-		double y = 0;
-		double z = 0;
-		for ( Spot spot : spots )
+		GroupHandle groupHandle = appModel.getGroupManager().createGroupHandle();
+		groupHandle.setGroupId( 0 );
+		NavigationHandler<Spot, Link> navigationModel = groupHandle.getModel( appModel.NAVIGATION );
+		FocusModel<Spot, Link> focusModel = new AutoNavigateFocusModel<>( appModel.getFocusModel(), navigationModel );
+		ModelGraph graph = appModel.getModel().getGraph();
+		GraphIdBimap<Spot, Link> graphIdBimap = graph.getGraphIdBimap();
+		nonBlockingStub.subscribeToActiveSpotChange( Empty.newBuilder().build(), new StreamObserver<ActiveSpotResponse>()
 		{
-			x += spot.getDoublePosition( 0 );
-			y += spot.getDoublePosition( 1 );
-			z += spot.getDoublePosition( 2 );
-		}
-		int n = spots.size();
-		RealLocalizable mean = RealPoint.wrap( new double[] { x / n, y / n, z / n } );
-		return mean;
+			@Override
+			public void onNext( ActiveSpotResponse activeObjectIdResponse )
+			{
+				int id = activeObjectIdResponse.getId();
+				System.out.println( id );
+				if(id > 0)
+				{
+					Spot ref = graph.vertexRef();
+					Spot vertex = graphIdBimap.getVertex( id, ref );
+					focusModel.focusVertex( vertex );
+					graph.releaseRef( graph.vertexRef() );
+				}
+			}
+
+			@Override
+			public void onError( Throwable throwable )
+			{
+				throwable.printStackTrace();
+			}
+
+			@Override
+			public void onCompleted()
+			{
+
+			}
+		} );
 	}
 
-	private static double getVariance( Collection<Spot> spots, RealLocalizable mean )
+	private static void transferEmbryo( MamutAppModel appModel ) throws Exception
 	{
-		double variance = 0;
-		for ( Spot spot : spots )
-		{
-			variance += sqr( spot.getDoublePosition( 0 ) - mean.getDoublePosition( 0 ) );
-			variance += sqr( spot.getDoublePosition( 1 ) - mean.getDoublePosition( 1 ) );
-			variance += sqr( spot.getDoublePosition( 2 ) - mean.getDoublePosition( 2 ) );
-		}
-		variance /= ( spots.size() - 1 );
-		return variance;
-	}
-
-	private static double sqr( double v )
-	{
-		return v * v;
-	}
-
-	private static void transferEmbryo( Model model ) throws Exception
-	{
+		Model model = appModel.getModel();
 		ManagedChannel channel = ManagedChannelBuilder.forTarget( "localhost:50051" ).usePlaintext().build();
-		try
-		{
-			ViewServiceClient client = new ViewServiceClient( channel );
-			StopWatch watch = StopWatch.createAndStart();
-			transferCoordinates( client, model );
-			transferColors( client, model );
-			transferTimePoint( client, 42 );
-			System.out.println( watch );
-		}
-		finally
-		{
-			channel.shutdownNow(); //.awaitTermination( 5, TimeUnit.SECONDS );
+		Runtime.getRuntime().addShutdownHook( new Thread( channel::shutdown ) );
+		ViewServiceClient client = new ViewServiceClient( channel );
+		StopWatch watch = StopWatch.createAndStart();
+		client.transferCoordinates( model.getGraph() );
+		client.transferColors( model );
+		client.transferTimePoint( 42 );
+		client.nonBlockingPrintActiveObject( appModel );
+		System.out.println( watch );
+	}
+
+	private void printActiveObject()
+	{
+		Iterator<ActiveSpotResponse> activeObjectIterator = blockingStub.subscribeToActiveSpotChange( Empty.newBuilder().build() );
+		while(activeObjectIterator.hasNext()) {
+			System.out.println(activeObjectIterator.next().getId());
 		}
 	}
 
-	private static void transferTimePoint( ViewServiceClient client, int timePoint )
+	private void transferTimePoint( int timePoint )
 	{
-		client.blockingStub.setTimePoint(SetTimePointRequest.newBuilder()
+		blockingStub.setTimePoint(SetTimePointRequest.newBuilder()
 				.setTimepoint(timePoint)
 				.build());
 	}
 
-	private static void transferCoordinates( ViewServiceClient client, Model model )
+	private void transferCoordinates( ModelGraph graph )
 	{
-		ModelGraph graph = model.getGraph();
-		transform.set(getNormalizingTransform( graph.vertices() ));
+		AffineTransform3D transform = PointCloudNormalizationUtils.getNormalizingTransform( graph.vertices() );
 		for ( Spot spot : getTrackletStarts( graph ) )
-			transferTracklet( graph, spot, client );
+			transferTracklet( graph, spot, transform );
 	}
 
-	private static void transferColors( ViewServiceClient client, Model model )
+	private void transferColors( Model model )
 	{
 		int defaultColor = 0x444444;
 		TagSetStructure.TagSet tagSet = getTagSet( model, "2d112_many_colors" );
@@ -174,7 +168,7 @@ public class ViewServiceClient
 			request.addIds( spot.getInternalPoolIndex() );
 			request.addColors( tag == null ? defaultColor : tag.color() );
 		}
-		client.blockingStub.setSpotColors( request.build() );
+		blockingStub.setSpotColors( request.build() );
 	}
 
 	private static TagSetStructure.TagSet getTagSet( Model model, String name ) {
@@ -207,7 +201,7 @@ public class ViewServiceClient
 		}
 	}
 
-	private static void transferTracklet( ModelGraph graph, Spot start, ViewServiceClient client )
+	private void transferTracklet( ModelGraph graph, Spot start, AffineTransform3D transform )
 	{
 		Spot spot = graph.vertexRef();
 		try
@@ -216,15 +210,15 @@ public class ViewServiceClient
 			request.setId( start.getInternalPoolIndex() );
 			request.setLabel( start.getLabel() );
 			spot.refTo( start );
-			coordinates( request, spot );
+			coordinates( request, spot, transform );
 			while ( spot.outgoingEdges().size() == 1 )
 			{
 				spot.outgoingEdges().iterator().next().getTarget( spot );
 				if ( spot.incomingEdges().size() != 1 )
 					break;
-				coordinates( request, spot );
+				coordinates( request, spot, transform );
 			}
-			client.blockingStub.addMovingSpot( request.build() );
+			blockingStub.addMovingSpot( request.build() );
 		}
 		finally
 		{
@@ -232,7 +226,7 @@ public class ViewServiceClient
 		}
 	}
 
-	private static void coordinates( AddMovingSpotRequest.Builder request, Spot spot )
+	private void coordinates( AddMovingSpotRequest.Builder request, Spot spot, AffineTransform3D transform )
 	{
 		RealPoint point = new RealPoint( 3 );
 		transform.apply( spot, point );

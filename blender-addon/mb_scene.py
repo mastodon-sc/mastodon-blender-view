@@ -1,4 +1,5 @@
 import bpy
+import bidict
 import random
 from . import mb_utils
 
@@ -18,7 +19,7 @@ class ManySpheres:
     collection = None
     parent_object = None
     reference_sphere = None
-    ids_to_spheres = dict()
+    ids_to_spheres = bidict.bidict()
 
     def __init__(self):
         def init_collection():
@@ -96,3 +97,9 @@ class ManySpheres:
     def set_time_point(self, request):
         time_point = request.timepoint
         bpy.context.scene.frame_set(time_point)
+
+    def get_active_spot_id(self):
+        try:
+            return self.ids_to_spheres.inverse[bpy.context.active_object]
+        except:
+            return None

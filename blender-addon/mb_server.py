@@ -17,6 +17,7 @@ from concurrent import futures
 
 import grpc
 import bpy
+import queue
 from . import mb_scene
 from . import mastodon_blender_view_pb2 as pb
 from . import mastodon_blender_view_pb2_grpc as rpc
@@ -26,9 +27,13 @@ from functools import partial
 
 class ViewService(rpc.ViewServiceServicer):
     many_spheres = None
+    active_spot_id = None
+    active_spot_id_queue = queue.Queue()
 
     def __init__(self, many_spheres):
         self.many_spheres = many_spheres
+        callback = self.active_object_changed_callback
+        subscribe_to_active_object_change_event(self, callback)
 
     def addMovingSpot(self, request, context):
         mb_utils.run_in_main_thread(
@@ -45,6 +50,31 @@ class ViewService(rpc.ViewServiceServicer):
             partial(self.many_spheres.set_time_point, request))
         return pb.Empty()
 
+    def subscribeToActiveSpotChange(self, request, context):
+        while context.is_active():
+            try:
+                spot_id = self.active_spot_id_queue.get(timeout=1)
+                if spot_id == None:
+                    spot_id = 0xffffffff
+                yield pb.ActiveSpotResponse(id=spot_id)
+            except queue.Empty:
+                pass
+
+    def active_object_changed_callback(self):
+        active_spot_id = self.many_spheres.get_active_spot_id()
+        if self.active_spot_id != active_spot_id:
+            self.active_spot_id = active_spot_id
+            self.active_spot_id_queue.put(active_spot_id)
+
+
+def subscribe_to_active_object_change_event(owner, callback):
+    bpy.msgbus.subscribe_rna(
+        key=(bpy.types.LayerObjects, 'active'),
+        owner=owner,
+        args=(callback,),
+        notify=lambda x: x()
+    )
+
 
 class MastodonBlenderServer:
     many_spheres = None
@@ -58,7 +88,7 @@ class MastodonBlenderServer:
         self.server.start()
 
     def stop(self):
-        self.server.stop()
+        self.server.stop(grace=2)
 
 
 mastodon_blender_server = None
@@ -76,5 +106,5 @@ def delayed_start_server():
 def unregister():
     global mastodon_blender_server
     if mastodon_blender_server is not None:
-        mastodon_blender_server.stop(None)
+        mastodon_blender_server.stop()
         mastodon_blender_server = None
