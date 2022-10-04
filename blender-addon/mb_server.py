@@ -26,7 +26,7 @@ from functools import partial
 
 
 class ViewService(rpc.ViewServiceServicer):
-    many_spheres = None
+    many_spheres : mb_scene.ManySpheres = None
     active_spot_id = None
     active_spot_id_queue = queue.Queue()
 
@@ -66,6 +66,10 @@ class ViewService(rpc.ViewServiceServicer):
             self.active_spot_id = active_spot_id
             self.active_spot_id_queue.put(active_spot_id)
 
+    def setActiveSpot(self, request, context):
+        mb_utils.run_in_main_thread(
+            partial(self.many_spheres.set_active_spot_id, request))
+        return pb.Empty()
 
 def subscribe_to_active_object_change_event(owner, callback):
     bpy.msgbus.subscribe_rna(

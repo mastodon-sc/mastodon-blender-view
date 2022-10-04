@@ -22,6 +22,7 @@ class ManySpheres:
     ids_to_spheres = bidict.bidict()
 
     def __init__(self):
+
         def init_collection():
             self.collection = bpy.data.collections.new("mastodon_blender_view")
             bpy.context.scene.collection.children.link(self.collection)
@@ -103,3 +104,12 @@ class ManySpheres:
             return self.ids_to_spheres.inverse[bpy.context.active_object]
         except:
             return None
+
+    def set_active_spot_id(self, request):
+        try:
+            id = request.id
+            sphere = self.ids_to_spheres[id]
+            bpy.context.view_layer.objects.active = sphere
+            bpy.context.view_layer.objects.selected = sphere
+        except:
+            pass

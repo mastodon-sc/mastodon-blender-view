@@ -30,6 +30,8 @@ service ViewService {
   rpc setTimePoint(SetTimePointRequest) returns (Empty) {}
 
   rpc subscribeToActiveSpotChange(Empty) returns (stream ActiveSpotResponse) {}
+
+  rpc setActiveSpot(SetActiveSpotRequest) returns (Empty) {}
 }
 
 message Empty {}
@@ -51,5 +53,9 @@ message SetTimePointRequest {
 }
 
 message ActiveSpotResponse {
+  uint32 id = 1;
+}
+
+message SetActiveSpotRequest {
   uint32 id = 1;
 }

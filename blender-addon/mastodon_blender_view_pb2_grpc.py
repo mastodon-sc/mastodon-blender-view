@@ -34,6 +34,11 @@ class ViewServiceStub(object):
                 request_serializer=mastodon__blender__view__pb2.Empty.SerializeToString,
                 response_deserializer=mastodon__blender__view__pb2.ActiveSpotResponse.FromString,
                 )
+        self.setActiveSpot = channel.unary_unary(
+                '/mastodon_blender_view.ViewService/setActiveSpot',
+                request_serializer=mastodon__blender__view__pb2.SetActiveSpotRequest.SerializeToString,
+                response_deserializer=mastodon__blender__view__pb2.Empty.FromString,
+                )
 
 
 class ViewServiceServicer(object):
@@ -63,6 +68,12 @@ class ViewServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def setActiveSpot(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_ViewServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -85,6 +96,11 @@ def add_ViewServiceServicer_to_server(servicer, server):
                     servicer.subscribeToActiveSpotChange,
                     request_deserializer=mastodon__blender__view__pb2.Empty.FromString,
                     response_serializer=mastodon__blender__view__pb2.ActiveSpotResponse.SerializeToString,
+            ),
+            'setActiveSpot': grpc.unary_unary_rpc_method_handler(
+                    servicer.setActiveSpot,
+                    request_deserializer=mastodon__blender__view__pb2.SetActiveSpotRequest.FromString,
+                    response_serializer=mastodon__blender__view__pb2.Empty.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -161,5 +177,22 @@ class ViewService(object):
         return grpc.experimental.unary_stream(request, target, '/mastodon_blender_view.ViewService/subscribeToActiveSpotChange',
             mastodon__blender__view__pb2.Empty.SerializeToString,
             mastodon__blender__view__pb2.ActiveSpotResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def setActiveSpot(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/mastodon_blender_view.ViewService/setActiveSpot',
+            mastodon__blender__view__pb2.SetActiveSpotRequest.SerializeToString,
+            mastodon__blender__view__pb2.Empty.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

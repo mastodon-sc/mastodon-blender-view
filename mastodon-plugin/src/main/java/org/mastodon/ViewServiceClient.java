@@ -85,11 +85,18 @@ public class ViewServiceClient
 	private void nonBlockingPrintActiveObject( MamutAppModel appModel )
 	{
 		GroupHandle groupHandle = appModel.getGroupManager().createGroupHandle();
+		ModelGraph graph = appModel.getModel().getGraph();
 		groupHandle.setGroupId( 0 );
 		NavigationHandler<Spot, Link> navigationModel = groupHandle.getModel( appModel.NAVIGATION );
 		FocusModel<Spot, Link> focusModel = new AutoNavigateFocusModel<>( appModel.getFocusModel(), navigationModel );
-		ModelGraph graph = appModel.getModel().getGraph();
 		GraphIdBimap<Spot, Link> graphIdBimap = graph.getGraphIdBimap();
+		focusModel.listeners().add( () -> {
+			Spot ref = graph.vertexRef();
+			Spot focusedSpot = focusModel.getFocusedVertex( ref );
+			int id = graphIdBimap.vertexIdBimap().getId( focusedSpot );
+			SetActiveSpotRequest request = SetActiveSpotRequest.newBuilder().setId( id ).build();
+			blockingStub.setActiveSpot( request );
+		} );
 		nonBlockingStub.subscribeToActiveSpotChange( Empty.newBuilder().build(), new StreamObserver<ActiveSpotResponse>()
 		{
 			@Override
