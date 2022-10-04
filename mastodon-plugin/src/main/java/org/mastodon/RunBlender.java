@@ -36,7 +36,6 @@ public class RunBlender
 			throws Exception
 	{
 		start_blender();
-		Thread.sleep( 2000 );
 		ViewServiceClient.main();
 	}
 
