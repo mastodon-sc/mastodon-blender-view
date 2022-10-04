@@ -71,6 +71,11 @@ class ViewService(rpc.ViewServiceServicer):
             partial(self.many_spheres.set_active_spot_id, request))
         return pb.Empty()
 
+    def getTimePoint(self, request, context):
+        timepoint = bpy.context.scene.frame_current
+        return pb.TimePointResponse(timePoint=timepoint)
+
+
 def subscribe_to_active_object_change_event(owner, callback):
     bpy.msgbus.subscribe_rna(
         key=(bpy.types.LayerObjects, 'active'),

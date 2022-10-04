@@ -82,6 +82,8 @@ public class ViewServiceClient
 		transferEmbryo( appModel );
 	}
 
+	int known_active_object = -1;
+
 	private void synchronizeFocusedObject( MamutAppModel appModel )
 	{
 		GroupHandle groupHandle = appModel.getGroupManager().createGroupHandle();
@@ -90,26 +92,8 @@ public class ViewServiceClient
 		NavigationHandler<Spot, Link> navigationModel = groupHandle.getModel( appModel.NAVIGATION );
 		FocusModel<Spot, Link> focusModel = new AutoNavigateFocusModel<>( appModel.getFocusModel(), navigationModel );
 		GraphIdBimap<Spot, Link> graphIdBimap = graph.getGraphIdBimap();
-		int[] known_active_object = { -1 };
 		focusModel.listeners().add( () -> {
-			Spot ref = graph.vertexRef();
-			Spot ref2 = graph.vertexRef();
-			try
-			{
-				Spot focusedSpot = focusModel.getFocusedVertex( ref );
-				if(focusedSpot == null)
-					return;
-				Spot focusedBranchStart = branchStart(focusedSpot, ref2 );
-				int id = graphIdBimap.vertexIdBimap().getId( focusedBranchStart );
-				known_active_object[0] = id;
-				SetActiveSpotRequest request = SetActiveSpotRequest.newBuilder().setId( id ).build();
-				blockingStub.setActiveSpot( request );
-			}
-			finally
-			{
-				graph.releaseRef( ref );
-				graph.releaseRef( ref2 );
-			}
+			sendFocusedSpot( graph, focusModel, graphIdBimap );
 		} );
 
 		nonBlockingStub.subscribeToActiveSpotChange( Empty.newBuilder().build(), new StreamObserver<ActiveSpotResponse>()
@@ -117,18 +101,7 @@ public class ViewServiceClient
 			@Override
 			public void onNext( ActiveSpotResponse activeObjectIdResponse )
 			{
-				int id = activeObjectIdResponse.getId();
-				if(known_active_object[0] == id)
-					return;
-				known_active_object[0] = id;
-				System.out.println( id );
-				if(id > 0)
-				{
-					Spot ref = graph.vertexRef();
-					Spot vertex = graphIdBimap.getVertex( id, ref );
-					focusModel.focusVertex( vertex );
-					graph.releaseRef( graph.vertexRef() );
-				}
+				receiveFocusedSpotChange( activeObjectIdResponse, graph, graphIdBimap, focusModel );
 			}
 
 			@Override
@@ -143,6 +116,65 @@ public class ViewServiceClient
 
 			}
 		} );
+	}
+
+	private void receiveFocusedSpotChange( ActiveSpotResponse activeObjectIdResponse, ModelGraph graph, GraphIdBimap<Spot, Link> graphIdBimap, FocusModel<Spot, Link> focusModel )
+	{
+		int id = activeObjectIdResponse.getId();
+		if(known_active_object == id)
+			return;
+		known_active_object = id;
+		System.out.println( id );
+		if(id > 0)
+		{
+			Spot ref = graph.vertexRef();
+			Spot vertex = graphIdBimap.getVertex( id, ref );
+			focusModel.focusVertex( vertex );
+			graph.releaseRef( graph.vertexRef() );
+		}
+	}
+
+	private void sendFocusedSpot( ModelGraph graph, FocusModel<Spot, Link> focusModel, GraphIdBimap<Spot, Link> graphIdBimap )
+	{
+		Spot ref = graph.vertexRef();
+		Spot ref2 = graph.vertexRef();
+		Spot ref3 = graph.vertexRef();
+		try
+		{
+			Spot focusedSpot = focusModel.getFocusedVertex( ref );
+			if(focusedSpot == null)
+				return;
+			Spot focusedBranchStart = branchStart(focusedSpot, ref2 );
+			Spot focusedBranchEnd = branchEnd(focusedSpot, ref3 );
+			int id = graphIdBimap.vertexIdBimap().getId( focusedBranchStart );
+			known_active_object = id;
+			SetActiveSpotRequest request = SetActiveSpotRequest.newBuilder().setId( id ).build();
+			int timepoint = blockingStub.getTimePoint( Empty.newBuilder().build() ).getTimePoint();
+			if(timepoint < focusedBranchStart.getTimepoint() || timepoint > focusedBranchEnd.getTimepoint()) {
+				timepoint = Math.max( focusedBranchStart.getTimepoint(), timepoint);
+				timepoint = Math.min( focusedBranchEnd.getTimepoint(), timepoint);
+				blockingStub.setTimePoint( SetTimePointRequest.newBuilder().setTimepoint( timepoint ).build() );
+			}
+			blockingStub.setActiveSpot( request );
+		}
+		finally
+		{
+			graph.releaseRef( ref );
+			graph.releaseRef( ref2 );
+		}
+	}
+
+	private Spot branchEnd( Spot spot, Spot ref )
+	{
+		Spot s = spot;
+		while(s.outgoingEdges().size() == 1)
+		{
+			Link edge = s.outgoingEdges().iterator().next();
+			s = edge.getTarget( ref );
+			if(s.incomingEdges().size() != 1)
+				return edge.getSource( ref );
+		}
+		return s;
 	}
 
 	private static Spot branchStart( Spot spot, Spot ref )
