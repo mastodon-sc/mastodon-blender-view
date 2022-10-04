@@ -3,15 +3,21 @@ package org.mastodon;
 import javax.swing.WindowConstants;
 import mpicbg.spim.data.SpimDataException;
 import org.mastodon.graph.io.RawGraphIO;
+import org.mastodon.grouping.GroupHandle;
 import org.mastodon.mamut.MainWindow;
 import org.mastodon.mamut.MamutAppModel;
 import org.mastodon.mamut.WindowManager;
 import org.mastodon.mamut.feature.MamutRawFeatureModelIO;
 import org.mastodon.mamut.model.Link;
 import org.mastodon.mamut.model.Model;
+import org.mastodon.mamut.model.ModelGraph;
 import org.mastodon.mamut.model.Spot;
 import org.mastodon.mamut.project.MamutProject;
 import org.mastodon.mamut.project.MamutProjectIO;
+import org.mastodon.model.FocusModel;
+import org.mastodon.model.NavigationHandler;
+import org.mastodon.model.NavigationListener;
+import org.mastodon.model.TimepointModel;
 import org.scijava.Context;
 
 import java.io.IOException;
@@ -61,5 +67,50 @@ public class MastodonUtils
 		} catch (IOException | SpimDataException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	static void printModelEvents( MamutAppModel appModel )
+	{
+		GroupHandle groupHandle = appModel.getGroupManager().createGroupHandle();
+		groupHandle.setGroupId( 0 );
+		logNavigationHandle( groupHandle.getModel( appModel.NAVIGATION ) );
+		logTimePointModel(groupHandle.getModel( appModel.TIMEPOINT ) );
+		logFocusModel(appModel);
+	}
+
+	private static void logFocusModel( MamutAppModel appModel )
+	{
+		FocusModel<Spot, Link> focusModel = appModel.getFocusModel();
+		ModelGraph graph = appModel.getModel().getGraph();
+		focusModel.listeners().add(() -> {
+			Spot ref = graph.vertexRef();
+			Spot focusedSpot = focusModel.getFocusedVertex( ref );
+			System.out.println("FocusModel: focused vertex: " + focusedSpot);
+			graph.releaseRef( ref );
+		});
+	}
+
+	private static void logNavigationHandle( NavigationHandler<Spot, Link> navigationHandler )
+	{
+		navigationHandler.listeners().add( new NavigationListener<Spot, Link>()
+		{
+			@Override
+			public void navigateToVertex( Spot vertex )
+			{
+				System.out.println("NavigationHandler: navigate to vertex " + vertex);
+			}
+
+			@Override
+			public void navigateToEdge( Link edge )
+			{
+				System.out.println("NavigationHandler: navigate to edge " + edge);
+			}
+		} );
+	}
+
+	private static void logTimePointModel( TimepointModel model )
+	{
+		model.listeners().add( () -> System.out.println(
+				"Time point changed: (to " + model.getTimepoint() + ")" ));
 	}
 }

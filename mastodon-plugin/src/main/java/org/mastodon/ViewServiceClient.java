@@ -82,7 +82,7 @@ public class ViewServiceClient
 		transferEmbryo( appModel );
 	}
 
-	private void nonBlockingPrintActiveObject( MamutAppModel appModel )
+	private void synchronizeFocusedObject( MamutAppModel appModel )
 	{
 		GroupHandle groupHandle = appModel.getGroupManager().createGroupHandle();
 		ModelGraph graph = appModel.getModel().getGraph();
@@ -90,19 +90,37 @@ public class ViewServiceClient
 		NavigationHandler<Spot, Link> navigationModel = groupHandle.getModel( appModel.NAVIGATION );
 		FocusModel<Spot, Link> focusModel = new AutoNavigateFocusModel<>( appModel.getFocusModel(), navigationModel );
 		GraphIdBimap<Spot, Link> graphIdBimap = graph.getGraphIdBimap();
+		int[] known_active_object = { -1 };
 		focusModel.listeners().add( () -> {
 			Spot ref = graph.vertexRef();
-			Spot focusedSpot = focusModel.getFocusedVertex( ref );
-			int id = graphIdBimap.vertexIdBimap().getId( focusedSpot );
-			SetActiveSpotRequest request = SetActiveSpotRequest.newBuilder().setId( id ).build();
-			blockingStub.setActiveSpot( request );
+			Spot ref2 = graph.vertexRef();
+			try
+			{
+				Spot focusedSpot = focusModel.getFocusedVertex( ref );
+				if(focusedSpot == null)
+					return;
+				Spot focusedBranchStart = branchStart(focusedSpot, ref2 );
+				int id = graphIdBimap.vertexIdBimap().getId( focusedBranchStart );
+				known_active_object[0] = id;
+				SetActiveSpotRequest request = SetActiveSpotRequest.newBuilder().setId( id ).build();
+				blockingStub.setActiveSpot( request );
+			}
+			finally
+			{
+				graph.releaseRef( ref );
+				graph.releaseRef( ref2 );
+			}
 		} );
+
 		nonBlockingStub.subscribeToActiveSpotChange( Empty.newBuilder().build(), new StreamObserver<ActiveSpotResponse>()
 		{
 			@Override
 			public void onNext( ActiveSpotResponse activeObjectIdResponse )
 			{
 				int id = activeObjectIdResponse.getId();
+				if(known_active_object[0] == id)
+					return;
+				known_active_object[0] = id;
 				System.out.println( id );
 				if(id > 0)
 				{
@@ -127,6 +145,19 @@ public class ViewServiceClient
 		} );
 	}
 
+	private static Spot branchStart( Spot spot, Spot ref )
+	{
+		Spot s = spot;
+		while(s.incomingEdges().size() == 1)
+		{
+			Link edge = s.incomingEdges().iterator().next();
+			s = edge.getSource( ref );
+			if(s.outgoingEdges().size() != 1)
+				return edge.getTarget( ref );
+		}
+		return s;
+	}
+
 	private static void transferEmbryo( MamutAppModel appModel ) throws Exception
 	{
 		Model model = appModel.getModel();
@@ -137,7 +168,8 @@ public class ViewServiceClient
 		client.transferCoordinates( model.getGraph() );
 		client.transferColors( model );
 		client.transferTimePoint( 42 );
-		client.nonBlockingPrintActiveObject( appModel );
+		client.synchronizeFocusedObject( appModel );
+		MastodonUtils.printModelEvents(appModel);
 		System.out.println( watch );
 	}
 

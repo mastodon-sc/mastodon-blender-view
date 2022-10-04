@@ -102,7 +102,7 @@ class ManySpheres:
     def get_active_spot_id(self):
         try:
             return self.ids_to_spheres.inverse[bpy.context.active_object]
-        except:
+        except KeyError:
             return None
 
     def set_active_spot_id(self, request):
@@ -110,6 +110,8 @@ class ManySpheres:
             id = request.id
             sphere = self.ids_to_spheres[id]
             bpy.context.view_layer.objects.active = sphere
-            bpy.context.view_layer.objects.selected = sphere
-        except:
+            for obj in bpy.context.selected_objects:
+                obj.select_set(False)
+            sphere.select_set(True)
+        except KeyError:
             pass
