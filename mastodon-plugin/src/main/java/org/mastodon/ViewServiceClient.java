@@ -34,8 +34,12 @@ import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
+import net.imglib2.util.Pair;
 import net.imglib2.util.StopWatch;
+import net.imglib2.util.ValuePair;
+import org.mastodon.collection.RefList;
 import org.mastodon.collection.RefSet;
+import org.mastodon.collection.ref.RefArrayList;
 import org.mastodon.collection.ref.RefSetImp;
 import org.mastodon.graph.GraphIdBimap;
 import org.mastodon.grouping.GroupHandle;
@@ -47,6 +51,7 @@ import org.mastodon.mamut.model.Spot;
 import org.mastodon.model.AutoNavigateFocusModel;
 import org.mastodon.model.FocusModel;
 import org.mastodon.model.NavigationHandler;
+import org.mastodon.model.SelectionModel;
 import org.mastodon.model.tag.ObjTagMap;
 import org.mastodon.model.tag.TagSetModel;
 import org.mastodon.model.tag.TagSetStructure;
@@ -101,7 +106,7 @@ public class ViewServiceClient
 			@Override
 			public void onNext( ActiveSpotResponse activeObjectIdResponse )
 			{
-				receiveFocusedSpotChange( activeObjectIdResponse, graph, graphIdBimap, focusModel );
+				receiveFocusedSpotChange( activeObjectIdResponse, appModel, focusModel );
 			}
 
 			@Override
@@ -118,7 +123,7 @@ public class ViewServiceClient
 		} );
 	}
 
-	private void receiveFocusedSpotChange( ActiveSpotResponse activeObjectIdResponse, ModelGraph graph, GraphIdBimap<Spot, Link> graphIdBimap, FocusModel<Spot, Link> focusModel )
+	private void receiveFocusedSpotChange( ActiveSpotResponse activeObjectIdResponse, MamutAppModel appModel, FocusModel<Spot, Link> focusModel )
 	{
 		int id = activeObjectIdResponse.getId();
 		if(known_active_object == id)
@@ -127,11 +132,39 @@ public class ViewServiceClient
 		System.out.println( id );
 		if(id > 0)
 		{
+			ModelGraph graph = appModel.getModel().getGraph();
+			SelectionModel<Spot, Link> selectionModel = appModel.getSelectionModel();
+			selectionModel.clearSelection();
+			GraphIdBimap<Spot, Link> graphIdBimap = appModel.getModel().getGraphIdBimap();
 			Spot ref = graph.vertexRef();
 			Spot vertex = graphIdBimap.getVertex( id, ref );
+			Pair<RefList<Spot>, RefList<Link>> pair = branchSpots( graph, vertex );
+			RefList<Spot> branchSpots = pair.getA();
+			RefList<Link> branchEdges = pair.getB();
+			selectionModel.setVerticesSelected( branchSpots, true );
+			selectionModel.setEdgesSelected( branchEdges, true );
 			focusModel.focusVertex( vertex );
 			graph.releaseRef( graph.vertexRef() );
 		}
+	}
+
+	private Pair<RefList<Spot>, RefList<Link>> branchSpots( ModelGraph graph, Spot startSpot )
+	{
+		RefList<Link> links = new RefArrayList<>( graph.edges().getRefPool() );
+		RefList<Spot> spots = new RefArrayList<>( graph.vertices().getRefPool() );
+		spots.add( startSpot );
+		Spot ref = graph.vertexRef();
+		Spot spot = startSpot;
+		while(spot.outgoingEdges().size() == 1) {
+			Link link = spot.outgoingEdges().iterator().next();
+			spot = link.getTarget( ref );
+			if(spot.incomingEdges().size() != 1)
+				break;
+			links.add( link );
+			spots.add( spot );
+		}
+		graph.releaseRef( ref );
+		return new ValuePair<>( spots, links );
 	}
 
 	private void sendFocusedSpot( ModelGraph graph, FocusModel<Spot, Link> focusModel, GraphIdBimap<Spot, Link> graphIdBimap )
