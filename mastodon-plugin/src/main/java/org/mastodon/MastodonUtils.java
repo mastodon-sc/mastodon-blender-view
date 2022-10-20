@@ -18,6 +18,7 @@ import org.mastodon.model.FocusModel;
 import org.mastodon.model.NavigationHandler;
 import org.mastodon.model.NavigationListener;
 import org.mastodon.model.TimepointModel;
+import org.mastodon.model.tag.TagSetModel;
 import org.scijava.Context;
 
 import java.io.IOException;
@@ -76,6 +77,7 @@ public class MastodonUtils
 		logNavigationHandle( groupHandle.getModel( appModel.NAVIGATION ) );
 		logTimePointModel(groupHandle.getModel( appModel.TIMEPOINT ) );
 		logFocusModel(appModel);
+		logTagSetModel(appModel);
 	}
 
 	private static void logFocusModel( MamutAppModel appModel )
@@ -112,5 +114,13 @@ public class MastodonUtils
 	{
 		model.listeners().add( () -> System.out.println(
 				"Time point changed: (to " + model.getTimepoint() + ")" ));
+	}
+
+	private static void logTagSetModel( MamutAppModel appModel )
+	{
+		// TODO
+		Model model = appModel.getModel();
+		TagSetModel<Spot, Link> tagSetModel = model.getTagSetModel();
+		tagSetModel.listeners().add( () -> System.out.println("tag set changed") );
 	}
 }
