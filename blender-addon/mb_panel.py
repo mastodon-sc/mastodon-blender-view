@@ -10,7 +10,7 @@ def update_sphere_size(properties_group, context):
 
 
 class BlenderMastodonViewProperties(bpy.types.PropertyGroup):
-    sphere_size: bpy.props.FloatProperty(name="Sphere Size", soft_min=0.1,
+    sphere_size: bpy.props.FloatProperty(name="Sphere Size", soft_min=0.05,
                                          soft_max=1.0, default=0.1,
                                          update=update_sphere_size)
 
