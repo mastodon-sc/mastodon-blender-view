@@ -13,6 +13,16 @@ class BlenderMastodonViewProperties(bpy.types.PropertyGroup):
     sphere_size: bpy.props.FloatProperty(name="Sphere Size", soft_min=0.05,
                                          soft_max=1.0, default=0.1,
                                          update=update_sphere_size)
+    sync_group: bpy.props.EnumProperty(
+        name="Mastodon Sync Group",
+        description="This does the same as selecting a lock symbol in Mastodon",
+        items=[
+            ('NO_GROUP', "*", ""),
+            ('GROUP_1', "1", ""),
+            ('GROUP_2', "2", ""),
+            ('GROUP_3', "3", ""),
+        ]
+    )
 
 
 class TestPanel(bpy.types.Panel):
@@ -24,10 +34,12 @@ class TestPanel(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-        layout.prop(context.scene.blender_mastodon_view_properties,
-                    "sphere_size")
         row = layout.row()
-        row.label(text="gRPC Hello World Example 3", icon='CUBE')
+        row.label(text="Synchronization Group (TODO)", icon='LOCKED')
+        property_group = context.scene.blender_mastodon_view_properties
+        layout.prop(property_group, "sync_group", expand=True)
+        layout.row().label(text="Visualization Settings", icon='SETTINGS')
+        layout.prop(property_group, "sphere_size")
 
 
 classes = [TestPanel, BlenderMastodonViewProperties]
