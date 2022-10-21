@@ -165,30 +165,11 @@ public class ViewServiceClient
 		ModelGraph graph = appModel.getModel().getGraph();
 		SelectionModel<Spot, Link> selectionModel = appModel.getSelectionModel();
 		selectionModel.clearSelection();
-		Pair<RefList<Spot>, RefList<Link>> pair = branchSpots( graph, branchStart );
+		Pair<RefList<Spot>, RefList<Link>> pair = BranchGraphUtils.getBranchSpotsAndLinks( graph, branchStart );
 		RefList<Spot> branchSpots = pair.getA();
 		RefList<Link> branchEdges = pair.getB();
 		selectionModel.setVerticesSelected( branchSpots, true );
 		selectionModel.setEdgesSelected( branchEdges, true );
-	}
-
-	private Pair<RefList<Spot>, RefList<Link>> branchSpots( ModelGraph graph, Spot startSpot )
-	{
-		RefList<Link> links = new RefArrayList<>( graph.edges().getRefPool() );
-		RefList<Spot> spots = new RefArrayList<>( graph.vertices().getRefPool() );
-		spots.add( startSpot );
-		Spot ref = graph.vertexRef();
-		Spot spot = startSpot;
-		while(spot.outgoingEdges().size() == 1) {
-			Link link = spot.outgoingEdges().iterator().next();
-			spot = link.getTarget( ref );
-			if(spot.incomingEdges().size() != 1)
-				break;
-			links.add( link );
-			spots.add( spot );
-		}
-		graph.releaseRef( ref );
-		return new ValuePair<>( spots, links );
 	}
 
 	private void sendFocusedSpot( ModelGraph graph, GraphIdBimap<Spot, Link> graphIdBimap )
@@ -200,7 +181,7 @@ public class ViewServiceClient
 			Spot focusedSpot = focusModel.getFocusedVertex( ref );
 			if(focusedSpot == null)
 				return;
-			Spot focusedBranchStart = branchStart(focusedSpot, ref2 );
+			Spot focusedBranchStart = BranchGraphUtils.getBranchStart(focusedSpot, ref2 );
 			int id = graphIdBimap.vertexIdBimap().getId( focusedBranchStart );
 			known_active_object = id;
 			SetActiveSpotRequest request = SetActiveSpotRequest.newBuilder().setId( id ).build();
@@ -211,32 +192,6 @@ public class ViewServiceClient
 			graph.releaseRef( ref );
 			graph.releaseRef( ref2 );
 		}
-	}
-
-	private Spot branchEnd( Spot spot, Spot ref )
-	{
-		Spot s = spot;
-		while(s.outgoingEdges().size() == 1)
-		{
-			Link edge = s.outgoingEdges().iterator().next();
-			s = edge.getTarget( ref );
-			if(s.incomingEdges().size() != 1)
-				return edge.getSource( ref );
-		}
-		return s;
-	}
-
-	private static Spot branchStart( Spot spot, Spot ref )
-	{
-		Spot s = spot;
-		while(s.incomingEdges().size() == 1)
-		{
-			Link edge = s.incomingEdges().iterator().next();
-			s = edge.getSource( ref );
-			if(s.outgoingEdges().size() != 1)
-				return edge.getTarget( ref );
-		}
-		return s;
 	}
 
 	private static void transferEmbryo( MamutAppModel appModel )
@@ -264,7 +219,7 @@ public class ViewServiceClient
 	private void transferCoordinates( ModelGraph graph )
 	{
 		AffineTransform3D transform = PointCloudNormalizationUtils.getNormalizingTransform( graph.vertices() );
-		for ( Spot spot : getTrackletStarts( graph ) )
+		for ( Spot spot : BranchGraphUtils.getAllBranchStarts( graph ) )
 			transferTracklet( graph, spot, transform );
 	}
 
@@ -274,7 +229,7 @@ public class ViewServiceClient
 		TagSetStructure.TagSet tagSet = getTagSet( model, "2d112_many_colors" );
 		SetSpotColorsRequest.Builder request = SetSpotColorsRequest.newBuilder();
 		ObjTagMap<Spot, TagSetStructure.Tag> spotToTag = model.getTagSetModel().getVertexTags().tags( tagSet );
-		RefSet<Spot> trackletStarts = getTrackletStarts( model.getGraph() );
+		RefSet<Spot> trackletStarts = BranchGraphUtils.getAllBranchStarts( model.getGraph() );
 		for ( Spot spot : trackletStarts ) {
 			TagSetStructure.Tag tag = spotToTag.get( spot );
 			request.addIds( spot.getInternalPoolIndex() );
@@ -291,26 +246,6 @@ public class ViewServiceClient
 				return tagSet;
 		}
 		throw new NoSuchElementException();
-	}
-
-	private static RefSet<Spot> getTrackletStarts( ModelGraph graph )
-	{
-		Spot ref = graph.vertexRef();
-		try {
-			RefSet<Spot> set = new RefSetImp<>( graph.vertices().getRefPool() );
-			for ( Spot spot : graph.vertices() )
-			{
-				if ( spot.incomingEdges().size() != 1 )
-					set.add( spot );
-				if ( spot.outgoingEdges().size() > 1 )
-					for ( Link link : spot.outgoingEdges() )
-						set.add(link.getTarget( ref ) );
-			}
-			return set;
-		}
-		finally {
-			graph.releaseRef( ref );
-		}
 	}
 
 	private void transferTracklet( ModelGraph graph, Spot start, AffineTransform3D transform )
