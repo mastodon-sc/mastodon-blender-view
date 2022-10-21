@@ -52,6 +52,7 @@ import org.mastodon.model.AutoNavigateFocusModel;
 import org.mastodon.model.FocusModel;
 import org.mastodon.model.NavigationHandler;
 import org.mastodon.model.SelectionModel;
+import org.mastodon.model.TimepointModel;
 import org.mastodon.model.tag.ObjTagMap;
 import org.mastodon.model.tag.TagSetModel;
 import org.mastodon.model.tag.TagSetStructure;
@@ -64,16 +65,30 @@ public class ViewServiceClient
 
 	private static final String projectPath = "/home/arzt/Datasets/Mette/E1.mastodon";
 
-	//private static final String projectPath = "/home/arzt/Datasets/DeepLineage/Johannes/2022-01-27_Ml_NL45xNL26_fused_part5_2022-07-06_Matthias.mastodon";
-
 	private final ViewServiceGrpc.ViewServiceBlockingStub blockingStub;
 
 	private final ViewServiceGrpc.ViewServiceStub nonBlockingStub;
 
-	public ViewServiceClient( Channel channel )
+	private final MamutAppModel appModel;
+
+	private final GroupHandle groupHandle;
+
+	private final NavigationHandler<Spot, Link> navigationModel;
+
+	private final FocusModel<Spot, Link> focusModel;
+
+	private final TimepointModel timePointModel;
+
+	public ViewServiceClient( Channel channel, MamutAppModel appModel )
 	{
 		blockingStub = ViewServiceGrpc.newBlockingStub( channel );
 		nonBlockingStub = ViewServiceGrpc.newStub( channel );
+		this.appModel = appModel;
+		this.groupHandle = appModel.getGroupManager().createGroupHandle();
+		groupHandle.setGroupId( 0 );
+		navigationModel = groupHandle.getModel( appModel.NAVIGATION );
+		focusModel = new AutoNavigateFocusModel<>( appModel.getFocusModel(), navigationModel );
+		timePointModel = groupHandle.getModel( appModel.TIMEPOINT );
 	}
 
 	public static void main( String... args ) throws Exception
@@ -89,16 +104,16 @@ public class ViewServiceClient
 
 	int known_active_object = -1;
 
-	private void synchronizeFocusedObject( MamutAppModel appModel )
+	private void synchronizeFocusedObject()
 	{
-		GroupHandle groupHandle = appModel.getGroupManager().createGroupHandle();
 		ModelGraph graph = appModel.getModel().getGraph();
-		groupHandle.setGroupId( 0 );
-		NavigationHandler<Spot, Link> navigationModel = groupHandle.getModel( appModel.NAVIGATION );
-		FocusModel<Spot, Link> focusModel = new AutoNavigateFocusModel<>( appModel.getFocusModel(), navigationModel );
 		GraphIdBimap<Spot, Link> graphIdBimap = graph.getGraphIdBimap();
 		focusModel.listeners().add( () -> {
-			sendFocusedSpot( graph, focusModel, graphIdBimap );
+			sendFocusedSpot( graph, graphIdBimap );
+		} );
+		timePointModel.listeners().add( () -> {
+			int timepoint = timePointModel.getTimepoint();
+			transferTimePoint( timepoint );
 		} );
 
 		nonBlockingStub.subscribeToActiveSpotChange( Empty.newBuilder().build(), new StreamObserver<ActiveSpotResponse>()
@@ -106,7 +121,7 @@ public class ViewServiceClient
 			@Override
 			public void onNext( ActiveSpotResponse activeObjectIdResponse )
 			{
-				receiveFocusedSpotChange( activeObjectIdResponse, appModel, focusModel );
+				receiveFocusedSpotChange( activeObjectIdResponse );
 			}
 
 			@Override
@@ -123,29 +138,38 @@ public class ViewServiceClient
 		} );
 	}
 
-	private void receiveFocusedSpotChange( ActiveSpotResponse activeObjectIdResponse, MamutAppModel appModel, FocusModel<Spot, Link> focusModel )
+	private void receiveFocusedSpotChange( ActiveSpotResponse activeObjectIdResponse )
 	{
 		int id = activeObjectIdResponse.getId();
 		if(known_active_object == id)
 			return;
 		known_active_object = id;
 		System.out.println( id );
-		if(id > 0)
-		{
-			ModelGraph graph = appModel.getModel().getGraph();
-			SelectionModel<Spot, Link> selectionModel = appModel.getSelectionModel();
-			selectionModel.clearSelection();
+		if(id < 0)
+			return;
+		ModelGraph graph = appModel.getModel().getGraph();
+		Spot ref = graph.vertexRef();
+		try {
 			GraphIdBimap<Spot, Link> graphIdBimap = appModel.getModel().getGraphIdBimap();
-			Spot ref = graph.vertexRef();
 			Spot vertex = graphIdBimap.getVertex( id, ref );
-			Pair<RefList<Spot>, RefList<Link>> pair = branchSpots( graph, vertex );
-			RefList<Spot> branchSpots = pair.getA();
-			RefList<Link> branchEdges = pair.getB();
-			selectionModel.setVerticesSelected( branchSpots, true );
-			selectionModel.setEdgesSelected( branchEdges, true );
+			selectAllBranchNodesAndEdges( vertex );
 			focusModel.focusVertex( vertex );
+		}
+		finally {
 			graph.releaseRef( graph.vertexRef() );
 		}
+	}
+
+	private void selectAllBranchNodesAndEdges( Spot branchStart )
+	{
+		ModelGraph graph = appModel.getModel().getGraph();
+		SelectionModel<Spot, Link> selectionModel = appModel.getSelectionModel();
+		selectionModel.clearSelection();
+		Pair<RefList<Spot>, RefList<Link>> pair = branchSpots( graph, branchStart );
+		RefList<Spot> branchSpots = pair.getA();
+		RefList<Link> branchEdges = pair.getB();
+		selectionModel.setVerticesSelected( branchSpots, true );
+		selectionModel.setEdgesSelected( branchEdges, true );
 	}
 
 	private Pair<RefList<Spot>, RefList<Link>> branchSpots( ModelGraph graph, Spot startSpot )
@@ -167,27 +191,19 @@ public class ViewServiceClient
 		return new ValuePair<>( spots, links );
 	}
 
-	private void sendFocusedSpot( ModelGraph graph, FocusModel<Spot, Link> focusModel, GraphIdBimap<Spot, Link> graphIdBimap )
+	private void sendFocusedSpot( ModelGraph graph, GraphIdBimap<Spot, Link> graphIdBimap )
 	{
 		Spot ref = graph.vertexRef();
 		Spot ref2 = graph.vertexRef();
-		Spot ref3 = graph.vertexRef();
 		try
 		{
 			Spot focusedSpot = focusModel.getFocusedVertex( ref );
 			if(focusedSpot == null)
 				return;
 			Spot focusedBranchStart = branchStart(focusedSpot, ref2 );
-			Spot focusedBranchEnd = branchEnd(focusedSpot, ref3 );
 			int id = graphIdBimap.vertexIdBimap().getId( focusedBranchStart );
 			known_active_object = id;
 			SetActiveSpotRequest request = SetActiveSpotRequest.newBuilder().setId( id ).build();
-			int timepoint = blockingStub.getTimePoint( Empty.newBuilder().build() ).getTimePoint();
-			if(timepoint < focusedBranchStart.getTimepoint() || timepoint > focusedBranchEnd.getTimepoint()) {
-				timepoint = Math.max( focusedBranchStart.getTimepoint(), timepoint);
-				timepoint = Math.min( focusedBranchEnd.getTimepoint(), timepoint);
-				blockingStub.setTimePoint( SetTimePointRequest.newBuilder().setTimepoint( timepoint ).build() );
-			}
 			blockingStub.setActiveSpot( request );
 		}
 		finally
@@ -223,27 +239,19 @@ public class ViewServiceClient
 		return s;
 	}
 
-	private static void transferEmbryo( MamutAppModel appModel ) throws Exception
+	private static void transferEmbryo( MamutAppModel appModel )
 	{
 		Model model = appModel.getModel();
 		ManagedChannel channel = ManagedChannelBuilder.forTarget( "localhost:50051" ).usePlaintext().build();
 		Runtime.getRuntime().addShutdownHook( new Thread( channel::shutdown ) );
-		ViewServiceClient client = new ViewServiceClient( channel );
+		ViewServiceClient client = new ViewServiceClient( channel, appModel );
 		StopWatch watch = StopWatch.createAndStart();
 		client.transferCoordinates( model.getGraph() );
 		client.transferColors( model );
 		client.transferTimePoint( 42 );
-		client.synchronizeFocusedObject( appModel );
+		client.synchronizeFocusedObject();
 		MastodonUtils.printModelEvents(appModel);
 		System.out.println( watch );
-	}
-
-	private void printActiveObject()
-	{
-		Iterator<ActiveSpotResponse> activeObjectIterator = blockingStub.subscribeToActiveSpotChange( Empty.newBuilder().build() );
-		while(activeObjectIterator.hasNext()) {
-			System.out.println(activeObjectIterator.next().getId());
-		}
 	}
 
 	private void transferTimePoint( int timePoint )
