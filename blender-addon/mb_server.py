@@ -28,12 +28,14 @@ from functools import partial
 class ViewService(rpc.ViewServiceServicer):
     many_spheres : mb_scene.ManySpheres = None
     active_spot_id = None
-    active_spot_id_queue = queue.Queue()
+    time_point = None
+    changes_queue = queue.Queue()
 
     def __init__(self, many_spheres):
         self.many_spheres = many_spheres
         callback = self.active_object_changed_callback
         subscribe_to_active_object_change_event(self, callback)
+        bpy.app.handlers.frame_change_post.append(self.frame_change_callback)
 
     def addMovingSpot(self, request, context):
         mb_utils.run_in_main_thread(
@@ -46,17 +48,18 @@ class ViewService(rpc.ViewServiceServicer):
         return pb.Empty()
 
     def setTimePoint(self, request, context):
+        self.time_point = request.timepoint
         mb_utils.run_in_main_thread(
             partial(self.many_spheres.set_time_point, request))
         return pb.Empty()
 
-    def subscribeToActiveSpotChange(self, request, context):
+    def subscribeToChange(self, request, context):
         while context.is_active():
             try:
-                spot_id = self.active_spot_id_queue.get(timeout=1)
-                if spot_id == None:
-                    spot_id = 0xffffffff
-                yield pb.ActiveSpotResponse(id=spot_id)
+                change_id = self.changes_queue.get(timeout=1)
+                if change_id == None:
+                    change_id = 0xffffffff
+                yield pb.ChangeMessage(id=change_id)
             except queue.Empty:
                 pass
 
@@ -64,15 +67,24 @@ class ViewService(rpc.ViewServiceServicer):
         active_spot_id = self.many_spheres.get_active_spot_id()
         if self.active_spot_id != active_spot_id:
             self.active_spot_id = active_spot_id
-            self.active_spot_id_queue.put(active_spot_id)
+            self.changes_queue.put(pb.ACTIVE_SPOT)
+
+    def frame_change_callback(self, scene, _):
+        time_point = scene.frame_current
+        if self.time_point != time_point:
+            self.time_point = time_point
+            self.changes_queue.put(pb.TIME_POINT)
 
     def setActiveSpot(self, request, context):
         mb_utils.run_in_main_thread(
             partial(self.many_spheres.set_active_spot_id, request))
         return pb.Empty()
 
+    def getActiveSpot(self, request, context):
+        return pb.ActiveSpotResponse(id=self.active_spot_id);
+
     def getTimePoint(self, request, context):
-        timepoint = bpy.context.scene.frame_current
+        timepoint = self.time_point
         return pb.TimePointResponse(timePoint=timepoint)
 
 

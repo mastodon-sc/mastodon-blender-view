@@ -28,6 +28,7 @@
  */
 package org.mastodon;
 
+import javax.swing.SwingUtilities;
 import io.grpc.Channel;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -36,11 +37,8 @@ import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.util.Pair;
 import net.imglib2.util.StopWatch;
-import net.imglib2.util.ValuePair;
 import org.mastodon.collection.RefList;
 import org.mastodon.collection.RefSet;
-import org.mastodon.collection.ref.RefArrayList;
-import org.mastodon.collection.ref.RefSetImp;
 import org.mastodon.graph.GraphIdBimap;
 import org.mastodon.grouping.GroupHandle;
 import org.mastodon.mamut.MamutAppModel;
@@ -57,7 +55,6 @@ import org.mastodon.model.tag.ObjTagMap;
 import org.mastodon.model.tag.TagSetModel;
 import org.mastodon.model.tag.TagSetStructure;
 
-import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 public class ViewServiceClient
@@ -78,6 +75,10 @@ public class ViewServiceClient
 	private final FocusModel<Spot, Link> focusModel;
 
 	private final TimepointModel timePointModel;
+
+	int known_active_object = -1;
+
+	int knownTimePoint = 0;
 
 	public ViewServiceClient( Channel channel, MamutAppModel appModel )
 	{
@@ -102,8 +103,6 @@ public class ViewServiceClient
 		transferEmbryo( appModel );
 	}
 
-	int known_active_object = -1;
-
 	private void synchronizeFocusedObject()
 	{
 		ModelGraph graph = appModel.getModel().getGraph();
@@ -116,12 +115,12 @@ public class ViewServiceClient
 			transferTimePoint( timepoint );
 		} );
 
-		nonBlockingStub.subscribeToActiveSpotChange( Empty.newBuilder().build(), new StreamObserver<ActiveSpotResponse>()
+		nonBlockingStub.subscribeToChange( Empty.newBuilder().build(), new StreamObserver<ChangeMessage>()
 		{
 			@Override
-			public void onNext( ActiveSpotResponse activeObjectIdResponse )
+			public void onNext( ChangeMessage changeMessage )
 			{
-				receiveFocusedSpotChange( activeObjectIdResponse );
+				processChangeMessage( changeMessage );
 			}
 
 			@Override
@@ -138,9 +137,36 @@ public class ViewServiceClient
 		} );
 	}
 
-	private void receiveFocusedSpotChange( ActiveSpotResponse activeObjectIdResponse )
+	private void processChangeMessage( ChangeMessage changeMessage )
 	{
-		int id = activeObjectIdResponse.getId();
+		switch ( changeMessage.getId() ) {
+		case TIME_POINT:
+			SwingUtilities.invokeLater( this::onTimePointChange );
+			break;
+		case ACTIVE_SPOT:
+			SwingUtilities.invokeLater( this:: onActiveSpotChange );
+			break;
+		}
+	}
+
+	private void onTimePointChange()
+	{
+		int timePoint = getTimePoint();
+		System.out.println("on time point changed to: " + timePoint);
+		if(timePoint == knownTimePoint)
+			return;
+		knownTimePoint = timePoint;
+		timePointModel.setTimepoint( timePoint );
+	}
+
+	private int getTimePoint()
+	{
+		return blockingStub.getTimePoint( Empty.newBuilder().build() ).getTimePoint();
+	}
+
+	private void onActiveSpotChange()
+	{
+		int id = getActiveSpotId();
 		if(known_active_object == id)
 			return;
 		known_active_object = id;
@@ -149,15 +175,22 @@ public class ViewServiceClient
 			return;
 		ModelGraph graph = appModel.getModel().getGraph();
 		Spot ref = graph.vertexRef();
+		Spot ref2 = graph.vertexRef();
 		try {
 			GraphIdBimap<Spot, Link> graphIdBimap = appModel.getModel().getGraphIdBimap();
-			Spot vertex = graphIdBimap.getVertex( id, ref );
-			selectAllBranchNodesAndEdges( vertex );
-			focusModel.focusVertex( vertex );
+			Spot branchStart = graphIdBimap.getVertex( id, ref );
+			selectAllBranchNodesAndEdges( branchStart );
+			focusModel.focusVertex( BranchGraphUtils.findVertexForTimePoint(branchStart, knownTimePoint, ref2) );
 		}
 		finally {
-			graph.releaseRef( graph.vertexRef() );
+			graph.releaseRef( ref );
+			graph.releaseRef( ref2 );
 		}
+	}
+
+	private int getActiveSpotId()
+	{
+		return blockingStub.getActiveSpot( Empty.newBuilder().build() ).getId();
 	}
 
 	private void selectAllBranchNodesAndEdges( Spot branchStart )
@@ -183,6 +216,8 @@ public class ViewServiceClient
 				return;
 			Spot focusedBranchStart = BranchGraphUtils.getBranchStart(focusedSpot, ref2 );
 			int id = graphIdBimap.vertexIdBimap().getId( focusedBranchStart );
+			if(known_active_object == id)
+				return;
 			known_active_object = id;
 			SetActiveSpotRequest request = SetActiveSpotRequest.newBuilder().setId( id ).build();
 			blockingStub.setActiveSpot( request );
@@ -211,9 +246,14 @@ public class ViewServiceClient
 
 	private void transferTimePoint( int timePoint )
 	{
+		if( knownTimePoint == timePoint )
+			return;
+		knownTimePoint = timePoint;
+		System.out.println("set time point to " + timePoint);
 		blockingStub.setTimePoint(SetTimePointRequest.newBuilder()
 				.setTimepoint(timePoint)
 				.build());
+		System.out.println("done");
 	}
 
 	private void transferCoordinates( ModelGraph graph )

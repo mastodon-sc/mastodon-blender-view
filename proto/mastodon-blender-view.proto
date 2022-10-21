@@ -29,11 +29,13 @@ service ViewService {
 
   rpc setTimePoint(SetTimePointRequest) returns (Empty) {}
 
-  rpc subscribeToActiveSpotChange(Empty) returns (stream ActiveSpotResponse) {}
+  rpc getTimePoint(Empty) returns (TimePointResponse) {}
 
   rpc setActiveSpot(SetActiveSpotRequest) returns (Empty) {}
 
-  rpc getTimePoint(Empty) returns (TimePointResponse) {}
+  rpc getActiveSpot(Empty) returns (ActiveSpotResponse) {}
+
+  rpc subscribeToChange(Empty) returns (stream ChangeMessage) {}
 }
 
 message Empty {}
@@ -64,4 +66,13 @@ message SetActiveSpotRequest {
 
 message TimePointResponse {
   uint32 timePoint = 1;
+}
+
+message ChangeMessage {
+  ChangeId id = 1;
+}
+
+enum ChangeId {
+  TIME_POINT = 0;
+  ACTIVE_SPOT = 1;
 }

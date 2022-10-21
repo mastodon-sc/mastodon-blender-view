@@ -29,20 +29,25 @@ class ViewServiceStub(object):
                 request_serializer=mastodon__blender__view__pb2.SetTimePointRequest.SerializeToString,
                 response_deserializer=mastodon__blender__view__pb2.Empty.FromString,
                 )
-        self.subscribeToActiveSpotChange = channel.unary_stream(
-                '/mastodon_blender_view.ViewService/subscribeToActiveSpotChange',
+        self.getTimePoint = channel.unary_unary(
+                '/mastodon_blender_view.ViewService/getTimePoint',
                 request_serializer=mastodon__blender__view__pb2.Empty.SerializeToString,
-                response_deserializer=mastodon__blender__view__pb2.ActiveSpotResponse.FromString,
+                response_deserializer=mastodon__blender__view__pb2.TimePointResponse.FromString,
                 )
         self.setActiveSpot = channel.unary_unary(
                 '/mastodon_blender_view.ViewService/setActiveSpot',
                 request_serializer=mastodon__blender__view__pb2.SetActiveSpotRequest.SerializeToString,
                 response_deserializer=mastodon__blender__view__pb2.Empty.FromString,
                 )
-        self.getTimePoint = channel.unary_unary(
-                '/mastodon_blender_view.ViewService/getTimePoint',
+        self.getActiveSpot = channel.unary_unary(
+                '/mastodon_blender_view.ViewService/getActiveSpot',
                 request_serializer=mastodon__blender__view__pb2.Empty.SerializeToString,
-                response_deserializer=mastodon__blender__view__pb2.TimePointResponse.FromString,
+                response_deserializer=mastodon__blender__view__pb2.ActiveSpotResponse.FromString,
+                )
+        self.subscribeToChange = channel.unary_stream(
+                '/mastodon_blender_view.ViewService/subscribeToChange',
+                request_serializer=mastodon__blender__view__pb2.Empty.SerializeToString,
+                response_deserializer=mastodon__blender__view__pb2.ChangeMessage.FromString,
                 )
 
 
@@ -67,7 +72,7 @@ class ViewServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def subscribeToActiveSpotChange(self, request, context):
+    def getTimePoint(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -79,7 +84,13 @@ class ViewServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def getTimePoint(self, request, context):
+    def getActiveSpot(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def subscribeToChange(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -103,20 +114,25 @@ def add_ViewServiceServicer_to_server(servicer, server):
                     request_deserializer=mastodon__blender__view__pb2.SetTimePointRequest.FromString,
                     response_serializer=mastodon__blender__view__pb2.Empty.SerializeToString,
             ),
-            'subscribeToActiveSpotChange': grpc.unary_stream_rpc_method_handler(
-                    servicer.subscribeToActiveSpotChange,
+            'getTimePoint': grpc.unary_unary_rpc_method_handler(
+                    servicer.getTimePoint,
                     request_deserializer=mastodon__blender__view__pb2.Empty.FromString,
-                    response_serializer=mastodon__blender__view__pb2.ActiveSpotResponse.SerializeToString,
+                    response_serializer=mastodon__blender__view__pb2.TimePointResponse.SerializeToString,
             ),
             'setActiveSpot': grpc.unary_unary_rpc_method_handler(
                     servicer.setActiveSpot,
                     request_deserializer=mastodon__blender__view__pb2.SetActiveSpotRequest.FromString,
                     response_serializer=mastodon__blender__view__pb2.Empty.SerializeToString,
             ),
-            'getTimePoint': grpc.unary_unary_rpc_method_handler(
-                    servicer.getTimePoint,
+            'getActiveSpot': grpc.unary_unary_rpc_method_handler(
+                    servicer.getActiveSpot,
                     request_deserializer=mastodon__blender__view__pb2.Empty.FromString,
-                    response_serializer=mastodon__blender__view__pb2.TimePointResponse.SerializeToString,
+                    response_serializer=mastodon__blender__view__pb2.ActiveSpotResponse.SerializeToString,
+            ),
+            'subscribeToChange': grpc.unary_stream_rpc_method_handler(
+                    servicer.subscribeToChange,
+                    request_deserializer=mastodon__blender__view__pb2.Empty.FromString,
+                    response_serializer=mastodon__blender__view__pb2.ChangeMessage.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -180,7 +196,7 @@ class ViewService(object):
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def subscribeToActiveSpotChange(request,
+    def getTimePoint(request,
             target,
             options=(),
             channel_credentials=None,
@@ -190,9 +206,9 @@ class ViewService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_stream(request, target, '/mastodon_blender_view.ViewService/subscribeToActiveSpotChange',
+        return grpc.experimental.unary_unary(request, target, '/mastodon_blender_view.ViewService/getTimePoint',
             mastodon__blender__view__pb2.Empty.SerializeToString,
-            mastodon__blender__view__pb2.ActiveSpotResponse.FromString,
+            mastodon__blender__view__pb2.TimePointResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -214,7 +230,7 @@ class ViewService(object):
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def getTimePoint(request,
+    def getActiveSpot(request,
             target,
             options=(),
             channel_credentials=None,
@@ -224,8 +240,25 @@ class ViewService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/mastodon_blender_view.ViewService/getTimePoint',
+        return grpc.experimental.unary_unary(request, target, '/mastodon_blender_view.ViewService/getActiveSpot',
             mastodon__blender__view__pb2.Empty.SerializeToString,
-            mastodon__blender__view__pb2.TimePointResponse.FromString,
+            mastodon__blender__view__pb2.ActiveSpotResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def subscribeToChange(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_stream(request, target, '/mastodon_blender_view.ViewService/subscribeToChange',
+            mastodon__blender__view__pb2.Empty.SerializeToString,
+            mastodon__blender__view__pb2.ChangeMessage.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
