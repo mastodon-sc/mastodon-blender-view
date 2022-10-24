@@ -87,6 +87,8 @@ class ViewService(rpc.ViewServiceServicer):
         timepoint = self.time_point
         return pb.TimePointResponse(timePoint=timepoint)
 
+    def update_tags(self):
+        self.changes_queue.put(pb.UPDATE_TAGS)
 
 def subscribe_to_active_object_change_event(owner, callback):
     bpy.msgbus.subscribe_rna(
@@ -99,12 +101,13 @@ def subscribe_to_active_object_change_event(owner, callback):
 
 class MastodonBlenderServer:
     many_spheres = None
+    view_service = None
 
     def __init__(self):
         self.many_spheres = mb_scene.ManySpheres()
         self.server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-        greeter = ViewService(self.many_spheres)
-        rpc.add_ViewServiceServicer_to_server(greeter, self.server)
+        self.view_service = ViewService(self.many_spheres)
+        rpc.add_ViewServiceServicer_to_server(self.view_service, self.server)
         self.server.add_insecure_port('[::]:50051')
         self.server.start()
 

@@ -25,6 +25,21 @@ class BlenderMastodonViewProperties(bpy.types.PropertyGroup):
     )
 
 
+class BlenderMastodonUpdateTags(bpy.types.Operator):
+    """Add a simple box mesh"""
+    bl_idname = "mastodon.update_tags"
+    bl_label = "Update Tags"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+
+        if mb_server.mastodon_blender_server is not None:
+            mb_server.mastodon_blender_server.view_service.update_tags()
+        print(context)
+
+        return {'FINISHED'}
+
+
 class TestPanel(bpy.types.Panel):
     bl_label = "Mastodon 3D View"
     bl_idname = "_PT_ Mastodon 3D View"
@@ -40,9 +55,10 @@ class TestPanel(bpy.types.Panel):
         layout.prop(property_group, "sync_group", expand=True)
         layout.row().label(text="Visualization Settings", icon='SETTINGS')
         layout.prop(property_group, "sphere_size")
+        layout.row().operator('mastodon.update_tags')
 
 
-classes = [TestPanel, BlenderMastodonViewProperties]
+classes = [TestPanel, BlenderMastodonViewProperties, BlenderMastodonUpdateTags]
 
 
 def register():

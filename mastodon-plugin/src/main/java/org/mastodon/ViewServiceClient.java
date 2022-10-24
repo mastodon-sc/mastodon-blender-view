@@ -94,10 +94,12 @@ public class ViewServiceClient
 
 	public static void main( String... args ) throws Exception
 	{
+		// TODO: allow to select tag set in blender
+		// TODO: fix ConcurrentModificationException when opening TrackScheme
+		// TODO: visualize time points in the hierarchy view using colors
 		// TODO: synchronize object selection between blender and Mastodon
 		// TODO: enable selecting the tag set
 		// TODO: enable setting tags
-		// TODO: synchronize time points between blender and Mastodon
 		// TODO: show multiple embryos
 		MamutAppModel appModel = MastodonUtils.showGuiAndGetAppModel( projectPath );
 		transferEmbryo( appModel );
@@ -144,8 +146,13 @@ public class ViewServiceClient
 			SwingUtilities.invokeLater( this::onTimePointChange );
 			break;
 		case ACTIVE_SPOT:
-			SwingUtilities.invokeLater( this:: onActiveSpotChange );
+			SwingUtilities.invokeLater( this::onActiveSpotChange );
 			break;
+		case UPDATE_TAGS:
+			transferColors( appModel.getModel() );
+			break;
+		default:
+			System.err.println("Unexpected event received from blender mastodon plugin.");
 		}
 	}
 
