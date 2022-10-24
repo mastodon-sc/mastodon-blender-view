@@ -55,6 +55,7 @@ import org.mastodon.model.tag.ObjTagMap;
 import org.mastodon.model.tag.TagSetModel;
 import org.mastodon.model.tag.TagSetStructure;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 public class ViewServiceClient
@@ -247,8 +248,24 @@ public class ViewServiceClient
 		client.transferColors( model );
 		client.transferTimePoint( 42 );
 		client.synchronizeFocusedObject();
+		client.synchronizeTagSetList();
 		MastodonUtils.printModelEvents(appModel);
 		System.out.println( watch );
+	}
+
+	private void synchronizeTagSetList()
+	{
+		transferTagSetList();
+		appModel.getModel().getTagSetModel().listeners().add( this::transferTagSetList );
+	}
+
+	private void transferTagSetList()
+	{
+		List<TagSetStructure.TagSet> tagSets = appModel.getModel().getTagSetModel().getTagSetStructure().getTagSets();
+		SetTagSetListRequest.Builder request = SetTagSetListRequest.newBuilder();
+		for(TagSetStructure.TagSet tagSet : tagSets)
+			request.addTagSetNames(tagSet.getName());
+		blockingStub.setTagSetList(request.build());
 	}
 
 	private void transferTimePoint( int timePoint )

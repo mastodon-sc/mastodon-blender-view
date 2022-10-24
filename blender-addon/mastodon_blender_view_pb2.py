@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'\n\014org.mastodonB\017HelloWorldProtoP\001\242\002\003HLW',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x1bmastodon-blender-view.proto\x12\x15mastodon_blender_view\"\x07\n\x05\x45mpty\"Z\n\x14\x41\x64\x64MovingSpotRequest\x12\n\n\x02id\x18\x01 \x01(\r\x12\r\n\x05label\x18\x02 \x01(\t\x12\x13\n\x0b\x63oordinates\x18\x03 \x03(\x02\x12\x12\n\ntimepoints\x18\x04 \x03(\x05\"3\n\x14SetSpotColorsRequest\x12\x0b\n\x03ids\x18\x01 \x03(\r\x12\x0e\n\x06\x63olors\x18\x02 \x03(\r\"(\n\x13SetTimePointRequest\x12\x11\n\ttimepoint\x18\x01 \x01(\r\" \n\x12\x41\x63tiveSpotResponse\x12\n\n\x02id\x18\x01 \x01(\r\"\"\n\x14SetActiveSpotRequest\x12\n\n\x02id\x18\x01 \x01(\r\"&\n\x11TimePointResponse\x12\x11\n\ttimePoint\x18\x01 \x01(\r\"<\n\rChangeMessage\x12+\n\x02id\x18\x01 \x01(\x0e\x32\x1f.mastodon_blender_view.ChangeId*<\n\x08\x43hangeId\x12\x0e\n\nTIME_POINT\x10\x00\x12\x0f\n\x0b\x41\x43TIVE_SPOT\x10\x01\x12\x0f\n\x0bUPDATE_TAGS\x10\x02\x32\x96\x05\n\x0bViewService\x12\\\n\raddMovingSpot\x12+.mastodon_blender_view.AddMovingSpotRequest\x1a\x1c.mastodon_blender_view.Empty\"\x00\x12\\\n\rsetSpotColors\x12+.mastodon_blender_view.SetSpotColorsRequest\x1a\x1c.mastodon_blender_view.Empty\"\x00\x12Z\n\x0csetTimePoint\x12*.mastodon_blender_view.SetTimePointRequest\x1a\x1c.mastodon_blender_view.Empty\"\x00\x12X\n\x0cgetTimePoint\x12\x1c.mastodon_blender_view.Empty\x1a(.mastodon_blender_view.TimePointResponse\"\x00\x12\\\n\rsetActiveSpot\x12+.mastodon_blender_view.SetActiveSpotRequest\x1a\x1c.mastodon_blender_view.Empty\"\x00\x12Z\n\rgetActiveSpot\x12\x1c.mastodon_blender_view.Empty\x1a).mastodon_blender_view.ActiveSpotResponse\"\x00\x12[\n\x11subscribeToChange\x12\x1c.mastodon_blender_view.Empty\x1a$.mastodon_blender_view.ChangeMessage\"\x00\x30\x01\x42\'\n\x0corg.mastodonB\x0fHelloWorldProtoP\x01\xa2\x02\x03HLWb\x06proto3'
+  serialized_pb=b'\n\x1bmastodon-blender-view.proto\x12\x15mastodon_blender_view\"\x07\n\x05\x45mpty\"Z\n\x14\x41\x64\x64MovingSpotRequest\x12\n\n\x02id\x18\x01 \x01(\r\x12\r\n\x05label\x18\x02 \x01(\t\x12\x13\n\x0b\x63oordinates\x18\x03 \x03(\x02\x12\x12\n\ntimepoints\x18\x04 \x03(\x05\"3\n\x14SetSpotColorsRequest\x12\x0b\n\x03ids\x18\x01 \x03(\r\x12\x0e\n\x06\x63olors\x18\x02 \x03(\r\"(\n\x13SetTimePointRequest\x12\x11\n\ttimepoint\x18\x01 \x01(\r\" \n\x12\x41\x63tiveSpotResponse\x12\n\n\x02id\x18\x01 \x01(\r\"\"\n\x14SetActiveSpotRequest\x12\n\n\x02id\x18\x01 \x01(\r\"&\n\x11TimePointResponse\x12\x11\n\ttimePoint\x18\x01 \x01(\r\"<\n\rChangeMessage\x12+\n\x02id\x18\x01 \x01(\x0e\x32\x1f.mastodon_blender_view.ChangeId\"-\n\x14SetTagSetListRequest\x12\x15\n\rtag_set_names\x18\x01 \x03(\t*<\n\x08\x43hangeId\x12\x0e\n\nTIME_POINT\x10\x00\x12\x0f\n\x0b\x41\x43TIVE_SPOT\x10\x01\x12\x0f\n\x0bUPDATE_TAGS\x10\x02\x32\xf4\x05\n\x0bViewService\x12\\\n\raddMovingSpot\x12+.mastodon_blender_view.AddMovingSpotRequest\x1a\x1c.mastodon_blender_view.Empty\"\x00\x12\\\n\rsetSpotColors\x12+.mastodon_blender_view.SetSpotColorsRequest\x1a\x1c.mastodon_blender_view.Empty\"\x00\x12Z\n\x0csetTimePoint\x12*.mastodon_blender_view.SetTimePointRequest\x1a\x1c.mastodon_blender_view.Empty\"\x00\x12X\n\x0cgetTimePoint\x12\x1c.mastodon_blender_view.Empty\x1a(.mastodon_blender_view.TimePointResponse\"\x00\x12\\\n\rsetActiveSpot\x12+.mastodon_blender_view.SetActiveSpotRequest\x1a\x1c.mastodon_blender_view.Empty\"\x00\x12Z\n\rgetActiveSpot\x12\x1c.mastodon_blender_view.Empty\x1a).mastodon_blender_view.ActiveSpotResponse\"\x00\x12[\n\x11subscribeToChange\x12\x1c.mastodon_blender_view.Empty\x1a$.mastodon_blender_view.ChangeMessage\"\x00\x30\x01\x12\\\n\rsetTagSetList\x12+.mastodon_blender_view.SetTagSetListRequest\x1a\x1c.mastodon_blender_view.Empty\"\x00\x42\'\n\x0corg.mastodonB\x0fHelloWorldProtoP\x01\xa2\x02\x03HLWb\x06proto3'
 )
 
 _CHANGEID = _descriptor.EnumDescriptor(
@@ -48,8 +48,8 @@ _CHANGEID = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=422,
-  serialized_end=482,
+  serialized_start=469,
+  serialized_end=529,
 )
 _sym_db.RegisterEnumDescriptor(_CHANGEID)
 
@@ -336,6 +336,38 @@ _CHANGEMESSAGE = _descriptor.Descriptor(
   serialized_end=420,
 )
 
+
+_SETTAGSETLISTREQUEST = _descriptor.Descriptor(
+  name='SetTagSetListRequest',
+  full_name='mastodon_blender_view.SetTagSetListRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='tag_set_names', full_name='mastodon_blender_view.SetTagSetListRequest.tag_set_names', index=0,
+      number=1, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=422,
+  serialized_end=467,
+)
+
 _CHANGEMESSAGE.fields_by_name['id'].enum_type = _CHANGEID
 DESCRIPTOR.message_types_by_name['Empty'] = _EMPTY
 DESCRIPTOR.message_types_by_name['AddMovingSpotRequest'] = _ADDMOVINGSPOTREQUEST
@@ -345,6 +377,7 @@ DESCRIPTOR.message_types_by_name['ActiveSpotResponse'] = _ACTIVESPOTRESPONSE
 DESCRIPTOR.message_types_by_name['SetActiveSpotRequest'] = _SETACTIVESPOTREQUEST
 DESCRIPTOR.message_types_by_name['TimePointResponse'] = _TIMEPOINTRESPONSE
 DESCRIPTOR.message_types_by_name['ChangeMessage'] = _CHANGEMESSAGE
+DESCRIPTOR.message_types_by_name['SetTagSetListRequest'] = _SETTAGSETLISTREQUEST
 DESCRIPTOR.enum_types_by_name['ChangeId'] = _CHANGEID
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -404,6 +437,13 @@ ChangeMessage = _reflection.GeneratedProtocolMessageType('ChangeMessage', (_mess
   })
 _sym_db.RegisterMessage(ChangeMessage)
 
+SetTagSetListRequest = _reflection.GeneratedProtocolMessageType('SetTagSetListRequest', (_message.Message,), {
+  'DESCRIPTOR' : _SETTAGSETLISTREQUEST,
+  '__module__' : 'mastodon_blender_view_pb2'
+  # @@protoc_insertion_point(class_scope:mastodon_blender_view.SetTagSetListRequest)
+  })
+_sym_db.RegisterMessage(SetTagSetListRequest)
+
 
 DESCRIPTOR._options = None
 
@@ -414,8 +454,8 @@ _VIEWSERVICE = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=485,
-  serialized_end=1147,
+  serialized_start=532,
+  serialized_end=1288,
   methods=[
   _descriptor.MethodDescriptor(
     name='addMovingSpot',
@@ -484,6 +524,16 @@ _VIEWSERVICE = _descriptor.ServiceDescriptor(
     containing_service=None,
     input_type=_EMPTY,
     output_type=_CHANGEMESSAGE,
+    serialized_options=None,
+    create_key=_descriptor._internal_create_key,
+  ),
+  _descriptor.MethodDescriptor(
+    name='setTagSetList',
+    full_name='mastodon_blender_view.ViewService.setTagSetList',
+    index=7,
+    containing_service=None,
+    input_type=_SETTAGSETLISTREQUEST,
+    output_type=_EMPTY,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
   ),

@@ -49,6 +49,11 @@ class ViewServiceStub(object):
                 request_serializer=mastodon__blender__view__pb2.Empty.SerializeToString,
                 response_deserializer=mastodon__blender__view__pb2.ChangeMessage.FromString,
                 )
+        self.setTagSetList = channel.unary_unary(
+                '/mastodon_blender_view.ViewService/setTagSetList',
+                request_serializer=mastodon__blender__view__pb2.SetTagSetListRequest.SerializeToString,
+                response_deserializer=mastodon__blender__view__pb2.Empty.FromString,
+                )
 
 
 class ViewServiceServicer(object):
@@ -96,6 +101,12 @@ class ViewServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def setTagSetList(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_ViewServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -133,6 +144,11 @@ def add_ViewServiceServicer_to_server(servicer, server):
                     servicer.subscribeToChange,
                     request_deserializer=mastodon__blender__view__pb2.Empty.FromString,
                     response_serializer=mastodon__blender__view__pb2.ChangeMessage.SerializeToString,
+            ),
+            'setTagSetList': grpc.unary_unary_rpc_method_handler(
+                    servicer.setTagSetList,
+                    request_deserializer=mastodon__blender__view__pb2.SetTagSetListRequest.FromString,
+                    response_serializer=mastodon__blender__view__pb2.Empty.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -260,5 +276,22 @@ class ViewService(object):
         return grpc.experimental.unary_stream(request, target, '/mastodon_blender_view.ViewService/subscribeToChange',
             mastodon__blender__view__pb2.Empty.SerializeToString,
             mastodon__blender__view__pb2.ChangeMessage.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def setTagSetList(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/mastodon_blender_view.ViewService/setTagSetList',
+            mastodon__blender__view__pb2.SetTagSetListRequest.SerializeToString,
+            mastodon__blender__view__pb2.Empty.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

@@ -24,6 +24,17 @@ class BlenderMastodonViewProperties(bpy.types.PropertyGroup):
         ]
     )
 
+    def get_tag_set_items(self, context):
+        if mb_server.mastodon_blender_server is not None:
+            return mb_server.mastodon_blender_server.view_service.tag_set_items
+        return []
+
+    tag_set: bpy.props.EnumProperty(
+        name="Mastodon Tag Set",
+        description="Tag set that is used to color the spheres",
+        items=get_tag_set_items
+    )
+
 
 class BlenderMastodonUpdateTags(bpy.types.Operator):
     """Add a simple box mesh"""
@@ -55,6 +66,7 @@ class TestPanel(bpy.types.Panel):
         layout.prop(property_group, "sync_group", expand=True)
         layout.row().label(text="Visualization Settings", icon='SETTINGS')
         layout.prop(property_group, "sphere_size")
+        layout.prop(property_group, "tag_set")
         layout.row().operator('mastodon.update_tags')
 
 
