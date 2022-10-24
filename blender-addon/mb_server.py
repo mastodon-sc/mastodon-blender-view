@@ -30,7 +30,8 @@ class ViewService(rpc.ViewServiceServicer):
     active_spot_id = None
     time_point = None
     changes_queue = queue.Queue()
-    tag_set_items = []
+    tag_set_list = []
+    tag_set_index = -1
 
     def __init__(self, many_spheres):
         self.many_spheres = many_spheres
@@ -88,15 +89,19 @@ class ViewService(rpc.ViewServiceServicer):
         timepoint = self.time_point
         return pb.TimePointResponse(timePoint=timepoint)
 
-    def update_tags(self):
-        self.changes_queue.put(pb.UPDATE_TAGS)
+    def update_colors(self):
+        self.changes_queue.put(pb.UPDATE_COLORS_REQUEST)
 
     def setTagSetList(self, request, context):
-        items = []
-        for entry in request.tag_set_names:
-            items.append((entry, entry, ""))
-        self.tag_set_items = items
+        self.tag_set_list = request.tag_set_names
         return pb.Empty()
+
+    def getSelectedTagSet(self, request, context):
+        return pb.SelectedTagSetResponse(index=self.tag_set_index)
+
+    def set_tag_set_index(self, tag_set_index):
+        self.tag_set_index = tag_set_index
+        self.changes_queue.put(pb.SELECTED_TAG_SET)
 
 
 def subscribe_to_active_object_change_event(owner, callback):

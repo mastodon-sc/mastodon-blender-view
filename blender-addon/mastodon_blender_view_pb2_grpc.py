@@ -54,6 +54,11 @@ class ViewServiceStub(object):
                 request_serializer=mastodon__blender__view__pb2.SetTagSetListRequest.SerializeToString,
                 response_deserializer=mastodon__blender__view__pb2.Empty.FromString,
                 )
+        self.getSelectedTagSet = channel.unary_unary(
+                '/mastodon_blender_view.ViewService/getSelectedTagSet',
+                request_serializer=mastodon__blender__view__pb2.Empty.SerializeToString,
+                response_deserializer=mastodon__blender__view__pb2.SelectedTagSetResponse.FromString,
+                )
 
 
 class ViewServiceServicer(object):
@@ -107,6 +112,12 @@ class ViewServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def getSelectedTagSet(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_ViewServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -149,6 +160,11 @@ def add_ViewServiceServicer_to_server(servicer, server):
                     servicer.setTagSetList,
                     request_deserializer=mastodon__blender__view__pb2.SetTagSetListRequest.FromString,
                     response_serializer=mastodon__blender__view__pb2.Empty.SerializeToString,
+            ),
+            'getSelectedTagSet': grpc.unary_unary_rpc_method_handler(
+                    servicer.getSelectedTagSet,
+                    request_deserializer=mastodon__blender__view__pb2.Empty.FromString,
+                    response_serializer=mastodon__blender__view__pb2.SelectedTagSetResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -293,5 +309,22 @@ class ViewService(object):
         return grpc.experimental.unary_unary(request, target, '/mastodon_blender_view.ViewService/setTagSetList',
             mastodon__blender__view__pb2.SetTagSetListRequest.SerializeToString,
             mastodon__blender__view__pb2.Empty.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def getSelectedTagSet(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/mastodon_blender_view.ViewService/getSelectedTagSet',
+            mastodon__blender__view__pb2.Empty.SerializeToString,
+            mastodon__blender__view__pb2.SelectedTagSetResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

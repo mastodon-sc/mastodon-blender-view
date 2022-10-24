@@ -38,6 +38,8 @@ service ViewService {
   rpc subscribeToChange(Empty) returns (stream ChangeMessage) {}
 
   rpc setTagSetList(SetTagSetListRequest) returns (Empty) {}
+
+  rpc getSelectedTagSet(Empty) returns (SelectedTagSetResponse) {}
 }
 
 message Empty {}
@@ -77,9 +79,14 @@ message ChangeMessage {
 enum ChangeId {
   TIME_POINT = 0;
   ACTIVE_SPOT = 1;
-  UPDATE_TAGS = 2;
+  UPDATE_COLORS_REQUEST = 2;
+  SELECTED_TAG_SET = 3;
 }
 
 message SetTagSetListRequest {
   repeated string tag_set_names = 1;
+}
+
+message SelectedTagSetResponse {
+  int32 index = 1;
 }

@@ -25,14 +25,24 @@ class BlenderMastodonViewProperties(bpy.types.PropertyGroup):
     )
 
     def get_tag_set_items(self, context):
-        if mb_server.mastodon_blender_server is not None:
-            return mb_server.mastodon_blender_server.view_service.tag_set_items
-        return []
+        empty = [("-1", "none", "")]
+        if mb_server.mastodon_blender_server is None:
+            return empty
+        view_service = mb_server.mastodon_blender_server.view_service
+        tag_set_list = view_service.tag_set_list
+        return empty + [(str(i), tag_set, "") for i, tag_set in enumerate(tag_set_list)]
+
+    def update_tag_set(self, context):
+        if mb_server.mastodon_blender_server is None:
+            return
+        index = int(self.tag_set)
+        mb_server.mastodon_blender_server.view_service.set_tag_set_index(index)
 
     tag_set: bpy.props.EnumProperty(
         name="Mastodon Tag Set",
         description="Tag set that is used to color the spheres",
-        items=get_tag_set_items
+        items=get_tag_set_items,
+        update=update_tag_set
     )
 
 
@@ -45,7 +55,7 @@ class BlenderMastodonUpdateTags(bpy.types.Operator):
     def execute(self, context):
 
         if mb_server.mastodon_blender_server is not None:
-            mb_server.mastodon_blender_server.view_service.update_tags()
+            mb_server.mastodon_blender_server.view_service.update_colors()
         print(context)
 
         return {'FINISHED'}

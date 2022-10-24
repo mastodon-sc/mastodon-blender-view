@@ -51,12 +51,12 @@ import org.mastodon.model.FocusModel;
 import org.mastodon.model.NavigationHandler;
 import org.mastodon.model.SelectionModel;
 import org.mastodon.model.TimepointModel;
-import org.mastodon.model.tag.ObjTagMap;
 import org.mastodon.model.tag.TagSetModel;
 import org.mastodon.model.tag.TagSetStructure;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.function.Function;
 
 public class ViewServiceClient
 {
@@ -81,6 +81,8 @@ public class ViewServiceClient
 
 	int knownTimePoint = 0;
 
+	private TagSetStructure.TagSet tagSet;
+
 	public ViewServiceClient( Channel channel, MamutAppModel appModel )
 	{
 		blockingStub = ViewServiceGrpc.newBlockingStub( channel );
@@ -95,11 +97,9 @@ public class ViewServiceClient
 
 	public static void main( String... args ) throws Exception
 	{
-		// TODO: allow to select tag set in blender
 		// TODO: fix ConcurrentModificationException when opening TrackScheme
 		// TODO: visualize time points in the hierarchy view using colors
 		// TODO: synchronize object selection between blender and Mastodon
-		// TODO: enable selecting the tag set
 		// TODO: enable setting tags
 		// TODO: show multiple embryos
 		MamutAppModel appModel = MastodonUtils.showGuiAndGetAppModel( projectPath );
@@ -149,12 +149,23 @@ public class ViewServiceClient
 		case ACTIVE_SPOT:
 			SwingUtilities.invokeLater( this::onActiveSpotChange );
 			break;
-		case UPDATE_TAGS:
-			transferColors( appModel.getModel() );
+		case UPDATE_COLORS_REQUEST:
+			transferColors();
+			break;
+		case SELECTED_TAG_SET:
+			getSelectedTagSet();
+			transferColors();
 			break;
 		default:
 			System.err.println("Unexpected event received from blender mastodon plugin.");
 		}
+	}
+
+	private void getSelectedTagSet()
+	{
+		int index = blockingStub.getSelectedTagSet( Empty.newBuilder().build() ).getIndex();
+		List<TagSetStructure.TagSet> tagSets = appModel.getModel().getTagSetModel().getTagSetStructure().getTagSets();
+		tagSet = index >= 0 && index < tagSets.size() ? tagSets.get( index ) : null;
 	}
 
 	private void onTimePointChange()
@@ -245,7 +256,8 @@ public class ViewServiceClient
 		ViewServiceClient client = new ViewServiceClient( channel, appModel );
 		StopWatch watch = StopWatch.createAndStart();
 		client.transferCoordinates( model.getGraph() );
-		client.transferColors( model );
+		client.tagSet = getSelectedTagSet( model, "2d112_many_colors" );
+		client.transferColors();
 		client.transferTimePoint( 42 );
 		client.synchronizeFocusedObject();
 		client.synchronizeTagSetList();
@@ -287,22 +299,24 @@ public class ViewServiceClient
 			transferTracklet( graph, spot, transform );
 	}
 
-	private void transferColors( Model model )
+	private void transferColors()
 	{
+		Model model = appModel.getModel();;
 		int defaultColor = 0x444444;
-		TagSetStructure.TagSet tagSet = getTagSet( model, "2d112_many_colors" );
 		SetSpotColorsRequest.Builder request = SetSpotColorsRequest.newBuilder();
-		ObjTagMap<Spot, TagSetStructure.Tag> spotToTag = model.getTagSetModel().getVertexTags().tags( tagSet );
+		Function<Spot, TagSetStructure.Tag> spotToTag = tagSet == null ?
+				spot -> null :
+				model.getTagSetModel().getVertexTags().tags( tagSet )::get;
 		RefSet<Spot> trackletStarts = BranchGraphUtils.getAllBranchStarts( model.getGraph() );
 		for ( Spot spot : trackletStarts ) {
-			TagSetStructure.Tag tag = spotToTag.get( spot );
+			TagSetStructure.Tag tag = spotToTag.apply( spot );
 			request.addIds( spot.getInternalPoolIndex() );
 			request.addColors( tag == null ? defaultColor : tag.color() );
 		}
 		blockingStub.setSpotColors( request.build() );
 	}
 
-	private static TagSetStructure.TagSet getTagSet( Model model, String name ) {
+	private static TagSetStructure.TagSet getSelectedTagSet( Model model, String name ) {
 		TagSetModel<Spot, Link> tagSetModel = model.getTagSetModel();
 		TagSetStructure tagSetStructure = tagSetModel.getTagSetStructure();
 		for( TagSetStructure.TagSet tagSet : tagSetStructure.getTagSets() ) {
