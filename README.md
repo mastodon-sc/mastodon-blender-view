@@ -28,6 +28,10 @@ Installation:
 * Git clone this project
 * Copy the blender_addon directory to into the "scripts/addons/" folder of
   your Blender installation.
+* Go inside your blenders python directory ("python/bin").
+* Run `./python* -m ensurepip` to ensure that pip is installed.
+* Install dependencies using pip:
+  * $ ./pip3 install grpc grpc-tools google-api-python-client.
 * Start Blender and activate the plugin.
 * Restart Blender
 * Open the file mastodon-plugin/src/main/java/org/mastodon/ViewServiceClient.java
