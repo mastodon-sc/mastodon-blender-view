@@ -22,9 +22,13 @@ import org.mastodon.model.tag.TagSetModel;
 import org.scijava.Context;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 public class MastodonUtils
 {
+
+	private static final boolean LOG_STACK_TRACE = false;
+
 	private MastodonUtils() {
 		// prevent from instantiation
 	}
@@ -70,7 +74,7 @@ public class MastodonUtils
 		}
 	}
 
-	static void printModelEvents( MamutAppModel appModel )
+	static void logMastodonEvents( MamutAppModel appModel )
 	{
 		GroupHandle groupHandle = appModel.getGroupManager().createGroupHandle();
 		groupHandle.setGroupId( 0 );
@@ -87,7 +91,7 @@ public class MastodonUtils
 		focusModel.listeners().add(() -> {
 			Spot ref = graph.vertexRef();
 			Spot focusedSpot = focusModel.getFocusedVertex( ref );
-			System.out.println("FocusModel: focused vertex: " + focusedSpot);
+			log( "FocusModel: focused vertex: " + focusedSpot );
 			graph.releaseRef( ref );
 		});
 	}
@@ -99,21 +103,20 @@ public class MastodonUtils
 			@Override
 			public void navigateToVertex( Spot vertex )
 			{
-				System.out.println("NavigationHandler: navigate to vertex " + vertex);
+				log( "NavigationHandler: navigate to vertex " + vertex );
 			}
 
 			@Override
 			public void navigateToEdge( Link edge )
 			{
-				System.out.println("NavigationHandler: navigate to edge " + edge);
+				log( "NavigationHandler: navigate to edge " + edge );
 			}
 		} );
 	}
 
 	private static void logTimePointModel( TimepointModel model )
 	{
-		model.listeners().add( () -> System.out.println(
-				"Time point changed: (to " + model.getTimepoint() + ")" ));
+		model.listeners().add( () -> log( "Time point changed: (to " + model.getTimepoint() + ")" ) );
 	}
 
 	private static void logTagSetModel( MamutAppModel appModel )
@@ -121,6 +124,14 @@ public class MastodonUtils
 		// TODO
 		Model model = appModel.getModel();
 		TagSetModel<Spot, Link> tagSetModel = model.getTagSetModel();
-		tagSetModel.listeners().add( () -> System.out.println("tag set changed") );
+		tagSetModel.listeners().add( () -> log( "tag set changed" ) );
+	}
+
+	private static void log( String text )
+	{
+		System.out.println( text + " " + Thread.currentThread().getName() );
+		if( LOG_STACK_TRACE )
+			for ( StackTraceElement stackTraceElement : Thread.currentThread().getStackTrace() )
+				System.out.println( "   " + stackTraceElement );
 	}
 }

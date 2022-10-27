@@ -97,7 +97,7 @@ public class ViewServiceClient
 
 	public static void main( String... args ) throws Exception
 	{
-		// TODO: fix ConcurrentModificationException when opening TrackScheme
+		// TODO: fix time point manipulation by the branch track scheme
 		// TODO: visualize time points in the hierarchy view using colors
 		// TODO: synchronize object selection between blender and Mastodon
 		// TODO: enable setting tags
@@ -251,6 +251,7 @@ public class ViewServiceClient
 	private static void transferEmbryo( MamutAppModel appModel )
 	{
 		Model model = appModel.getModel();
+		MastodonUtils.logMastodonEvents(appModel);
 		ManagedChannel channel = ManagedChannelBuilder.forTarget( "localhost:50051" ).usePlaintext().build();
 		Runtime.getRuntime().addShutdownHook( new Thread( channel::shutdown ) );
 		ViewServiceClient client = new ViewServiceClient( channel, appModel );
@@ -261,7 +262,6 @@ public class ViewServiceClient
 		client.transferTimePoint( 42 );
 		client.synchronizeFocusedObject();
 		client.synchronizeTagSetList();
-		MastodonUtils.printModelEvents(appModel);
 		System.out.println( watch );
 	}
 
@@ -289,7 +289,6 @@ public class ViewServiceClient
 		blockingStub.setTimePoint(SetTimePointRequest.newBuilder()
 				.setTimepoint(timePoint)
 				.build());
-		System.out.println("done");
 	}
 
 	private void transferCoordinates( ModelGraph graph )
