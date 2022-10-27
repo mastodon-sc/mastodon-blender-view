@@ -28,22 +28,13 @@
  */
 package org.mastodon.blender;
 
-import java.io.IOException;
+import java.util.Random;
 
-public class RunBlender
+public class StartMastodon
 {
-	public static void main( String... args )
-			throws Exception
-	{
-		start_blender();
-		ViewServiceClient.main();
-	}
-
-	private static void start_blender() throws IOException
-	{
-		new ProcessBuilder( "bash", "blender-addon/start_blender.sh" )
-				.redirectOutput( ProcessBuilder.Redirect.INHERIT)
-				.redirectError( ProcessBuilder.Redirect.INHERIT)
-				.start();
+	public static void main(String... args) {
+		System.out.println( new Random().nextInt(65535 - 49152) + 49152 );
+		//49152-65535
+		//		MastodonUtils.showGuiAndGetAppModel( ExampleDatasets.metteE1 );
 	}
 }

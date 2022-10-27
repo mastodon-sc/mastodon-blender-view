@@ -122,7 +122,7 @@ class MastodonBlenderServer:
         self.server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
         self.view_service = ViewService(self.many_spheres)
         rpc.add_ViewServiceServicer_to_server(self.view_service, self.server)
-        self.server.add_insecure_port('[::]:50051')
+        self.server.add_insecure_port('[::]:50846')
         self.server.start()
 
     def stop(self):

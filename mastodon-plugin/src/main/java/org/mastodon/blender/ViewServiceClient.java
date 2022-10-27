@@ -69,8 +69,6 @@ import java.util.function.Function;
 public class ViewServiceClient
 {
 
-	private static final String projectPath = "/home/arzt/Datasets/Mette/E1.mastodon";
-
 	private final ViewServiceGrpc.ViewServiceBlockingStub blockingStub;
 
 	private final ViewServiceGrpc.ViewServiceStub nonBlockingStub;
@@ -101,17 +99,6 @@ public class ViewServiceClient
 		navigationModel = groupHandle.getModel( appModel.NAVIGATION );
 		focusModel = new AutoNavigateFocusModel<>( appModel.getFocusModel(), navigationModel );
 		timePointModel = groupHandle.getModel( appModel.TIMEPOINT );
-	}
-
-	public static void main( String... args ) throws Exception
-	{
-		// TODO: have an deployable actual mastodon plugin
-		// TODO: visualize time points in the hierarchy view using colors
-		// TODO: synchronize object selection between blender and Mastodon
-		// TODO: enable setting tags
-		// TODO: show multiple embryos
-		MamutAppModel appModel = MastodonUtils.showGuiAndGetAppModel( projectPath );
-		transferEmbryo( appModel );
 	}
 
 	private void synchronizeFocusedObject()
@@ -256,11 +243,11 @@ public class ViewServiceClient
 		}
 	}
 
-	private static void transferEmbryo( MamutAppModel appModel )
+	static void start( MamutAppModel appModel )
 	{
 		Model model = appModel.getModel();
 		MastodonUtils.logMastodonEvents(appModel);
-		ManagedChannel channel = ManagedChannelBuilder.forTarget( "localhost:50051" ).usePlaintext().build();
+		ManagedChannel channel = ManagedChannelBuilder.forTarget( "localhost:50846" ).usePlaintext().build();
 		Runtime.getRuntime().addShutdownHook( new Thread( channel::shutdown ) );
 		ViewServiceClient client = new ViewServiceClient( channel, appModel );
 		StopWatch watch = StopWatch.createAndStart();
