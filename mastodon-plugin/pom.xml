@@ -102,7 +102,7 @@
 
 		<labkit-pixel-classification.version>0.1.13</labkit-pixel-classification.version>
 
-		<mastodon.version>1.0.0-beta-25</mastodon.version>
+		<mastodon.version>1.0.0-beta-26-SNAPSHOT</mastodon.version>
 	</properties>
 
 	<build>

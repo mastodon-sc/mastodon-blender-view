@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package org.mastodon;
+package org.mastodon.blender;
 
 import javax.swing.SwingUtilities;
 import io.grpc.Channel;
@@ -37,6 +37,14 @@ import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.util.Pair;
 import net.imglib2.util.StopWatch;
+import org.mastodon.AddMovingSpotRequest;
+import org.mastodon.ChangeMessage;
+import org.mastodon.Empty;
+import org.mastodon.SetActiveSpotRequest;
+import org.mastodon.SetSpotColorsRequest;
+import org.mastodon.SetTagSetListRequest;
+import org.mastodon.SetTimePointRequest;
+import org.mastodon.ViewServiceGrpc;
 import org.mastodon.collection.RefList;
 import org.mastodon.collection.RefSet;
 import org.mastodon.graph.GraphIdBimap;
@@ -97,7 +105,7 @@ public class ViewServiceClient
 
 	public static void main( String... args ) throws Exception
 	{
-		// TODO: fix time point manipulation by the branch track scheme
+		// TODO: have an deployable actual mastodon plugin
 		// TODO: visualize time points in the hierarchy view using colors
 		// TODO: synchronize object selection between blender and Mastodon
 		// TODO: enable setting tags
@@ -286,7 +294,7 @@ public class ViewServiceClient
 			return;
 		knownTimePoint = timePoint;
 		System.out.println("set time point to " + timePoint);
-		blockingStub.setTimePoint(SetTimePointRequest.newBuilder()
+		blockingStub.setTimePoint( SetTimePointRequest.newBuilder()
 				.setTimepoint(timePoint)
 				.build());
 	}

@@ -1,4 +1,4 @@
-package org.mastodon;
+package org.mastodon.blender;
 
 import net.imglib2.RealLocalizable;
 import net.imglib2.RealPoint;

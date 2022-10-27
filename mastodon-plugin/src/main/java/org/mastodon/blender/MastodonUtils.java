@@ -1,4 +1,4 @@
-package org.mastodon;
+package org.mastodon.blender;
 
 import javax.swing.WindowConstants;
 import mpicbg.spim.data.SpimDataException;

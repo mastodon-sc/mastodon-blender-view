@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package org.mastodon;
+package org.mastodon.blender;
 
 import java.io.IOException;
 
