@@ -41,6 +41,7 @@ import org.scijava.ui.behaviour.util.AbstractNamedAction;
 import org.scijava.ui.behaviour.util.Actions;
 import org.scijava.ui.behaviour.util.RunnableAction;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -129,8 +130,27 @@ public class Blender3dViewPlugin extends AbstractContextual implements MamutPlug
 		if ( pluginAppModel != null )
 		{
 			new Thread(() -> {
+				startBlender();
 				ViewServiceClient.start( pluginAppModel.getAppModel() );
 			}).start();
 		}
+	}
+
+	private void startBlender()
+	{
+		try
+		{
+			new ProcessBuilder( "/home/arzt/Applications/blender-2.93.8-linux-x64/blender" ).start();
+			ViewServiceClient.waitForConnection();
+		}
+		catch ( IOException e )
+		{
+			e.printStackTrace();
+		}
+	}
+
+	private void waitForConnection()
+	{
+
 	}
 }

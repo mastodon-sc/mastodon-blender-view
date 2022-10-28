@@ -33,8 +33,6 @@ import java.util.Random;
 public class StartMastodon
 {
 	public static void main(String... args) {
-		System.out.println( new Random().nextInt(65535 - 49152) + 49152 );
-		//49152-65535
-		//		MastodonUtils.showGuiAndGetAppModel( ExampleDatasets.metteE1 );
+		MastodonUtils.showGuiAndGetAppModel( ExampleDatasets.metteE1 );
 	}
 }

@@ -44,6 +44,7 @@ import org.mastodon.SetActiveSpotRequest;
 import org.mastodon.SetSpotColorsRequest;
 import org.mastodon.SetTagSetListRequest;
 import org.mastodon.SetTimePointRequest;
+import org.mastodon.TimePointResponse;
 import org.mastodon.ViewServiceGrpc;
 import org.mastodon.collection.RefList;
 import org.mastodon.collection.RefSet;
@@ -68,6 +69,8 @@ import java.util.function.Function;
 
 public class ViewServiceClient
 {
+
+	private static final String URL = "localhost:50846";
 
 	private final ViewServiceGrpc.ViewServiceBlockingStub blockingStub;
 
@@ -99,6 +102,14 @@ public class ViewServiceClient
 		navigationModel = groupHandle.getModel( appModel.NAVIGATION );
 		focusModel = new AutoNavigateFocusModel<>( appModel.getFocusModel(), navigationModel );
 		timePointModel = groupHandle.getModel( appModel.TIMEPOINT );
+	}
+
+	public static void waitForConnection()
+	{
+		ManagedChannel channel = ManagedChannelBuilder.forTarget( URL ).usePlaintext().build();
+		TimePointResponse timepoint = ViewServiceGrpc.newBlockingStub( channel ).withWaitForReady().getTimePoint( Empty.newBuilder().build() );
+		timepoint.getTimePoint();
+		channel.shutdown();
 	}
 
 	private void synchronizeFocusedObject()
@@ -247,7 +258,7 @@ public class ViewServiceClient
 	{
 		Model model = appModel.getModel();
 		MastodonUtils.logMastodonEvents(appModel);
-		ManagedChannel channel = ManagedChannelBuilder.forTarget( "localhost:50846" ).usePlaintext().build();
+		ManagedChannel channel = ManagedChannelBuilder.forTarget( URL ).usePlaintext().build();
 		Runtime.getRuntime().addShutdownHook( new Thread( channel::shutdown ) );
 		ViewServiceClient client = new ViewServiceClient( channel, appModel );
 		StopWatch watch = StopWatch.createAndStart();
