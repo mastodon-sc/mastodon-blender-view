@@ -5,7 +5,7 @@ import bpy
 import sys
 
 
-def python_path():
+def get_python_path():
     try:
         # 2.92 and older
         path = bpy.app.binary_path_python
@@ -19,5 +19,16 @@ os.environ.pop("PIP_REQ_TRACKER", None)
 ensurepip.bootstrap()
 os.environ.pop("PIP_REQ_TRACKER", None)
 
-subprocess.check_output([python_path(), '-m', 'pip', 'install', 'grpcio', 'bidict', 'grpcio-tools'])
+python_path = get_python_path()
+packages = {'grpcio', 'bidict', 'grpcio-tools'}
+subprocess.check_output([python_path, '-m', 'pip', 'install', *packages])
+
+try:
+    import bidict
+    import grpc
+    import google.protobuf
+    print("dependencies installed")
+except ModuleNotFoundError:
+    print("installation failed")
+
 # also some other google library see some other pr on this project
