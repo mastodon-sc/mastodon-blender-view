@@ -28,6 +28,7 @@
  */
 package org.mastodon.blender;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -39,6 +40,7 @@ import java.nio.file.Paths;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+@Ignore
 public class SetupBlenderTest
 {
 
@@ -56,7 +58,7 @@ public class SetupBlenderTest
 	@Test
 	public void testFindAddonsFolder() {
 		Path addonsPath = SetupBlender.findAddonsFolder(blenderRootPath);
-		assertEquals(blenderRootPath.resolve( "2.93/scripts/addons" ), addonsPath);
+		assertEquals(blenderRootPath.resolve( "3.3/scripts/addons" ), addonsPath);
 	}
 
 	@Test

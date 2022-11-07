@@ -30,7 +30,6 @@ package org.mastodon.blender;
 
 import com.amazonaws.util.IOUtils;
 import org.apache.commons.io.FileUtils;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;

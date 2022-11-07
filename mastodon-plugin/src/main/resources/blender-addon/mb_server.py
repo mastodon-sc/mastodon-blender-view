@@ -67,6 +67,14 @@ class ViewService(rpc.ViewServiceServicer):
         subscribe_to_active_object_change_event(self, callback)
         bpy.app.handlers.frame_change_post.append(self.frame_change_callback)
 
+    def getVersion(self, request, context):
+        return pb.VersionResponse(version="0.0.1")
+
+    def closeAll(self, request, context):
+        mb_utils.run_in_main_thread(
+            partial(bpy.ops.wm.quit_blender))
+        return pb.Empty()
+
     def addMovingSpot(self, request, context):
         mb_utils.run_in_main_thread(
             partial(self.many_spheres.add_moving_spot, request))

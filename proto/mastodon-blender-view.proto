@@ -23,6 +23,10 @@ package mastodon_blender_view;
 
 service ViewService {
 
+  rpc getVersion(Empty) returns (VersionResponse) {}
+
+  rpc closeAll(Empty) returns (Empty) {}
+
   rpc addMovingSpot(AddMovingSpotRequest) returns (Empty) {}
 
   rpc setSpotColors(SetSpotColorsRequest) returns (Empty) {}
@@ -43,6 +47,10 @@ service ViewService {
 }
 
 message Empty {}
+
+message VersionResponse {
+  string version = 1;
+}
 
 message AddMovingSpotRequest {
   uint32 id = 1;

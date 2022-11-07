@@ -13,7 +13,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1bmastodon-blender-view.proto\x12\x15mastodon_blender_view\"\x07\n\x05\x45mpty\"Z\n\x14\x41\x64\x64MovingSpotRequest\x12\n\n\x02id\x18\x01 \x01(\r\x12\r\n\x05label\x18\x02 \x01(\t\x12\x13\n\x0b\x63oordinates\x18\x03 \x03(\x02\x12\x12\n\ntimepoints\x18\x04 \x03(\x05\"3\n\x14SetSpotColorsRequest\x12\x0b\n\x03ids\x18\x01 \x03(\r\x12\x0e\n\x06\x63olors\x18\x02 \x03(\r\"(\n\x13SetTimePointRequest\x12\x11\n\ttimepoint\x18\x01 \x01(\r\" \n\x12\x41\x63tiveSpotResponse\x12\n\n\x02id\x18\x01 \x01(\r\"\"\n\x14SetActiveSpotRequest\x12\n\n\x02id\x18\x01 \x01(\r\"&\n\x11TimePointResponse\x12\x11\n\ttimePoint\x18\x01 \x01(\r\"<\n\rChangeMessage\x12+\n\x02id\x18\x01 \x01(\x0e\x32\x1f.mastodon_blender_view.ChangeId\"-\n\x14SetTagSetListRequest\x12\x15\n\rtag_set_names\x18\x01 \x03(\t\"\'\n\x16SelectedTagSetResponse\x12\r\n\x05index\x18\x01 \x01(\x05*\\\n\x08\x43hangeId\x12\x0e\n\nTIME_POINT\x10\x00\x12\x0f\n\x0b\x41\x43TIVE_SPOT\x10\x01\x12\x19\n\x15UPDATE_COLORS_REQUEST\x10\x02\x12\x14\n\x10SELECTED_TAG_SET\x10\x03\x32\xd8\x06\n\x0bViewService\x12\\\n\raddMovingSpot\x12+.mastodon_blender_view.AddMovingSpotRequest\x1a\x1c.mastodon_blender_view.Empty\"\x00\x12\\\n\rsetSpotColors\x12+.mastodon_blender_view.SetSpotColorsRequest\x1a\x1c.mastodon_blender_view.Empty\"\x00\x12Z\n\x0csetTimePoint\x12*.mastodon_blender_view.SetTimePointRequest\x1a\x1c.mastodon_blender_view.Empty\"\x00\x12X\n\x0cgetTimePoint\x12\x1c.mastodon_blender_view.Empty\x1a(.mastodon_blender_view.TimePointResponse\"\x00\x12\\\n\rsetActiveSpot\x12+.mastodon_blender_view.SetActiveSpotRequest\x1a\x1c.mastodon_blender_view.Empty\"\x00\x12Z\n\rgetActiveSpot\x12\x1c.mastodon_blender_view.Empty\x1a).mastodon_blender_view.ActiveSpotResponse\"\x00\x12[\n\x11subscribeToChange\x12\x1c.mastodon_blender_view.Empty\x1a$.mastodon_blender_view.ChangeMessage\"\x00\x30\x01\x12\\\n\rsetTagSetList\x12+.mastodon_blender_view.SetTagSetListRequest\x1a\x1c.mastodon_blender_view.Empty\"\x00\x12\x62\n\x11getSelectedTagSet\x12\x1c.mastodon_blender_view.Empty\x1a-.mastodon_blender_view.SelectedTagSetResponse\"\x00\x42\'\n\x0corg.mastodonB\x0fHelloWorldProtoP\x01\xa2\x02\x03HLWb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1bmastodon-blender-view.proto\x12\x15mastodon_blender_view\"\x07\n\x05\x45mpty\"\"\n\x0fVersionResponse\x12\x0f\n\x07version\x18\x01 \x01(\t\"Z\n\x14\x41\x64\x64MovingSpotRequest\x12\n\n\x02id\x18\x01 \x01(\r\x12\r\n\x05label\x18\x02 \x01(\t\x12\x13\n\x0b\x63oordinates\x18\x03 \x03(\x02\x12\x12\n\ntimepoints\x18\x04 \x03(\x05\"3\n\x14SetSpotColorsRequest\x12\x0b\n\x03ids\x18\x01 \x03(\r\x12\x0e\n\x06\x63olors\x18\x02 \x03(\r\"(\n\x13SetTimePointRequest\x12\x11\n\ttimepoint\x18\x01 \x01(\r\" \n\x12\x41\x63tiveSpotResponse\x12\n\n\x02id\x18\x01 \x01(\r\"\"\n\x14SetActiveSpotRequest\x12\n\n\x02id\x18\x01 \x01(\r\"&\n\x11TimePointResponse\x12\x11\n\ttimePoint\x18\x01 \x01(\r\"<\n\rChangeMessage\x12+\n\x02id\x18\x01 \x01(\x0e\x32\x1f.mastodon_blender_view.ChangeId\"-\n\x14SetTagSetListRequest\x12\x15\n\rtag_set_names\x18\x01 \x03(\t\"\'\n\x16SelectedTagSetResponse\x12\r\n\x05index\x18\x01 \x01(\x05*\\\n\x08\x43hangeId\x12\x0e\n\nTIME_POINT\x10\x00\x12\x0f\n\x0b\x41\x43TIVE_SPOT\x10\x01\x12\x19\n\x15UPDATE_COLORS_REQUEST\x10\x02\x12\x14\n\x10SELECTED_TAG_SET\x10\x03\x32\xf8\x07\n\x0bViewService\x12T\n\ngetVersion\x12\x1c.mastodon_blender_view.Empty\x1a&.mastodon_blender_view.VersionResponse\"\x00\x12H\n\x08\x63loseAll\x12\x1c.mastodon_blender_view.Empty\x1a\x1c.mastodon_blender_view.Empty\"\x00\x12\\\n\raddMovingSpot\x12+.mastodon_blender_view.AddMovingSpotRequest\x1a\x1c.mastodon_blender_view.Empty\"\x00\x12\\\n\rsetSpotColors\x12+.mastodon_blender_view.SetSpotColorsRequest\x1a\x1c.mastodon_blender_view.Empty\"\x00\x12Z\n\x0csetTimePoint\x12*.mastodon_blender_view.SetTimePointRequest\x1a\x1c.mastodon_blender_view.Empty\"\x00\x12X\n\x0cgetTimePoint\x12\x1c.mastodon_blender_view.Empty\x1a(.mastodon_blender_view.TimePointResponse\"\x00\x12\\\n\rsetActiveSpot\x12+.mastodon_blender_view.SetActiveSpotRequest\x1a\x1c.mastodon_blender_view.Empty\"\x00\x12Z\n\rgetActiveSpot\x12\x1c.mastodon_blender_view.Empty\x1a).mastodon_blender_view.ActiveSpotResponse\"\x00\x12[\n\x11subscribeToChange\x12\x1c.mastodon_blender_view.Empty\x1a$.mastodon_blender_view.ChangeMessage\"\x00\x30\x01\x12\\\n\rsetTagSetList\x12+.mastodon_blender_view.SetTagSetListRequest\x1a\x1c.mastodon_blender_view.Empty\"\x00\x12\x62\n\x11getSelectedTagSet\x12\x1c.mastodon_blender_view.Empty\x1a-.mastodon_blender_view.SelectedTagSetResponse\"\x00\x42\'\n\x0corg.mastodonB\x0fHelloWorldProtoP\x01\xa2\x02\x03HLWb\x06proto3')
 
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, globals())
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'mastodon_blender_view_pb2', globals())
@@ -21,28 +21,30 @@ if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
   DESCRIPTOR._serialized_options = b'\n\014org.mastodonB\017HelloWorldProtoP\001\242\002\003HLW'
-  _CHANGEID._serialized_start=510
-  _CHANGEID._serialized_end=602
+  _CHANGEID._serialized_start=546
+  _CHANGEID._serialized_end=638
   _EMPTY._serialized_start=54
   _EMPTY._serialized_end=61
-  _ADDMOVINGSPOTREQUEST._serialized_start=63
-  _ADDMOVINGSPOTREQUEST._serialized_end=153
-  _SETSPOTCOLORSREQUEST._serialized_start=155
-  _SETSPOTCOLORSREQUEST._serialized_end=206
-  _SETTIMEPOINTREQUEST._serialized_start=208
-  _SETTIMEPOINTREQUEST._serialized_end=248
-  _ACTIVESPOTRESPONSE._serialized_start=250
-  _ACTIVESPOTRESPONSE._serialized_end=282
-  _SETACTIVESPOTREQUEST._serialized_start=284
-  _SETACTIVESPOTREQUEST._serialized_end=318
-  _TIMEPOINTRESPONSE._serialized_start=320
-  _TIMEPOINTRESPONSE._serialized_end=358
-  _CHANGEMESSAGE._serialized_start=360
-  _CHANGEMESSAGE._serialized_end=420
-  _SETTAGSETLISTREQUEST._serialized_start=422
-  _SETTAGSETLISTREQUEST._serialized_end=467
-  _SELECTEDTAGSETRESPONSE._serialized_start=469
-  _SELECTEDTAGSETRESPONSE._serialized_end=508
-  _VIEWSERVICE._serialized_start=605
-  _VIEWSERVICE._serialized_end=1461
+  _VERSIONRESPONSE._serialized_start=63
+  _VERSIONRESPONSE._serialized_end=97
+  _ADDMOVINGSPOTREQUEST._serialized_start=99
+  _ADDMOVINGSPOTREQUEST._serialized_end=189
+  _SETSPOTCOLORSREQUEST._serialized_start=191
+  _SETSPOTCOLORSREQUEST._serialized_end=242
+  _SETTIMEPOINTREQUEST._serialized_start=244
+  _SETTIMEPOINTREQUEST._serialized_end=284
+  _ACTIVESPOTRESPONSE._serialized_start=286
+  _ACTIVESPOTRESPONSE._serialized_end=318
+  _SETACTIVESPOTREQUEST._serialized_start=320
+  _SETACTIVESPOTREQUEST._serialized_end=354
+  _TIMEPOINTRESPONSE._serialized_start=356
+  _TIMEPOINTRESPONSE._serialized_end=394
+  _CHANGEMESSAGE._serialized_start=396
+  _CHANGEMESSAGE._serialized_end=456
+  _SETTAGSETLISTREQUEST._serialized_start=458
+  _SETTAGSETLISTREQUEST._serialized_end=503
+  _SELECTEDTAGSETRESPONSE._serialized_start=505
+  _SELECTEDTAGSETRESPONSE._serialized_end=544
+  _VIEWSERVICE._serialized_start=641
+  _VIEWSERVICE._serialized_end=1657
 # @@protoc_insertion_point(module_scope)
