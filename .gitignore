@@ -6,8 +6,8 @@ __pycache__/
 .idea/
 target/
 *.iml
-/blender-addon/DisplayServer/
-/blender-addon/typescript
+/DisplayServer/
+/src/main/resources/blender-addon/typescript
 /mastodon/
 /mastodon-graph/
 /mastodon-collection/
