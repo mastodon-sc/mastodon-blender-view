@@ -65,12 +65,13 @@ import org.mastodon.model.tag.TagSetStructure;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 public class ViewServiceClient
 {
 
-	private static final String URL = "localhost:50846";
+	public static final String URL = "localhost:50846";
 
 	private final ViewServiceGrpc.ViewServiceBlockingStub blockingStub;
 
@@ -107,7 +108,10 @@ public class ViewServiceClient
 	public static void waitForConnection()
 	{
 		ManagedChannel channel = ManagedChannelBuilder.forTarget( URL ).usePlaintext().build();
-		TimePointResponse timepoint = ViewServiceGrpc.newBlockingStub( channel ).withWaitForReady().getTimePoint( Empty.newBuilder().build() );
+		TimePointResponse timepoint = ViewServiceGrpc.newBlockingStub( channel )
+				.withWaitForReady()
+				.withDeadlineAfter( 10, TimeUnit.SECONDS )
+				.getTimePoint( Empty.newBuilder().build() );
 		timepoint.getTimePoint();
 		channel.shutdown();
 	}

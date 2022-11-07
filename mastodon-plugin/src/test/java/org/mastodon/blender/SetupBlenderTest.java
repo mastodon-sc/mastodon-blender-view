@@ -28,30 +28,50 @@
  */
 package org.mastodon.blender;
 
-import org.mastodon.mamut.MamutAppModel;
+import org.junit.Test;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
-public class StartBlenderAndMastodon
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+public class SetupBlenderTest
 {
-	public static void main( String... args )
-			throws Exception
+
+	private final Path blenderBinaryPath = Paths.get("/home/arzt/Applications/blender-3.3.1-linux-x64/blender");
+
+	private final Path blenderRootPath = blenderBinaryPath.getParent();
+
+	@Test
+	public void testInstallDependencies()
+			throws IOException, InterruptedException
 	{
-		startBlender();
-		startMastodon();
+		SetupBlender.installDependency( blenderBinaryPath );
 	}
 
-	private static void startBlender() throws IOException
-	{
-		new ProcessBuilder( "bash", "blender-scripts/start_blender.sh" )
-				.redirectOutput( ProcessBuilder.Redirect.INHERIT)
-				.redirectError( ProcessBuilder.Redirect.INHERIT)
-				.start();
+	@Test
+	public void testFindAddonsFolder() {
+		Path addonsPath = SetupBlender.findAddonsFolder(blenderRootPath);
+		assertEquals(blenderRootPath.resolve( "2.93/scripts/addons" ), addonsPath);
 	}
 
-	private static void startMastodon()
+	@Test
+	public void testCopyAddon() throws IOException, URISyntaxException
 	{
-		MamutAppModel appModel = MastodonUtils.showGuiAndGetAppModel( ExampleDatasets.metteE1 );
-		ViewServiceClient.start( appModel );
+		SetupBlender.copyAddon(blenderBinaryPath);
+		Path addonsPath = SetupBlender.findAddonsFolder(blenderRootPath);
+		assertTrue( Files.exists( addonsPath.resolve( "mastodon-blender-view/mb_scene.py" ) ) );
+	}
+
+	@Test
+	public void testAddon()
+			throws IOException, URISyntaxException
+	{
+		SetupBlender.copyAddon( blenderBinaryPath );
+		assertTrue(SetupBlender.verifyAddonWorks( blenderBinaryPath ));
 	}
 }
