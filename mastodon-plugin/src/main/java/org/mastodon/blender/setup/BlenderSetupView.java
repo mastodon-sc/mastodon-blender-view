@@ -80,7 +80,7 @@ public class BlenderSetupView extends JDialog
 
 		final String intro = "Mastodon can use Blender to visualise cell trackings in 3D."
 				+ "But in order to achieve this, it is required to install "
-				+ "a \"mastodon-blender-view\" addon to Blender. This dialog can "
+				+ "a \"mastodon_blender_view\" addon to Blender. This dialog can "
 				+ "guide you through the process of installing the addon.";
 
 		final JTextArea introTextArea = new JTextArea( intro, 3, 30 );
@@ -98,7 +98,7 @@ public class BlenderSetupView extends JDialog
 		        + "<a href=\"https://blender.org/download\">https://blender.org/download</a><br>"
 				+ "and install it on your computer.<br>"
 				+ "<p>Please chose \"portable\" version of Blender when possible.<br>"
-				+ "(The \"mastodon-blender-view\" addon only supports portable Blender installations.)<br>"
+				+ "(The \"mastodon_blender_view\" addon only supports portable Blender installations.)<br>"
 				+ "<p>Continue with the step two when your are done."
 				+ "</html></body>";
 		JEditorPane html = new JEditorPane( "text/html", blenderInstallText );

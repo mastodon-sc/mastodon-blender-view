@@ -46,6 +46,9 @@ import java.util.stream.Collectors;
 
 public class BlenderSetupUtils
 {
+
+	public static final String ADDON_NAME = "mastodon_blender_view";
+
 	static Path findAddonsFolder( Path blenderBinaryPath )
 	{
 		try
@@ -92,7 +95,7 @@ public class BlenderSetupUtils
 	private static Path prepareAddonDirectory( Path blenderBinaryPath ) throws IOException
 	{
 		Path addons = findAddonsFolder( blenderBinaryPath );
-		Path resolve = addons.resolve( "mastodon-blender-view" );
+		Path resolve = addons.resolve( ADDON_NAME );
 		if( Files.exists( resolve ) )
 			FileUtils.deleteDirectory( resolve.toFile() );
 		Files.createDirectory( resolve );
@@ -139,7 +142,7 @@ public class BlenderSetupUtils
 	public static Process startBlender( Path blenderBinaryPath, String... args )
 			throws IOException
 	{
-		String[] command = { blenderBinaryPath.toString(), "--addons", "mastodon-blender-view" };
+		String[] command = { blenderBinaryPath.toString(), "--addons", ADDON_NAME };
 		Process process = new ProcessBuilder( ArrayUtils.addAll( command, args ) ).start();
 		ViewServiceClient.waitForConnection();
 		return process;
@@ -148,7 +151,7 @@ public class BlenderSetupUtils
 	public static boolean isMastodonAddonInstalled( Path blenderBinaryPath )
 	{
 		Path addonsFolder = findAddonsFolder( blenderBinaryPath );
-		Path mastodonAddonFolder = addonsFolder.resolve( "mastodon-blender-view" );
+		Path mastodonAddonFolder = addonsFolder.resolve( ADDON_NAME );
 		return Files.exists( mastodonAddonFolder );
 	}
 }

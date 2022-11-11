@@ -65,7 +65,7 @@ public class BlenderSetupUtilsTest
 	{
 		BlenderSetupUtils.copyAddon(blenderBinaryPath);
 		Path addonsPath = BlenderSetupUtils.findAddonsFolder(blenderBinaryPath);
-		assertTrue( Files.exists( addonsPath.resolve( "mastodon-blender-view/mb_scene.py" ) ) );
+		assertTrue( Files.exists( addonsPath.resolve( BlenderSetupUtils.ADDON_NAME + "/mb_scene.py" ) ) );
 	}
 
 	@Test
