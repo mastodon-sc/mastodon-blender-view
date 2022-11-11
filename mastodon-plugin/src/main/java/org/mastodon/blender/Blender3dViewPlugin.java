@@ -30,6 +30,7 @@ package org.mastodon.blender;
 
 import javax.swing.JFileChooser;
 import org.mastodon.app.ui.ViewMenuBuilder;
+import org.mastodon.blender.setup.BlenderSetupUtils;
 import org.mastodon.mamut.MamutAppModel;
 import org.mastodon.mamut.plugin.MamutPlugin;
 import org.mastodon.mamut.plugin.MamutPluginAppModel;
@@ -46,8 +47,8 @@ import org.scijava.ui.behaviour.util.Actions;
 import org.scijava.ui.behaviour.util.RunnableAction;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -150,29 +151,28 @@ public class Blender3dViewPlugin extends AbstractContextual implements MamutPlug
 	{
 		try
 		{
-			String blenderPath = getBlenderPath();
-			new ProcessBuilder( blenderPath ).start();
-			ViewServiceClient.waitForConnection();
+			Path blenderPath = getBlenderPath();
+			BlenderSetupUtils.startBlender( blenderPath );
 		}
-		catch ( IOException e )
+		catch ( Exception e )
 		{
 			e.printStackTrace();
 		}
 	}
 
-	private String getBlenderPath()
+	private Path getBlenderPath()
 	{
 		PrefService service = context.service( PrefService.class );
 		String blender_path = service.get( Blender3dViewPlugin.class, "blender_path" );
 		if( blender_path != null && !blender_path.isEmpty() && Files.exists( Paths.get(blender_path) ) )
-			return blender_path;
+			return Paths.get( blender_path );
 		JFileChooser fileChooser = new JFileChooser();
 		if( fileChooser.showOpenDialog( null ) != JFileChooser.APPROVE_OPTION )
 			throw new RuntimeException("no blender binary selected");
 		File blender_file = fileChooser.getSelectedFile();
-		if( ! Files.exists( blender_file.toPath() ) )
+		if( ! blender_file.exists() )
 			throw new RuntimeException("no valid blender binary selected");
 		service.put( Blender3dViewPlugin.class, "blender_path", blender_file.getAbsolutePath());
-		return blender_file.getAbsolutePath();
+		return blender_file.toPath();
 	}
 }

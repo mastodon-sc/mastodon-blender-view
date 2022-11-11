@@ -44,7 +44,6 @@ import org.mastodon.SetActiveSpotRequest;
 import org.mastodon.SetSpotColorsRequest;
 import org.mastodon.SetTagSetListRequest;
 import org.mastodon.SetTimePointRequest;
-import org.mastodon.TimePointResponse;
 import org.mastodon.VersionResponse;
 import org.mastodon.ViewServiceGrpc;
 import org.mastodon.collection.RefList;
@@ -109,17 +108,36 @@ public class ViewServiceClient
 	public static void waitForConnection()
 	{
 		ManagedChannel channel = ManagedChannelBuilder.forTarget( URL ).usePlaintext().build();
-		ViewServiceGrpc.ViewServiceBlockingStub stub =
-				ViewServiceGrpc.newBlockingStub( channel )
-						.withWaitForReady()
-						.withDeadlineAfter( 10, TimeUnit.SECONDS );
-		VersionResponse versionResponse = stub
-				.getVersion( Empty.newBuilder().build() );
-		String version = versionResponse.getVersion();
-		stub.closeAll( Empty.newBuilder().build() );
-		if(!version.equals( "0.0.1" ))
-			throw new RuntimeException("Version of Mastodon plugin does not match.");
-		channel.shutdown();
+		try
+		{
+			String version = ViewServiceGrpc
+					.newBlockingStub( channel )
+					.withWaitForReady()
+					.withDeadlineAfter( 10, TimeUnit.SECONDS )
+					.getVersion( Empty.newBuilder().build() )
+					.getVersion();
+			if ( !version.equals( "0.0.1" ) )
+				throw new RuntimeException( "Version of Mastodon plugin does not match." );
+		}
+		finally
+		{
+			channel.shutdown();
+		}
+	}
+
+	public static void closeBlender()
+	{
+		ManagedChannel channel = ManagedChannelBuilder.forTarget( URL ).usePlaintext().build();
+		try
+		{
+			ViewServiceGrpc
+					.newBlockingStub( channel )
+					.closeAll( Empty.newBuilder().build() );
+		}
+		finally
+		{
+			channel.shutdown();
+		}
 	}
 
 	private void synchronizeFocusedObject()

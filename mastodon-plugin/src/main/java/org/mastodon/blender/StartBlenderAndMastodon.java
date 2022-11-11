@@ -28,9 +28,11 @@
  */
 package org.mastodon.blender;
 
+import org.mastodon.blender.setup.BlenderSetupUtils;
 import org.mastodon.mamut.MamutAppModel;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 
 public class StartBlenderAndMastodon
 {
@@ -43,10 +45,7 @@ public class StartBlenderAndMastodon
 
 	private static void startBlender() throws IOException
 	{
-		new ProcessBuilder( "bash", "blender-scripts/start_blender.sh" )
-				.redirectOutput( ProcessBuilder.Redirect.INHERIT)
-				.redirectError( ProcessBuilder.Redirect.INHERIT)
-				.start();
+		BlenderSetupUtils.startBlender( Paths.get("/home/arzt/Applications/blender-3.3.1-linux-x64/blender") );
 	}
 
 	private static void startMastodon()

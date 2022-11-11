@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package org.mastodon.blender;
+package org.mastodon.blender.setup;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -41,31 +41,30 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @Ignore
-public class SetupBlenderTest
+public class BlenderSetupUtilsTest
 {
+	// TODO, improve tests
 
 	private final Path blenderBinaryPath = Paths.get("/home/arzt/Applications/blender-3.3.1-linux-x64/blender");
-
-	private final Path blenderRootPath = blenderBinaryPath.getParent();
 
 	@Test
 	public void testInstallDependencies()
 			throws IOException, InterruptedException
 	{
-		SetupBlender.installDependency( blenderBinaryPath );
+		BlenderSetupUtils.installDependency( blenderBinaryPath );
 	}
 
 	@Test
 	public void testFindAddonsFolder() {
-		Path addonsPath = SetupBlender.findAddonsFolder(blenderRootPath);
-		assertEquals(blenderRootPath.resolve( "3.3/scripts/addons" ), addonsPath);
+		Path addonsPath = BlenderSetupUtils.findAddonsFolder(blenderBinaryPath);
+		assertEquals(blenderBinaryPath.getParent().resolve( "3.3/scripts/addons" ), addonsPath);
 	}
 
 	@Test
 	public void testCopyAddon() throws IOException, URISyntaxException
 	{
-		SetupBlender.copyAddon(blenderBinaryPath);
-		Path addonsPath = SetupBlender.findAddonsFolder(blenderRootPath);
+		BlenderSetupUtils.copyAddon(blenderBinaryPath);
+		Path addonsPath = BlenderSetupUtils.findAddonsFolder(blenderBinaryPath);
 		assertTrue( Files.exists( addonsPath.resolve( "mastodon-blender-view/mb_scene.py" ) ) );
 	}
 
@@ -73,7 +72,7 @@ public class SetupBlenderTest
 	public void testAddon()
 			throws IOException, URISyntaxException
 	{
-		SetupBlender.copyAddon( blenderBinaryPath );
-		assertTrue(SetupBlender.verifyAddonWorks( blenderBinaryPath ));
+		BlenderSetupUtils.copyAddon( blenderBinaryPath );
+		assertTrue( BlenderSetupUtils.verifyAddonWorks( blenderBinaryPath ));
 	}
 }
