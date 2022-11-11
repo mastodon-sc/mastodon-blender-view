@@ -3,6 +3,7 @@ package org.mastodon.blender;
 import javax.swing.JOptionPane;
 import org.jetbrains.annotations.NotNull;
 import org.mastodon.blender.setup.BlenderSetupController;
+import org.mastodon.blender.setup.BlenderSetupUtils;
 import org.scijava.Context;
 import org.scijava.prefs.PrefService;
 
@@ -21,7 +22,7 @@ public class BlenderClient
 		this.context = context;
 		Path blenderPath = null;//getBlenderPath( context );
 		try {
-			SetupBlender.startBlender( blenderPath );
+			BlenderSetupUtils.startBlender( blenderPath );
 		}
 		catch ( Exception e ) {
 			blenderPath = startSetupWithMessage( blenderPath );
@@ -29,7 +30,7 @@ public class BlenderClient
 				throw new CancellationException();
 			try
 			{
-				SetupBlender.startBlender( blenderPath );
+				BlenderSetupUtils.startBlender( blenderPath );
 				setBlenderPath(blenderPath);
 			}
 			catch ( IOException ioException )

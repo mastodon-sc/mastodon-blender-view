@@ -168,7 +168,7 @@ public class BlenderSetupView extends JDialog
 		File file = FileChooser.chooseFile( this, selectedFile, FileChooser.DialogType.LOAD );
 		if(file == null)
 			return;
-		listener.pathSelected( file.toPath() );
+		listener.setBlenderPath( file.toPath() );
 	}
 
 	public void setBlenderPath(Path blenderBinaryPath) {
@@ -200,32 +200,9 @@ public class BlenderSetupView extends JDialog
 		finishButton.setEnabled( enableFinish );
 	}
 
-	public static void main(String... args) {
-		BlenderSetupView frame = new BlenderSetupView( new Listener()
-		{
-			@Override
-			public void pathSelected( Path blenderPath ) { }
-
-			@Override
-			public void installAddonClicked() { }
-
-			@Override
-			public void finishClicked() { }
-
-			@Override
-			public void cancelClicked() { }
-
-			@Override
-			public void testAddonClicked() { }
-		} );
-		frame.pack();
-		frame.setVisible( true );
-		frame.setDefaultCloseOperation( DISPOSE_ON_CLOSE );
-	}
-
 	public interface Listener {
 
-		void pathSelected( Path blenderPath );
+		void setBlenderPath( Path blenderPath );
 
 		void installAddonClicked();
 

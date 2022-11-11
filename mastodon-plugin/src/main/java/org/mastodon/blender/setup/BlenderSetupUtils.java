@@ -30,6 +30,7 @@ package org.mastodon.blender.setup;
 
 import com.amazonaws.util.IOUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.mastodon.blender.ViewServiceClient;
 
 import java.io.File;
@@ -102,11 +103,12 @@ public class BlenderSetupUtils
 	{
 		try
 		{
-			Process process = new ProcessBuilder( blenderBinaryPath.toString(), "-b" ).start();
+			Process process = new ProcessBuilder( blenderBinaryPath.toString(),
+					"-b", "--python-expr",
+					"print(\"Blender started from within Mastodon.\")" ).start();
 			String output = IOUtils.toString( process.getInputStream() );
 			process.waitFor();
-			// TODO: don't rely on "Blender quit"
-			return output.contains( "Blender quit" );
+			return output.contains( "Blender started from within Mastodon." );
 		}
 		catch ( Exception e ) {
 			return false;
@@ -134,10 +136,11 @@ public class BlenderSetupUtils
 		process.waitFor();
 	}
 
-	public static Process startBlender( Path blenderBinaryPath )
+	public static Process startBlender( Path blenderBinaryPath, String... args )
 			throws IOException
 	{
-		Process process = new ProcessBuilder( blenderBinaryPath.toString(), "--addons", "mastodon-blender-view" ).start();
+		String[] command = { blenderBinaryPath.toString(), "--addons", "mastodon-blender-view" };
+		Process process = new ProcessBuilder( ArrayUtils.addAll( command, args ) ).start();
 		ViewServiceClient.waitForConnection();
 		return process;
 	}
