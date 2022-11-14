@@ -28,8 +28,6 @@
  */
 package org.mastodon.blender;
 
-import java.util.Random;
-
 public class StartMastodon
 {
 	public static void main(String... args) {

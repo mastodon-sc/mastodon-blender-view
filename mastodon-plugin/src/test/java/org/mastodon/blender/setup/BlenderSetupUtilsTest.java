@@ -56,23 +56,23 @@ public class BlenderSetupUtilsTest
 
 	@Test
 	public void testFindAddonsFolder() {
-		Path addonsPath = BlenderSetupUtils.findAddonsFolder(blenderBinaryPath);
-		assertEquals(blenderBinaryPath.getParent().resolve( "3.3/scripts/addons" ), addonsPath);
+		Path addonsPath = BlenderSetupUtils.findMyAddonFolder(blenderBinaryPath);
+		assertEquals(blenderBinaryPath.getParent().resolve( "3.3/scripts/addons/mastodon_blender_view" ), addonsPath);
 	}
 
 	@Test
 	public void testCopyAddon() throws IOException, URISyntaxException
 	{
 		BlenderSetupUtils.copyAddon(blenderBinaryPath);
-		Path addonsPath = BlenderSetupUtils.findAddonsFolder(blenderBinaryPath);
-		assertTrue( Files.exists( addonsPath.resolve( BlenderSetupUtils.ADDON_NAME + "/mb_scene.py" ) ) );
+		Path addonsPath = BlenderSetupUtils.findMyAddonFolder( blenderBinaryPath );
+		assertTrue( Files.exists( addonsPath.resolve( "mb_scene.py" ) ) );
 	}
 
 	@Test
 	public void testAddon()
-			throws IOException, URISyntaxException
+			throws IOException, URISyntaxException, InterruptedException
 	{
 		BlenderSetupUtils.copyAddon( blenderBinaryPath );
-		assertTrue( BlenderSetupUtils.verifyAddonWorks( blenderBinaryPath ));
+		BlenderSetupUtils.runAddonTest( blenderBinaryPath );
 	}
 }

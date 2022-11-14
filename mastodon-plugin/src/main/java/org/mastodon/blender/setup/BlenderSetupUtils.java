@@ -6,13 +6,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -30,7 +30,6 @@ package org.mastodon.blender.setup;
 
 import com.amazonaws.util.IOUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.mastodon.blender.ViewServiceClient;
 
 import java.io.File;
@@ -47,17 +46,17 @@ import java.util.stream.Collectors;
 public class BlenderSetupUtils
 {
 
-	public static final String ADDON_NAME = "mastodon_blender_view";
-
-	static Path findAddonsFolder( Path blenderBinaryPath )
+	public static Path findMyAddonFolder( Path blenderPath )
 	{
 		try
 		{
-			Path root = blenderBinaryPath.getParent();
-			return Files.list(root)
-				.map( path -> path.resolve( "scripts" ).resolve( "addons" ) )
-				.filter( path -> Files.exists( path ) && Files.isDirectory( path ) )
-				.findFirst().orElseThrow( NoSuchElementException::new );
+			Path root = blenderPath.getParent();
+			Path addonsFolder = Files.list( root )
+					.map( path -> path.resolve( "scripts" ).resolve( "addons" ) )
+					.filter( path -> Files.exists( path ) && Files.isDirectory( path ) )
+					.findFirst()
+					.orElseThrow( NoSuchElementException::new );
+			return addonsFolder.resolve( StartBlender.ADDON_NAME );
 		}
 		catch ( IOException e )
 		{
@@ -65,23 +64,38 @@ public class BlenderSetupUtils
 		}
 	}
 
-	static void installDependency( Path blenderPath )
+	public static boolean verifyBlenderBinary( Path blenderPath )
+	{
+		try
+		{
+			String output = runCommandGetOutput( blenderPath.toString(),
+					"-b",
+					"--python-expr",
+					"print(\"Blender started from within Mastodon.\")" );
+			return output.contains( "Blender started from within Mastodon." );
+		}
+		catch ( Exception e ) {
+			return false;
+		}
+	}
+
+	public static void installDependency( Path blenderPath )
 			throws IOException, InterruptedException
 	{
 		URL resource = BlenderSetupUtils.class.getResource( "/blender-scripts/install_grpc_to_blender.py" );
 		File destination = Files.createTempFile( "intall_grpc_to_blender", ".py" ).toFile();
 		FileUtils.copyURLToFile( resource, destination );
-		Process process = new ProcessBuilder( blenderPath.toString(), "--background", "--python", destination.getAbsolutePath() ).start();
-		String output = IOUtils.toString( process.getInputStream() );
-		process.waitFor();
+		String output = runCommandGetOutput( blenderPath.toString(),
+				"--background",
+				"--python", destination.getAbsolutePath() );
 		if ( ! output.contains( "dependencies installed" ) )
 			throw new RuntimeException("dependency installation failed");
 	}
 
-	static void copyAddon( Path blenderBinaryPath )
+	static void copyAddon( Path blenderPath )
 			throws IOException, URISyntaxException
 	{
-		Path destination = prepareAddonDirectory( blenderBinaryPath );
+		Path destination = prepareAddonDirectory( blenderPath );
 		URL source = BlenderSetupUtils.class.getResource( "/blender-addon" );
 		List<Path> files = Files.list( Paths.get( source.toURI() ) )
 				.filter( path -> path.getFileName().toString().endsWith( ".py" ) )
@@ -92,68 +106,39 @@ public class BlenderSetupUtils
 		}
 	}
 
-	private static Path prepareAddonDirectory( Path blenderBinaryPath ) throws IOException
+	private static Path prepareAddonDirectory( Path blenderPath ) throws IOException
 	{
-		Path addons = findAddonsFolder( blenderBinaryPath );
-		Path resolve = addons.resolve( ADDON_NAME );
+		Path resolve = findMyAddonFolder( blenderPath );
 		if( Files.exists( resolve ) )
 			FileUtils.deleteDirectory( resolve.toFile() );
 		Files.createDirectory( resolve );
 		return resolve;
 	}
 
-	public static boolean verifyBlenderBinary( Path blenderBinaryPath )
-	{
-		try
-		{
-			Process process = new ProcessBuilder( blenderBinaryPath.toString(),
-					"-b", "--python-expr",
-					"print(\"Blender started from within Mastodon.\")" ).start();
-			String output = IOUtils.toString( process.getInputStream() );
-			process.waitFor();
-			return output.contains( "Blender started from within Mastodon." );
-		}
-		catch ( Exception e ) {
-			return false;
-		}
-	}
-
-	static boolean verifyAddonWorks( Path blenderBinaryPath )
-	{
-		try
-		{
-			runAddonTest( blenderBinaryPath );
-			return true;
-		}
-		catch ( Exception e ) {
-			e.printStackTrace();
-			return false;
-		}
-	}
-
-	static void runAddonTest( Path blenderBinaryPath )
+	private static String runCommandGetOutput( String... command )
 			throws IOException, InterruptedException
 	{
-		String script = "import mastodon_blender_view.mb_server as mb_server;"
+		Process process = new ProcessBuilder( command ).start();
+		String output = IOUtils.toString( process.getInputStream() );
+		process.waitFor();
+		return output;
+	}
+
+	public static void runAddonTest( Path blenderPath )
+			throws IOException, InterruptedException
+	{
+		String script = "import mastodon_blender_view.mb_server as mb_server;" //
 				+ " mb_server.delayed_start_server();import time; time.sleep(2)";
-		Process process = startBlender( blenderBinaryPath, "-b", "--python-expr", script );
+		Process process = StartBlender.startBlender( blenderPath, //
+				"--background", //
+				"--python-expr", script );
 		ViewServiceClient.closeBlender();
 		process.waitFor();
 	}
 
-	public static Process startBlender( Path blenderBinaryPath, String... args )
-			throws IOException
+	public static boolean isMastodonAddonInstalled( Path blenderPath )
 	{
-		String[] command = { blenderBinaryPath.toString(), "--addons", ADDON_NAME };
-		Process process = new ProcessBuilder( ArrayUtils.addAll( command, args ) ).start();
-		ViewServiceClient.waitForConnection();
-		return process;
-	}
-
-	public static boolean isMastodonAddonInstalled( Path blenderBinaryPath )
-	{
-		Path addonsFolder = findAddonsFolder( blenderBinaryPath );
-		Path mastodonAddonFolder = addonsFolder.resolve( ADDON_NAME );
+		Path mastodonAddonFolder = findMyAddonFolder( blenderPath );
 		return Files.exists( mastodonAddonFolder );
 	}
 }

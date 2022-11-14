@@ -28,9 +28,9 @@
  */
 package org.mastodon.blender;
 
-import javax.swing.JFileChooser;
 import org.mastodon.app.ui.ViewMenuBuilder;
-import org.mastodon.blender.setup.BlenderSetupUtils;
+import org.mastodon.blender.setup.BlenderSetup;
+import org.mastodon.blender.setup.StartBlender;
 import org.mastodon.mamut.MamutAppModel;
 import org.mastodon.mamut.plugin.MamutPlugin;
 import org.mastodon.mamut.plugin.MamutPluginAppModel;
@@ -41,15 +41,10 @@ import org.scijava.AbstractContextual;
 import org.scijava.Context;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import org.scijava.prefs.PrefService;
 import org.scijava.ui.behaviour.util.AbstractNamedAction;
 import org.scijava.ui.behaviour.util.Actions;
 import org.scijava.ui.behaviour.util.RunnableAction;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -65,14 +60,17 @@ public class Blender3dViewPlugin extends AbstractContextual implements MamutPlug
 	private Context context;
 
 	private static final String SHOW_IN_BLENDER = "[blender-3d-view] show in blender";
+	private static final String SETUP_BLENDER = "[blender-3d-view] setup blender";
 
 	private static final String[] SHOW_IN_BLENDER_KEYS = { "not mapped" };
+	private static final String[] SETUP_BLENDER_KEYS = { "not mapped" };
 
 	private static final Map< String, String > menuTexts = new HashMap<>();
 
 	static
 	{
 		menuTexts.put( SHOW_IN_BLENDER, "Show in Blender" );
+		menuTexts.put( SETUP_BLENDER, "Setup Blender ..." );
 	}
 
 	/*
@@ -90,16 +88,19 @@ public class Blender3dViewPlugin extends AbstractContextual implements MamutPlug
 		public void getCommandDescriptions( final CommandDescriptions descriptions )
 		{
 			descriptions.add( SHOW_IN_BLENDER, SHOW_IN_BLENDER_KEYS, "Show the spots in a Blender 3D view." );
+			descriptions.add( SETUP_BLENDER, SETUP_BLENDER_KEYS, "Show a setup window that helps to configure Blender to be used from Mastodon." );
 		}
 	}
 
 	private final AbstractNamedAction showInBlender;
+	private final AbstractNamedAction setupBlender;
 
 	private MamutPluginAppModel pluginAppModel;
 
 	public Blender3dViewPlugin()
 	{
 		showInBlender = new RunnableAction( SHOW_IN_BLENDER, this::startBlenderView );
+		setupBlender = new RunnableAction( SETUP_BLENDER, this::showSetup );
 		updateEnabledActions();
 	}
 
@@ -114,8 +115,11 @@ public class Blender3dViewPlugin extends AbstractContextual implements MamutPlug
 	public List< ViewMenuBuilder.MenuItem > getMenuItems()
 	{
 		return Arrays.asList(
+				menu( "File",
+								item( SETUP_BLENDER )),
 				menu( "Window",
 								item( SHOW_IN_BLENDER )) );
+
 	}
 
 	@Override
@@ -128,11 +132,13 @@ public class Blender3dViewPlugin extends AbstractContextual implements MamutPlug
 	public void installGlobalActions( final Actions actions )
 	{
 		actions.namedAction( showInBlender, SHOW_IN_BLENDER_KEYS );
+		actions.namedAction( setupBlender, SETUP_BLENDER_KEYS );
 	}
 
 	private void updateEnabledActions()
 	{
-		final MamutAppModel appModel = ( pluginAppModel == null ) ? null : pluginAppModel.getAppModel();
+		final MamutAppModel appModel = ( pluginAppModel == null ) ?
+				null : pluginAppModel.getAppModel();
 		showInBlender.setEnabled( appModel != null );
 	}
 
@@ -141,38 +147,20 @@ public class Blender3dViewPlugin extends AbstractContextual implements MamutPlug
 		if ( pluginAppModel != null )
 		{
 			new Thread(() -> {
-				startBlender();
+				try {
+					StartBlender.startBlender( context );
+				}
+				catch ( Throwable e ) {
+					BlenderSetup.startSetupWithMessage( context, e );
+					return;
+				}
 				ViewServiceClient.start( pluginAppModel.getAppModel() );
 			}).start();
 		}
 	}
 
-	private void startBlender()
-	{
-		try
-		{
-			Path blenderPath = getBlenderPath();
-			BlenderSetupUtils.startBlender( blenderPath );
-		}
-		catch ( Exception e )
-		{
-			e.printStackTrace();
-		}
+	private void showSetup() {
+		BlenderSetup.showSetup( context );
 	}
 
-	private Path getBlenderPath()
-	{
-		PrefService service = context.service( PrefService.class );
-		String blender_path = service.get( Blender3dViewPlugin.class, "blender_path" );
-		if( blender_path != null && !blender_path.isEmpty() && Files.exists( Paths.get(blender_path) ) )
-			return Paths.get( blender_path );
-		JFileChooser fileChooser = new JFileChooser();
-		if( fileChooser.showOpenDialog( null ) != JFileChooser.APPROVE_OPTION )
-			throw new RuntimeException("no blender binary selected");
-		File blender_file = fileChooser.getSelectedFile();
-		if( ! blender_file.exists() )
-			throw new RuntimeException("no valid blender binary selected");
-		service.put( Blender3dViewPlugin.class, "blender_path", blender_file.getAbsolutePath());
-		return blender_file.toPath();
-	}
 }
