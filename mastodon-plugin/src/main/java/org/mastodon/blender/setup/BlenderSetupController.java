@@ -86,7 +86,7 @@ public class BlenderSetupController implements BlenderSetupView.Listener
 		catch ( Exception e ) {
 			SwingUtilities.invokeLater( () -> {
 				setState( BlenderSetupState.BLENDER_INSTALLED );
-				ExceptionDialog.show( frame,
+				ExceptionDialog.showOkDialog( frame,
 						"Addon Installation Failed",
 						"There was an exception during the installation:", e );
 			} );
@@ -111,7 +111,7 @@ public class BlenderSetupController implements BlenderSetupView.Listener
 		catch ( Exception e ) {
 			SwingUtilities.invokeLater( () -> {
 				setState( BlenderSetupState.TEST_FAILED );
-				ExceptionDialog.show( frame,
+				ExceptionDialog.showOkDialog( frame,
 						"Test Failed",
 						"There was an exception during the test:", e );
 			} );

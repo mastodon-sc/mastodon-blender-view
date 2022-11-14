@@ -17,15 +17,21 @@ public class BlenderClient
 {
 	private final Context context;
 
+	// TODO implement a method startBlenderOrShowSetup that
+	// test if blender is setup correctly
+	// shows a message if it needs to start the setup
+	// starts the setup
+	// returns true if blender started successfully, false otherwise.
+
 	public BlenderClient( Context context )
 	{
 		this.context = context;
-		Path blenderPath = null;//getBlenderPath( context );
+		Path blenderPath = getBlenderPath( context );
 		try {
 			BlenderSetupUtils.startBlender( blenderPath );
 		}
 		catch ( Exception e ) {
-			blenderPath = startSetupWithMessage( blenderPath );
+			blenderPath = startSetupWithMessage( blenderPath, e );
 			if(blenderPath == null)
 				throw new CancellationException();
 			try
@@ -40,18 +46,15 @@ public class BlenderClient
 		}
 	}
 
-	private static Path startSetupWithMessage( Path blenderPath )
+	private static Path startSetupWithMessage( Path blenderPath, Throwable e )
 	{
 		String message = appropriateMessage( blenderPath );
-		int result = JOptionPane.showOptionDialog( null,
+		boolean ok = ExceptionDialog.showOkCancelDialog( null,
+				"Problem Starting Blender",
 				message,
-				"Problem Starting Mastodon",
-				JOptionPane.OK_CANCEL_OPTION,
-				JOptionPane.ERROR_MESSAGE,
-				null,
-				new Object[] { "Setup Blender", "Cancel" },
-				null );
-		if(result != JOptionPane.OK_OPTION )
+				e,
+				"Setup Blender", "Cancel");
+		if( ! ok )
 			throw new CancellationException();
 		return BlenderSetupController.showSetup( blenderPath );
 	}

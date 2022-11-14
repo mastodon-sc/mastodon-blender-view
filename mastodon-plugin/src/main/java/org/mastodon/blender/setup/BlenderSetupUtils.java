@@ -134,7 +134,9 @@ public class BlenderSetupUtils
 	static void runAddonTest( Path blenderBinaryPath )
 			throws IOException, InterruptedException
 	{
-		Process process = startBlender( blenderBinaryPath );
+		String script = "import mastodon_blender_view.mb_server as mb_server;"
+				+ " mb_server.delayed_start_server();import time; time.sleep(2)";
+		Process process = startBlender( blenderBinaryPath, "-b", "--python-expr", script );
 		ViewServiceClient.closeBlender();
 		process.waitFor();
 	}
