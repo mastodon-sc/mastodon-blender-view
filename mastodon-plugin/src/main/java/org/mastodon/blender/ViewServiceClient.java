@@ -44,7 +44,6 @@ import org.mastodon.SetActiveSpotRequest;
 import org.mastodon.SetSpotColorsRequest;
 import org.mastodon.SetTagSetListRequest;
 import org.mastodon.SetTimePointRequest;
-import org.mastodon.VersionResponse;
 import org.mastodon.ViewServiceGrpc;
 import org.mastodon.collection.RefList;
 import org.mastodon.collection.RefSet;
@@ -71,7 +70,7 @@ import java.util.function.Function;
 public class ViewServiceClient
 {
 
-	public static final String URL = "localhost:50846";
+	public static final String URL = "localhost:";
 
 	private final ViewServiceGrpc.ViewServiceBlockingStub blockingStub;
 
@@ -105,9 +104,9 @@ public class ViewServiceClient
 		timePointModel = groupHandle.getModel( appModel.TIMEPOINT );
 	}
 
-	public static void waitForConnection()
+	public static void waitForConnection( int port )
 	{
-		ManagedChannel channel = ManagedChannelBuilder.forTarget( URL ).usePlaintext().build();
+		ManagedChannel channel = ManagedChannelBuilder.forTarget( URL + port ).usePlaintext().build();
 		try
 		{
 			String version = ViewServiceGrpc
@@ -125,9 +124,9 @@ public class ViewServiceClient
 		}
 	}
 
-	public static void closeBlender()
+	public static void closeBlender( int port )
 	{
-		ManagedChannel channel = ManagedChannelBuilder.forTarget( URL ).usePlaintext().build();
+		ManagedChannel channel = ManagedChannelBuilder.forTarget( URL + port ).usePlaintext().build();
 		try
 		{
 			ViewServiceGrpc
@@ -282,18 +281,19 @@ public class ViewServiceClient
 		}
 	}
 
-	static void start( MamutAppModel appModel )
+	static void start( int port, MamutAppModel appModel )
 	{
 		Model model = appModel.getModel();
 		MastodonUtils.logMastodonEvents(appModel);
-		ManagedChannel channel = ManagedChannelBuilder.forTarget( URL ).usePlaintext().build();
+		ManagedChannel channel = ManagedChannelBuilder.forTarget( URL + port ).usePlaintext().build();
 		Runtime.getRuntime().addShutdownHook( new Thread( channel::shutdown ) );
 		ViewServiceClient client = new ViewServiceClient( channel, appModel );
 		StopWatch watch = StopWatch.createAndStart();
 		client.transferCoordinates( model.getGraph() );
-		client.tagSet = getSelectedTagSet( model, "2d112_many_colors" );
 		client.transferColors();
-		client.transferTimePoint( 42 );
+		int timepoint = client.timePointModel.getTimepoint();
+		client.transferTimePoint( timepoint + 1 );
+		client.transferTimePoint( timepoint );
 		client.synchronizeFocusedObject();
 		client.synchronizeTagSetList();
 		System.out.println( watch );

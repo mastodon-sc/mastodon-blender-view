@@ -28,10 +28,13 @@
  */
 package org.mastodon.blender;
 
+import org.mastodon.blender.setup.BlenderSetupUtils;
 import org.mastodon.blender.setup.StartBlender;
 import org.mastodon.mamut.MamutAppModel;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class StartBlenderAndMastodon
@@ -39,18 +42,21 @@ public class StartBlenderAndMastodon
 	public static void main( String... args )
 			throws Exception
 	{
-		startBlender();
-		startMastodon();
+		int port = StartBlender.getFreePort();
+		startBlender(port);
+		startMastodon(port);
 	}
 
-	private static void startBlender() throws IOException
+	private static void startBlender( int port ) throws IOException, URISyntaxException
 	{
-		StartBlender.startBlender( Paths.get("/home/arzt/Applications/blender-3.3.1-linux-x64/blender") );
+		Path blenderPath = Paths.get( "/home/arzt/Applications/blender-3.3.1-linux-x64/blender" );
+		BlenderSetupUtils.copyAddon( blenderPath );
+		StartBlender.startBlender( blenderPath, port );
 	}
 
-	private static void startMastodon()
+	private static void startMastodon( int port )
 	{
 		MamutAppModel appModel = MastodonUtils.showGuiAndGetAppModel( ExampleDatasets.metteE1 );
-		ViewServiceClient.start( appModel );
+		ViewServiceClient.start( port, appModel );
 	}
 }

@@ -28,15 +28,23 @@
  */
 package org.mastodon.blender.setup;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.mastodon.blender.Blender3dViewPlugin;
 import org.mastodon.blender.ViewServiceClient;
 import org.scijava.Context;
 import org.scijava.prefs.PrefService;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.SocketException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class StartBlender
 {
@@ -44,18 +52,39 @@ public class StartBlender
 
 	public static final String BLENDER_PATH_ENTRY = "BLENDER_BINARY_PATH";
 
-	public static void startBlender( Context context ) throws IOException
+	private static String emptyBlenderProject = "";
+
+	public static void startBlender( Context context, int port ) throws IOException
 	{
-		startBlender( getBlenderPath( context ) );
+		startBlender( getBlenderPath( context ), port );
 	}
 
-	public static Process startBlender( Path blenderPath, String... args )
+	public static Process startBlender( Path blenderPath, int port, String... args )
 			throws IOException
 	{
-		String[] command = { blenderPath.toString(), "--addons", ADDON_NAME };
-		Process process = new ProcessBuilder( ArrayUtils.addAll( command, args ) ).start();
-		ViewServiceClient.waitForConnection();
+		List<String> command = new ArrayList<>();
+		command.add( blenderPath.toString() );
+		command.add( emptyBlenderProject() );
+		command.add( "--addons" );
+		command.add( ADDON_NAME );
+		command.addAll( Arrays.asList(args) );
+		command.add("--");
+		command.add("--mastodon-port");
+		command.add(Integer.toString( port ));
+		Process process = new ProcessBuilder( command.toArray(new String[0]) ).start();
+		ViewServiceClient.waitForConnection( port );
 		return process;
+	}
+
+	public static int getFreePort()
+	{
+		try (ServerSocket socket = new ServerSocket(0)) {
+			socket.setReuseAddress(true);
+			return socket.getLocalPort();
+		}
+		catch ( IOException e ) {
+			throw new RuntimeException( e );
+		}
 	}
 
 	public static Path getBlenderPath( Context context )
@@ -75,5 +104,23 @@ public class StartBlender
 	{
 		PrefService service = context.service( PrefService.class );
 		service.put( Blender3dViewPlugin.class, BLENDER_PATH_ENTRY, blenderPath.toString() );
+	}
+
+	public static String emptyBlenderProject() {
+		if(!emptyBlenderProject.isEmpty())
+			return emptyBlenderProject;
+		try
+		{
+			File tmp = File.createTempFile( "empty", ".blend" );
+			URL source = StartBlender.class.getResource( "/blender-scripts/empty.blend" );
+			FileUtils.copyURLToFile(source, tmp);
+			emptyBlenderProject = tmp.getAbsolutePath();
+			return emptyBlenderProject;
+		}
+		catch ( IOException e )
+		{
+			e.printStackTrace();
+			return "";
+		}
 	}
 }

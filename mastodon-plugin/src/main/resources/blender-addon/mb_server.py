@@ -43,6 +43,7 @@
 
 from concurrent import futures
 
+import sys
 import grpc
 import bpy
 import queue
@@ -158,7 +159,11 @@ class MastodonBlenderServer:
         self.server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
         self.view_service = ViewService(self.many_spheres)
         rpc.add_ViewServiceServicer_to_server(self.view_service, self.server)
-        self.server.add_insecure_port('localhost:50846')
+        try:
+            port = get_port_from_command_line()
+            self.server.add_insecure_port('localhost:' + str(port))
+        except ValueError as error:
+            print(error)
         self.server.start()
 
     def stop(self):
@@ -166,6 +171,19 @@ class MastodonBlenderServer:
 
 
 mastodon_blender_server = None
+
+
+def get_port_from_command_line():
+    argv = sys.argv
+    try:
+        index = argv.index("--mastodon-port")
+    except ValueError:
+        raise ValueError("command line argument --mastodon-port is missing")
+    try:
+        return int(argv[index + 1])
+    except (IndexError, ValueError):
+        raise ValueError("command line argument --mastodon-port"
+                         " must be followed by a integer")
 
 
 def register():

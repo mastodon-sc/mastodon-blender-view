@@ -92,7 +92,7 @@ public class BlenderSetupUtils
 			throw new RuntimeException("dependency installation failed");
 	}
 
-	static void copyAddon( Path blenderPath )
+	public static void copyAddon( Path blenderPath )
 			throws IOException, URISyntaxException
 	{
 		Path destination = prepareAddonDirectory( blenderPath );
@@ -129,10 +129,12 @@ public class BlenderSetupUtils
 	{
 		String script = "import mastodon_blender_view.mb_server as mb_server;" //
 				+ " mb_server.delayed_start_server();import time; time.sleep(2)";
+		int port = StartBlender.getFreePort();
 		Process process = StartBlender.startBlender( blenderPath, //
+				port,
 				"--background", //
 				"--python-expr", script );
-		ViewServiceClient.closeBlender();
+		ViewServiceClient.closeBlender(port);
 		process.waitFor();
 	}
 

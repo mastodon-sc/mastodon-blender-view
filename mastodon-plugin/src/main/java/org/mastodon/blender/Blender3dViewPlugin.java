@@ -147,14 +147,15 @@ public class Blender3dViewPlugin extends AbstractContextual implements MamutPlug
 		if ( pluginAppModel != null )
 		{
 			new Thread(() -> {
+				int port = StartBlender.getFreePort();
 				try {
-					StartBlender.startBlender( context );
+					StartBlender.startBlender( context, port );
 				}
 				catch ( Throwable e ) {
 					BlenderSetup.startSetupWithMessage( context, e );
 					return;
 				}
-				ViewServiceClient.start( pluginAppModel.getAppModel() );
+				ViewServiceClient.start( port, pluginAppModel.getAppModel() );
 			}).start();
 		}
 	}
