@@ -32,12 +32,11 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 @Ignore
@@ -61,18 +60,19 @@ public class BlenderSetupUtilsTest
 	}
 
 	@Test
-	public void testCopyAddon() throws IOException
+	public void testInstallAddon() throws IOException
 	{
-		BlenderSetupUtils.copyAddon(blenderBinaryPath);
-		Path addonsPath = BlenderSetupUtils.findMyAddonFolder( blenderBinaryPath );
-		assertTrue( Files.exists( addonsPath.resolve( "mb_scene.py" ) ) );
+		BlenderSetupUtils.uninstallAddon(blenderBinaryPath);
+		assertFalse( BlenderSetupUtils.isMastodonAddonInstalled( blenderBinaryPath ) );
+		BlenderSetupUtils.installAddon(blenderBinaryPath);
+		assertTrue( BlenderSetupUtils.isMastodonAddonInstalled( blenderBinaryPath ) );
 	}
 
 	@Test
 	public void testAddon()
 			throws IOException, InterruptedException
 	{
-		BlenderSetupUtils.copyAddon( blenderBinaryPath );
+		BlenderSetupUtils.installAddon( blenderBinaryPath );
 		BlenderSetupUtils.runAddonTest( blenderBinaryPath );
 	}
 }

@@ -50,7 +50,7 @@ public class StartBlenderAndMastodon
 	private static void startBlender( int port ) throws IOException, URISyntaxException
 	{
 		Path blenderPath = Paths.get( "/home/arzt/Applications/blender-3.3.1-linux-x64/blender" );
-		BlenderSetupUtils.copyAddon( blenderPath );
+		BlenderSetupUtils.installAddon( blenderPath );
 		StartBlender.startBlender( blenderPath, port );
 	}
 

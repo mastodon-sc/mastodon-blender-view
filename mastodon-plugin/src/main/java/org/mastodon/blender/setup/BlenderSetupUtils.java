@@ -39,7 +39,6 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.NoSuchElementException;
 
 public class BlenderSetupUtils
@@ -91,30 +90,32 @@ public class BlenderSetupUtils
 			throw new RuntimeException("dependency installation failed");
 	}
 
-	public static void copyAddon( Path blenderPath ) throws IOException
+	public static void installAddon( Path blenderPath ) throws IOException
 	{
-		Path destination = prepareAddonDirectory( blenderPath );
-		final String resource = "/blender-addon/";
-		List<String> filenames = readLinesFromResource( resource + "file_list.txt" );
-		for ( String filename : filenames )
-			copyResourceToFile( resource + filename, destination.resolve( filename ) );
+		final String resource = "/mastodon_blender_view.zip";
+		Path tmpDir = Files.createTempDirectory( "mastodon_blender_setup" );
+		Path addonZip = tmpDir.resolve( "mastodon_blender_view.zip" );
+		copyResourceToFile( resource, addonZip );
+		runBlenderInstall( blenderPath, addonZip );
 	}
 
-	private static Path prepareAddonDirectory( Path blenderPath ) throws IOException
+	private static void runBlenderInstall( Path blenderPath, Path addonZip )
 	{
-		Path resolve = findMyAddonFolder( blenderPath );
-		if( Files.exists( resolve ) )
-			FileUtils.deleteDirectory( resolve.toFile() );
-		Files.createDirectory( resolve );
-		return resolve;
+		String python = "import bpy; bpy.ops.preferences.addon_install(filepath='" + addonZip.toAbsolutePath().toString() + "')";
+		String output = executePythonExpression( blenderPath, python );
+		System.out.println(output);
 	}
 
-	private static List<String> readLinesFromResource( String resource ) throws IOException
+	public static void uninstallAddon( Path blenderPath )
 	{
-		try (InputStream stream = BlenderSetupUtils.class.getResourceAsStream( resource ))
-		{
-			return IOUtils.readLines( stream, StandardCharsets.UTF_8 );
-		}
+		String python = "import bpy; bpy.ops.preferences.addon_remove(module='mastodon_blender_view')";
+		String output = executePythonExpression( blenderPath, python );
+		System.out.println(output);
+	}
+
+	private static String executePythonExpression( Path blenderPath, String python )
+	{
+		return runCommandGetOutput( blenderPath.toString(), "--background", "--python-expr", python );
 	}
 
 	private static void copyResourceToFile( String resource, Path resolve )
@@ -127,12 +128,18 @@ public class BlenderSetupUtils
 	}
 
 	private static String runCommandGetOutput( String... command )
-			throws IOException, InterruptedException
 	{
-		Process process = new ProcessBuilder( command ).start();
-		String output = IOUtils.toString( process.getInputStream() );
-		process.waitFor();
-		return output;
+		try
+		{
+			Process process = new ProcessBuilder( command ).start();
+			String output = IOUtils.toString( process.getInputStream(), StandardCharsets.UTF_8 );
+			process.waitFor();
+			return output;
+		}
+		catch ( IOException | InterruptedException e )
+		{
+			throw new RuntimeException( e );
+		}
 	}
 
 	public static void runAddonTest( Path blenderPath )
@@ -151,7 +158,8 @@ public class BlenderSetupUtils
 
 	public static boolean isMastodonAddonInstalled( Path blenderPath )
 	{
-		Path mastodonAddonFolder = findMyAddonFolder( blenderPath );
-		return Files.exists( mastodonAddonFolder );
+		String python = "import addon_utils; print([module.__name__ for module in addon_utils.modules()])";
+		String output = executePythonExpression( blenderPath, python );
+		return output.contains( "'mastodon_blender_view'" );
 	}
 }
