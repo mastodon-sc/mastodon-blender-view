@@ -61,7 +61,7 @@ public class BlenderSetupUtilsTest
 	}
 
 	@Test
-	public void testCopyAddon() throws IOException, URISyntaxException
+	public void testCopyAddon() throws IOException
 	{
 		BlenderSetupUtils.copyAddon(blenderBinaryPath);
 		Path addonsPath = BlenderSetupUtils.findMyAddonFolder( blenderBinaryPath );
@@ -70,7 +70,7 @@ public class BlenderSetupUtilsTest
 
 	@Test
 	public void testAddon()
-			throws IOException, URISyntaxException, InterruptedException
+			throws IOException, InterruptedException
 	{
 		BlenderSetupUtils.copyAddon( blenderBinaryPath );
 		BlenderSetupUtils.runAddonTest( blenderBinaryPath );

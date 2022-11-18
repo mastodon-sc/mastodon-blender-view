@@ -28,20 +28,19 @@
  */
 package org.mastodon.blender.setup;
 
-import com.amazonaws.util.IOUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.mastodon.blender.ViewServiceClient;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
+import java.io.InputStream;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 
 public class BlenderSetupUtils
 {
@@ -92,18 +91,13 @@ public class BlenderSetupUtils
 			throw new RuntimeException("dependency installation failed");
 	}
 
-	public static void copyAddon( Path blenderPath )
-			throws IOException, URISyntaxException
+	public static void copyAddon( Path blenderPath ) throws IOException
 	{
 		Path destination = prepareAddonDirectory( blenderPath );
-		URL source = BlenderSetupUtils.class.getResource( "/blender-addon" );
-		List<Path> files = Files.list( Paths.get( source.toURI() ) )
-				.filter( path -> path.getFileName().toString().endsWith( ".py" ) )
-				.collect( Collectors.toList() );
-		for ( Path file : files ) {
-			Path fileDestination = destination.resolve( file.getFileName() );
-			Files.copy( file, fileDestination );
-		}
+		final String resource = "/blender-addon/";
+		List<String> filenames = readLinesFromResource( resource + "file_list.txt" );
+		for ( String filename : filenames )
+			copyResourceToFile( resource + filename, destination.resolve( filename ) );
 	}
 
 	private static Path prepareAddonDirectory( Path blenderPath ) throws IOException
@@ -113,6 +107,23 @@ public class BlenderSetupUtils
 			FileUtils.deleteDirectory( resolve.toFile() );
 		Files.createDirectory( resolve );
 		return resolve;
+	}
+
+	private static List<String> readLinesFromResource( String resource ) throws IOException
+	{
+		try (InputStream stream = BlenderSetupUtils.class.getResourceAsStream( resource ))
+		{
+			return IOUtils.readLines( stream, StandardCharsets.UTF_8 );
+		}
+	}
+
+	private static void copyResourceToFile( String resource, Path resolve )
+			throws IOException
+	{
+		try (InputStream stream = BlenderSetupUtils.class.getResourceAsStream( resource ))
+		{
+			FileUtils.copyInputStreamToFile( stream, resolve.toFile() );
+		}
 	}
 
 	private static String runCommandGetOutput( String... command )
