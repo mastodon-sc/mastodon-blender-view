@@ -41,15 +41,22 @@ class BlenderMastodonViewProperties(bpy.types.PropertyGroup):
     sphere_size: bpy.props.FloatProperty(name="Sphere Size", soft_min=0.05,
                                          soft_max=1.0, default=0.1,
                                          update=update_sphere_size)
+
+    def update_sync_group(self, context):
+        index = int(self.sync_group)
+        print(index)
+        mb_server.mastodon_blender_server.view_service.set_sync_group(index)
+
     sync_group: bpy.props.EnumProperty(
         name="Mastodon Sync Group",
         description="This does the same as selecting a lock symbol in Mastodon",
         items=[
-            ('NO_GROUP', "*", ""),
-            ('GROUP_1', "1", ""),
-            ('GROUP_2', "2", ""),
-            ('GROUP_3', "3", ""),
-        ]
+            ('-1', "*", ""),
+            ('0', "1", ""),
+            ('1', "2", ""),
+            ('2', "3", ""),
+        ],
+        update=update_sync_group
     )
 
     def get_tag_set_items(self, context):

@@ -44,6 +44,8 @@ service ViewService {
   rpc setTagSetList(SetTagSetListRequest) returns (Empty) {}
 
   rpc getSelectedTagSet(Empty) returns (SelectedTagSetResponse) {}
+
+  rpc getSelectedSyncGroup(Empty) returns (SelectedSyncGroupResponse) {}
 }
 
 message Empty {}
@@ -89,6 +91,7 @@ enum ChangeId {
   ACTIVE_SPOT = 1;
   UPDATE_COLORS_REQUEST = 2;
   SELECTED_TAG_SET = 3;
+  SYNC_GROUP = 4;
 }
 
 message SetTagSetListRequest {
@@ -96,5 +99,9 @@ message SetTagSetListRequest {
 }
 
 message SelectedTagSetResponse {
+  int32 index = 1;
+}
+
+message SelectedSyncGroupResponse {
   int32 index = 1;
 }

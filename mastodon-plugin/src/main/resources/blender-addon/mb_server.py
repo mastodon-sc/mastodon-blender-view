@@ -25,21 +25,6 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 # #L%
-###
-# Copyright 2015 gRPC authors.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-"""The Python implementation of the GRPC helloworld.ViewService server."""
 
 from concurrent import futures
 
@@ -61,6 +46,7 @@ class ViewService(rpc.ViewServiceServicer):
     changes_queue = queue.Queue()
     tag_set_list = []
     tag_set_index = -1
+    sync_group_index = -1
 
     def __init__(self, many_spheres):
         self.many_spheres = many_spheres
@@ -139,6 +125,13 @@ class ViewService(rpc.ViewServiceServicer):
     def set_tag_set_index(self, tag_set_index):
         self.tag_set_index = tag_set_index
         self.changes_queue.put(pb.SELECTED_TAG_SET)
+
+    def getSelectedSyncGroup(self, request, context):
+        return pb.SelectedSyncGroupResponse(index=self.sync_group_index)
+
+    def set_sync_group(self, index):
+        self.sync_group_index = index
+        self.changes_queue.put(pb.SYNC_GROUP)
 
 
 def subscribe_to_active_object_change_event(owner, callback):

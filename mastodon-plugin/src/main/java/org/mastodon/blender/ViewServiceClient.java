@@ -189,9 +189,18 @@ public class ViewServiceClient
 			getSelectedTagSet();
 			transferColors();
 			break;
+		case SYNC_GROUP:
+			updateSyncGroup();
+			break;
 		default:
 			System.err.println("Unexpected event received from blender mastodon plugin.");
 		}
+	}
+
+	private void updateSyncGroup()
+	{
+		int index = blockingStub.getSelectedSyncGroup( Empty.newBuilder().build() ).getIndex();
+		groupHandle.setGroupId( index );
 	}
 
 	private void getSelectedTagSet()
