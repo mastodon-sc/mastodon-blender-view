@@ -35,7 +35,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -45,13 +44,6 @@ public class BlenderSetupUtilsTest
 	// TODO, improve tests
 
 	private final Path blenderBinaryPath = Paths.get("/home/arzt/Applications/blender-3.3.1-linux-x64/blender");
-
-	@Test
-	public void testInstallDependencies()
-			throws IOException, InterruptedException
-	{
-		BlenderSetupUtils.installDependency( blenderBinaryPath );
-	}
 
 	@Test
 	public void testInstallAddon() throws IOException

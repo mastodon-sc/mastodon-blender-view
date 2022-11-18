@@ -32,6 +32,7 @@ import subprocess
 import bpy
 import sys
 
+# install pip
 
 def get_python_path():
     try:
@@ -47,9 +48,13 @@ os.environ.pop("PIP_REQ_TRACKER", None)
 ensurepip.bootstrap()
 os.environ.pop("PIP_REQ_TRACKER", None)
 
+# install dependencies
+
 python_path = get_python_path()
 packages = {'grpcio', 'bidict', 'grpcio-tools'}
 subprocess.check_output([python_path, '-m', 'pip', 'install', *packages])
+
+# test if dependencies are installed
 
 try:
     import bidict
@@ -57,6 +62,12 @@ try:
     import google.protobuf
     print("dependencies installed")
 except ModuleNotFoundError:
-    print("installation failed")
+    raise Exception("dependency installation failed")
 
-# also some other google library see some other pr on this project
+# install addon
+
+argv = sys.argv
+addon_zip = argv[argv.index('--') + 1]
+bpy.ops.preferences.addon_install(filepath=addon_zip)
+
+print("mastodon blender view installed")

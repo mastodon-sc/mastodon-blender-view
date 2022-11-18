@@ -32,10 +32,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.mastodon.blender.ViewServiceClient;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -55,26 +52,24 @@ public class BlenderSetupUtils
 		}
 	}
 
-	public static void installDependency( Path blenderPath )
-			throws IOException
-	{
-		URL resource = BlenderSetupUtils.class.getResource( "/blender-scripts/install_grpc_to_blender.py" );
-		File destination = Files.createTempFile( "intall_grpc_to_blender", ".py" ).toFile();
-		FileUtils.copyURLToFile( resource, destination );
-		String output = runCommandGetOutput( blenderPath.toString(),
-				"--background",
-				"--python", destination.getAbsolutePath() );
-		if ( ! output.contains( "dependencies installed" ) )
-			throw new RuntimeException("dependency installation failed");
-	}
-
 	public static void installAddon( Path blenderPath ) throws IOException
 	{
 		Path tmpDir = Files.createTempDirectory( "mastodon_blender_setup" );
-		Path addonZip = tmpDir.resolve( "mastodon_blender_view.zip" );
-		copyResourceToFile( "/mastodon_blender_view.zip", addonZip );
-		String python = "import bpy; bpy.ops.preferences.addon_install(filepath='" + addonZip.toAbsolutePath().toString() + "')";
-		String output = runPythonWithinBlender( blenderPath, python );
+		Path addonZip = tmpDir.resolve( "install_mastodon_blender_addon.zip" );
+		Path pythonScript = tmpDir.resolve( "install_addon.py" );
+		FileUtils.copyURLToFile( BlenderSetupUtils.class.getResource( "/mastodon_blender_view.zip" ), addonZip.toFile() );
+		FileUtils.copyURLToFile( BlenderSetupUtils.class.getResource( "/blender-scripts/install_addon.py" ), pythonScript.toFile() );
+		String output = runCommandGetOutput( blenderPath.toString(), //
+				"--background", //
+				"--python", pythonScript.toAbsolutePath().toString(), //
+				"--", addonZip.toAbsolutePath().toString() ); //
+		if ( !output.contains( "dependencies installed" ) )
+			throw new RuntimeException( "Installation of the dependencies for the mastodon_blender_view addon failed:\n" + output );
+		if ( !output.contains( "mastodon blender view installed" ) )
+			throw new RuntimeException( "Installation of the mastodon_blender_view addon failed:\n" + output );
+		Files.delete( pythonScript );
+		Files.delete( addonZip );
+		Files.delete( tmpDir );
 	}
 
 	public static void uninstallAddon( Path blenderPath )
@@ -124,12 +119,4 @@ public class BlenderSetupUtils
 		}
 	}
 
-	private static void copyResourceToFile( String resource, Path resolve )
-			throws IOException
-	{
-		try (InputStream stream = BlenderSetupUtils.class.getResourceAsStream( resource ))
-		{
-			FileUtils.copyInputStreamToFile( stream, resolve.toFile() );
-		}
-	}
 }

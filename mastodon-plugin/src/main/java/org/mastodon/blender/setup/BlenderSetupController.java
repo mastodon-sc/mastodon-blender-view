@@ -106,7 +106,6 @@ public class BlenderSetupController implements BlenderSetupView.Listener
 	{
 		try
 		{
-			BlenderSetupUtils.installDependency( blenderPath );
 			BlenderSetupUtils.installAddon( blenderPath );
 			SwingUtilities.invokeLater( () -> setState( State.ADDON_INSTALLED ) );
 		}
