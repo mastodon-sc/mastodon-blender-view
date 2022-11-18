@@ -54,12 +54,6 @@ public class BlenderSetupUtilsTest
 	}
 
 	@Test
-	public void testFindAddonsFolder() {
-		Path addonsPath = BlenderSetupUtils.findMyAddonFolder(blenderBinaryPath);
-		assertEquals(blenderBinaryPath.getParent().resolve( "3.3/scripts/addons/mastodon_blender_view" ), addonsPath);
-	}
-
-	@Test
 	public void testInstallAddon() throws IOException
 	{
 		BlenderSetupUtils.uninstallAddon(blenderBinaryPath);
