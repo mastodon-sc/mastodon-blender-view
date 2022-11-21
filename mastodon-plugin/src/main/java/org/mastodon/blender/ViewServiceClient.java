@@ -115,7 +115,7 @@ public class ViewServiceClient
 					.withDeadlineAfter( 10, TimeUnit.SECONDS )
 					.getVersion( Empty.newBuilder().build() )
 					.getVersion();
-			if ( !version.equals( "0.0.1" ) )
+			if ( !version.equals( "0.1.0" ) )
 				throw new RuntimeException( "Version of Mastodon plugin does not match." );
 		}
 		finally
