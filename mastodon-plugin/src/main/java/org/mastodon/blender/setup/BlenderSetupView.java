@@ -30,15 +30,15 @@ package org.mastodon.blender.setup;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JTextArea;
-import javax.swing.event.HyperlinkEvent;
 import net.miginfocom.swing.MigLayout;
 import org.mastodon.ui.util.FileChooser;
 
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Desktop;
 import java.awt.Dialog;
 import java.awt.Font;
@@ -60,9 +60,11 @@ public class BlenderSetupView extends JDialog
 
 	private final JButton installAddonButton;
 
+	private final JLabel addonFeedback;
+
 	private final JButton testAddonButton;
 
-	private final JLabel addonFeedback;
+	private final JLabel testFeedback;
 
 	private final JButton finishButton;
 
@@ -72,45 +74,36 @@ public class BlenderSetupView extends JDialog
 
 	BlenderSetupView( Listener listener ) {
 
-		super( ( Frame ) null, "Setup the Mastodon Blender Addon", true );
+		super( ( Frame ) null, "Setup Mastodon Blender Addon", true );
 		this.setModalExclusionType( Dialog.ModalExclusionType.NO_EXCLUDE );
 		this.listener = listener;
 
 		setLayout( new MigLayout("insets dialog, fill", "[][grow]") );
 
-		final String intro = "Mastodon can use Blender to visualise cell trackings in 3D."
-				+ "But in order to achieve this, it is required to install "
-				+ "a \"mastodon_blender_view\" addon to Blender. This dialog can "
-				+ "guide you through the process of installing the addon.";
+		// TODO: Allow to select directory.
+		// TODO: Make setup not modal
 
-		final JTextArea introTextArea = new JTextArea( intro, 3, 30 );
-		introTextArea.setLineWrap( true );
-		introTextArea.setWrapStyleWord( true );
-		introTextArea.setBackground( getBackground() );
-		introTextArea.setEditable( false );
-		add( introTextArea, "span, wrap, grow, wmin 0" );
+		final String introText = "<html><body>"
+				+ "Mastodon can use Blender to visualise cell trackings in 3D. "
+				+ "In order to achieve this, it is required to install "
+				+ "the \"mastodon_blender_view\" addon to Blender.<br><br>"
+				+ "This dialog will guide you through the installation."
+				+ "</body></html>";
+		add( setFonStyle( new JLabel( introText ), Font.PLAIN ), "span, wrap, grow, width 0:0:pref" );
 
 		add( new JLabel( "1."), "gaptop unrelated" );
 		add( new JLabel("Install Blender:"), "wrap, wmin 0" );
-		final String blenderInstallText = "<html><bode>"
-				+ "The first step is installing Blender. This needs to be done manually, by you.<br>"
-				+ "Download Blender from the official web page: "
-		        + "<a href=\"https://blender.org/download\">https://blender.org/download</a><br>"
-				+ "and install it on your computer.<br>"
-				+ "<p>Please chose \"portable\" version of Blender when possible.<br>"
-				+ "(The \"mastodon_blender_view\" addon only supports portable Blender installations.)<br>"
-				+ "<p>Continue with the step two when your are done."
-				+ "</html></body>";
-		JEditorPane html = new JEditorPane( "text/html", blenderInstallText );
-		html.setEditable( false );
-		html.addHyperlinkListener( e -> {
-			if(e.getEventType() != HyperlinkEvent.EventType.ACTIVATED)
-				return;
-			onHyperlinkClicked();
-		} );
-		add( html, "skip, wrap" );
+		final String blenderInstallText = "<html><body>"
+				+ "The first step is to install Blender. This needs to be done manually by you.<br>"
+				+ "Mastodon only supports the portable version of Blender.<br>"
+				+ "Go to the official blender webpage, and:<br>"
+				+ "<br>"
+				+ "Please download and install the <b>portable version of Blender</b>!"
+				+ "</body></html>";
+		add( setFonStyle( new JLabel( blenderInstallText ), Font.PLAIN ), "skip, wrap, grow, wmin 0" );
+		add( initializeLinkButton(), "skip, wrap");
 		add( new JLabel( "2."), "gaptop unrelated" );
-		add( new JLabel("Select The Path Of Your Blender Installation:"), "wrap, wmin 0" );
+		add( new JLabel("Select the path of your Blender installation:"), "wrap, wmin 0" );
 		pathTextArea = new JTextArea( 2, 50 );
 		pathTextArea.setBorder( BorderFactory.createLineBorder( Color.LIGHT_GRAY ) );
 		pathTextArea.setEditable( false );
@@ -119,20 +112,27 @@ public class BlenderSetupView extends JDialog
 		selectPathButton.addActionListener( ignore -> onSelectPathClicked() );
 		add( selectPathButton, "skip, wrap");
 		pathFeedback = new JLabel( "" );
-		setFontToNormal( pathFeedback );
+		setFonStyle( pathFeedback, Font.ITALIC );
 		add( pathFeedback, "skip, wrap, wmin 0" );
 
-		add( new JLabel( "2."), "gaptop unrelated");
-		add( new JLabel("Install / Update Blender Addon"), "wrap, wmin 0" );
+		add( new JLabel( "3."), "gaptop unrelated");
+		add( new JLabel("Install / update Blender addon"), "wrap, wmin 0" );
 		installAddonButton = new JButton( "install addon" );
 		installAddonButton.addActionListener( ignore -> listener.installAddonClicked() );
+		add( installAddonButton, "skip, wrap");
+		addonFeedback = new JLabel( "" );
+		setFonStyle( addonFeedback, Font.ITALIC );
+		add( addonFeedback, "skip, wrap, wmin 0" );
+
+		add( new JLabel( "4."), "gaptop unrelated");
+		add( new JLabel("Test Blender addon"), "wrap, wmin 0" );
 		testAddonButton = new JButton("test addon");
 		testAddonButton.addActionListener( ignore -> listener.testAddonClicked() );
-		add( installAddonButton, "skip, split 2");
-		add( testAddonButton, "wrap" );
-		addonFeedback = new JLabel( "" );
-		setFontToNormal( addonFeedback );
-		add( addonFeedback, "skip, wrap, wmin 0" );
+		add( testAddonButton, "skip, wrap" );
+		testFeedback = new JLabel( "" );
+		setFonStyle( testFeedback, Font.ITALIC );
+		add( testFeedback, "skip, wrap, wmin 0" );
+
 		add( new JLabel(""), "push, wrap");
 
 		finishButton = new JButton( "Finish" );
@@ -143,7 +143,19 @@ public class BlenderSetupView extends JDialog
 		add( cancelButton );
 	}
 
-	private void onHyperlinkClicked()
+	private JButton initializeLinkButton()
+	{
+		JButton linkButton = new JButton( "<html><bode><a href=\"dummy\">https://blender.org/download</a></body></html>" );
+		setFonStyle( linkButton, Font.PLAIN );
+		linkButton.addActionListener( ignore -> onLinkClicked() );
+		linkButton.setBackground( new Color( 0, true ) );
+		linkButton.setBorder( BorderFactory.createEmptyBorder() );
+		linkButton.setCursor( new Cursor( Cursor.HAND_CURSOR ) );
+		linkButton.setOpaque( false );
+		return linkButton;
+	}
+
+	private void onLinkClicked()
 	{
 		try
 		{
@@ -155,11 +167,12 @@ public class BlenderSetupView extends JDialog
 		}
 	}
 
-	private void setFontToNormal( JLabel label )
+	private JComponent setFonStyle( JComponent component, int style )
 	{
-		Font boldFont = label.getFont();
-		Font normalFont = boldFont.deriveFont( boldFont.getStyle() & ~Font.BOLD );
-		label.setFont( normalFont );
+		Font boldFont = component.getFont();
+		Font normalFont = boldFont.deriveFont( style );
+		component.setFont( normalFont );
+		return component;
 	}
 
 	private void onSelectPathClicked()
@@ -178,11 +191,35 @@ public class BlenderSetupView extends JDialog
 	}
 
 	public void setPathFeedback(String text) {
-		pathFeedback.setText( text );
+		pathFeedback.setText( formatFeedback( text ) );
 	}
 
 	public void setAddonFeedback(String text) {
-		addonFeedback.setText( text );
+		addonFeedback.setText( formatFeedback( text ) );
+	}
+
+	public void setTestFeedback(String text) {
+		testFeedback.setText( formatFeedback( text ) );
+	}
+
+	private String formatFeedback( String text )
+	{
+		if(text.startsWith( "ok:" ))
+			return formatFeedback( "green", "✔", text );
+		if(text.startsWith( "todo:" ))
+			return formatFeedback( "orange", "➜", text );
+		if(text.startsWith( "failed:" ))
+			return formatFeedback( "red", "❌", text );
+		return text;
+	}
+
+	private String formatFeedback( String color, String symbol, String text )
+	{
+		int index = text.indexOf( ":" );
+		return "<html><body><p style=\"color:" + color + "\">"
+				+ symbol + " "
+				+ text.substring( index + 1 )
+				+ "</html><body>";
 	}
 
 	public void setInstallAddonEnabled( boolean enabled )
@@ -194,6 +231,7 @@ public class BlenderSetupView extends JDialog
 	{
 		testAddonButton.setEnabled( enabled );
 	}
+
 
 	public void setFinishEnabled( boolean enableFinish )
 	{

@@ -69,8 +69,8 @@ public class Blender3dViewPlugin extends AbstractContextual implements MamutPlug
 
 	static
 	{
-		menuTexts.put( SHOW_IN_BLENDER, "Show in Blender" );
-		menuTexts.put( SETUP_BLENDER, "Setup Blender ..." );
+		menuTexts.put( SHOW_IN_BLENDER, "New Blender Window" );
+		menuTexts.put( SETUP_BLENDER, "Setup Blender Addon ..." );
 	}
 
 	/*
@@ -115,10 +115,10 @@ public class Blender3dViewPlugin extends AbstractContextual implements MamutPlug
 	public List< ViewMenuBuilder.MenuItem > getMenuItems()
 	{
 		return Arrays.asList(
-				menu( "File",
-								item( SETUP_BLENDER )),
 				menu( "Window",
-								item( SHOW_IN_BLENDER )) );
+						item( SHOW_IN_BLENDER )),
+				menu( "Plugins",
+						item( SETUP_BLENDER )) );
 
 	}
 
@@ -160,8 +160,9 @@ public class Blender3dViewPlugin extends AbstractContextual implements MamutPlug
 		}
 	}
 
-	private void showSetup() {
-		BlenderSetup.showSetup( context );
+	private void showSetup()
+	{
+		new Thread(() -> BlenderSetup.showSetup( context ) ).start();
 	}
 
 }

@@ -60,6 +60,7 @@ public class BlenderSetupController implements BlenderSetupView.Listener
 		frame = new BlenderSetupView( this );
 		setState( State.PATH_NOT_SET );
 		setBlenderPath( blenderPath );
+		frame.setLocationByPlatform( true );
 		frame.pack();
 		frame.setVisible( true );
 	}
@@ -72,6 +73,7 @@ public class BlenderSetupController implements BlenderSetupView.Listener
 		frame.setTestAddonEnabled( state.enableTest );
 		frame.setAddonFeedback( state.addonFeedback );
 		frame.setFinishEnabled( state.enableFinish );
+		frame.setTestFeedback( state.testFeedback );
 	}
 
 	@Override
@@ -171,65 +173,43 @@ public class BlenderSetupController implements BlenderSetupView.Listener
 enum State
 {
 
-	PATH_NOT_SET(
-			"please select",
-			"",
-			""
-	),
+	PATH_NOT_SET( "todo:please select" ),
 
-	WRONG_PATH_DIRECTORY(
-			"This is a directory, please select the executable Blender file",
-			"",
-			""
-	),
+	WRONG_PATH_DIRECTORY( "failed:This is a directory, please select the executable Blender file" ),
 
-	WRONG_PATH_NOT_FOUND(
-			"file doesn't exits",
-			"",
-			""
-	),
+	WRONG_PATH_NOT_FOUND( "failed:file doesn't exits" ),
 
-	WRONG_PATH(
-			"doesn't seem to be a correct blender executable",
-			"",
-			""
-	),
+	WRONG_PATH( "failed:doesn't seem to be a correct blender executable" ),
 
-	BLENDER_INSTALLED(
-			"looks good",
-			"Please install addon!",
-			"install"
-	),
+	BLENDER_INSTALLED( //
+			"todo:Please install addon!", //
+			"", //
+			"install" ),
 
-	INSTALLING_ADDON(
-			"looks good",
-			"Installing addon ...",
-			"install"
-	),
+	INSTALLING_ADDON( //
+			"todo:Installing addon ...", //
+			"", //
+			"" ),
 
-	ADDON_INSTALLED(
-			"looks good",
-			"Addon is installed. Please test it.",
-			"install, test"
-	),
+	ADDON_INSTALLED( //
+			"ok:Addon is installed.", //
+			"todo:Please test the addon!", //
+			"install, test" ), //
 
-	TESTING_ADDON(
-			"looks good",
-			"Testing addon ...",
-			"install"
-	),
+	TESTING_ADDON( //
+			"ok:Addon is installed.", //
+			"todo:Testing addon ...", //
+			"" ), //
 
-	TEST_FAILED(
-			"looks good",
-			"Something went wrong. Maybe try to install the addon again!?",
-			"install, test"
-	),
+	TEST_FAILED( //
+			"ok:Addon is installed.", //
+			"failed:Something went wrong. Maybe try to install the addon again!?", //
+			"install, test" ), //
 
-	TEST_SUCCEEDED(
-			"looks good",
-			"Great! The addon works as expected. Click \"Finish\" the complete the setup.",
-			"install, test, finish"
-	);
+	TEST_SUCCEEDED( //
+			"ok:Addon is installed.", //
+			"ok:Test successful! The addon works as expected.<br>Click \"Finish\" the complete the setup.",
+			"install, test, finish" );
 
 	public final boolean enableInstall;
 
@@ -241,10 +221,24 @@ enum State
 
 	public final String addonFeedback;
 
-	State( String pathFeedback, String addonFeedback, String enable )
+	public final String testFeedback;
+
+	State( String pathFeedback )
 	{
+		// NB: Constructor for states that have a wrong Blender path.
 		this.pathFeedback = pathFeedback;
+		this.addonFeedback = "";
+		this.testFeedback = "";
+		this.enableInstall = false;
+		this.enableTest = false;
+		this.enableFinish = false;
+	}
+
+	State( String addonFeedback, String testFeedback, String enable )
+	{
+		this.pathFeedback = "ok:Blender path is set correct.";
 		this.addonFeedback = addonFeedback;
+		this.testFeedback = testFeedback;
 		this.enableInstall = enable.contains( "install" );
 		this.enableTest = enable.contains( "test" );
 		this.enableFinish = enable.contains( "finish" );
