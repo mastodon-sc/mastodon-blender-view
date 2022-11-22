@@ -34,6 +34,7 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JTextArea;
+import javax.swing.filechooser.FileFilter;
 import net.miginfocom.swing.MigLayout;
 import org.mastodon.ui.util.FileChooser;
 
@@ -79,9 +80,6 @@ public class BlenderSetupView extends JDialog
 		this.listener = listener;
 
 		setLayout( new MigLayout("insets dialog, fill", "[][grow]") );
-
-		// TODO: Allow to select directory.
-		// TODO: Make setup not modal
 
 		final String introText = "<html><body>"
 				+ "Mastodon can use Blender to visualise cell trackings in 3D. "
@@ -178,7 +176,32 @@ public class BlenderSetupView extends JDialog
 	private void onSelectPathClicked()
 	{
 		String selectedFile = blenderPath == null ? null : blenderPath.toString();
-		File file = FileChooser.chooseFile( this, selectedFile, FileChooser.DialogType.LOAD );
+		FileFilter filenameFilter = new FileFilter()
+		{
+			@Override
+			public boolean accept( File f )
+			{
+				if ( f.isDirectory() )
+					return true;
+				String name = f.getName();
+				return name.equals( "blender" )
+						|| name.equals( "blender-softwaregl" )
+						|| name.equals( "blender.exe" )
+						|| name.equals( "Blender" );
+			}
+
+			@Override
+			public String getDescription()
+			{
+				return "Blender Binary (blender.exe etc.)";
+			}
+		};
+		File file = FileChooser.chooseFile( this,
+				selectedFile,
+				filenameFilter,
+				"Select Blender Installation",
+				FileChooser.DialogType.LOAD,
+				FileChooser.SelectionMode.FILES_AND_DIRECTORIES );
 		if(file == null)
 			return;
 		listener.setBlenderPath( file.toPath() );

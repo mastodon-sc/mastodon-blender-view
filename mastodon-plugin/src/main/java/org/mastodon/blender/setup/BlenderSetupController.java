@@ -79,8 +79,8 @@ public class BlenderSetupController implements BlenderSetupView.Listener
 	@Override
 	public void setBlenderPath( Path blenderPath )
 	{
-		this.blenderPath = blenderPath;
-		frame.setBlenderPath( blenderPath );
+		this.blenderPath = deriveBinaryFromDirectory( blenderPath );
+		frame.setBlenderPath( this.blenderPath );
 		if ( this.blenderPath == null)
 			setState( State.PATH_NOT_SET );
 		else if ( Files.isDirectory( this.blenderPath ) )
@@ -93,6 +93,21 @@ public class BlenderSetupController implements BlenderSetupView.Listener
 			setState( State.BLENDER_INSTALLED );
 		else
 			setState( State.ADDON_INSTALLED );
+	}
+
+	private Path deriveBinaryFromDirectory( Path blenderPath )
+	{
+		if ( blenderPath == null )
+			return null;
+		if ( Files.isDirectory( blenderPath ) ) {
+			Path blenderExe = blenderPath.resolve( "blender.exe" );
+			if ( Files.exists( blenderExe ) && Files.isExecutable( blenderExe ) )
+				return blenderExe;
+			Path blenderBinary = blenderPath.resolve( "blender" );
+			if ( Files.exists( blenderBinary ) && Files.isExecutable( blenderBinary ) )
+				return blenderBinary;
+		}
+		return blenderPath;
 	}
 
 	@Override
