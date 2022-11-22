@@ -58,11 +58,9 @@ import org.mastodon.model.FocusModel;
 import org.mastodon.model.NavigationHandler;
 import org.mastodon.model.SelectionModel;
 import org.mastodon.model.TimepointModel;
-import org.mastodon.model.tag.TagSetModel;
 import org.mastodon.model.tag.TagSetStructure;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
@@ -353,16 +351,6 @@ public class ViewServiceClient
 			request.addColors( tag == null ? defaultColor : tag.color() );
 		}
 		blockingStub.setSpotColors( request.build() );
-	}
-
-	private static TagSetStructure.TagSet getSelectedTagSet( Model model, String name ) {
-		TagSetModel<Spot, Link> tagSetModel = model.getTagSetModel();
-		TagSetStructure tagSetStructure = tagSetModel.getTagSetStructure();
-		for( TagSetStructure.TagSet tagSet : tagSetStructure.getTagSets() ) {
-			if ( tagSet.getName().equals( name ))
-				return tagSet;
-		}
-		throw new NoSuchElementException();
 	}
 
 	private void transferTracklet( ModelGraph graph, Spot start, AffineTransform3D transform )
