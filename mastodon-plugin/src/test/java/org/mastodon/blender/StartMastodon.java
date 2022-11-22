@@ -28,6 +28,9 @@
  */
 package org.mastodon.blender;
 
+/**
+ * Starts Mastodon on the given project.
+ */
 public class StartMastodon
 {
 	public static void main(String... args) {

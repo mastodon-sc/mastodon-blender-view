@@ -6,13 +6,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -28,35 +28,25 @@
  */
 package org.mastodon.blender;
 
-import org.mastodon.blender.setup.BlenderSetupUtils;
-import org.mastodon.blender.setup.StartBlender;
-import org.mastodon.mamut.MamutAppModel;
+import org.mastodon.mamut.launcher.MastodonLauncherCommand;
+import org.scijava.Context;
+import org.scijava.command.CommandService;
+import org.scijava.ui.UIService;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
-public class StartBlenderAndMastodon
+/**
+ * Shows the ImageJ main window and Mastodon launcher.
+ *
+ * @author Matthias Arzt
+ */
+public class StartMastodonLauncher
 {
-	public static void main( String... args )
-			throws Exception
-	{
-		int port = StartBlender.getFreePort();
-		startBlender(port);
-		startMastodon(port);
-	}
 
-	private static void startBlender( int port ) throws IOException, URISyntaxException
+	public static void main( final String... args )
 	{
-		Path blenderPath = Paths.get( "/home/arzt/Applications/blender-3.3.1-linux-x64/blender" );
-		BlenderSetupUtils.installAddon( blenderPath );
-		StartBlender.startBlender( blenderPath, port );
-	}
-
-	private static void startMastodon( int port )
-	{
-		MamutAppModel appModel = MastodonUtils.showGuiAndGetAppModel( ExampleDatasets.metteE1 );
-		ViewServiceClient.start( port, appModel );
+		final Context context = new Context();
+		final UIService uiService = context.service( UIService.class );
+		uiService.showUI();
+		final CommandService commandService = context.service( CommandService.class );
+		commandService.run( MastodonLauncherCommand.class, true );
 	}
 }
