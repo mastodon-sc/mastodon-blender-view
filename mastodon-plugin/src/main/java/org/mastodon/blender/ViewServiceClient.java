@@ -36,7 +36,6 @@ import io.grpc.stub.StreamObserver;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.util.Pair;
-import net.imglib2.util.StopWatch;
 import org.mastodon.AddMovingSpotRequest;
 import org.mastodon.ChangeMessage;
 import org.mastodon.Empty;
@@ -293,11 +292,10 @@ public class ViewServiceClient
 	static void start( int port, MamutAppModel appModel )
 	{
 		Model model = appModel.getModel();
-		MastodonUtils.logMastodonEvents(appModel);
+		//MastodonUtils.logMastodonEvents(appModel);
 		ManagedChannel channel = ManagedChannelBuilder.forTarget( URL + port ).usePlaintext().build();
 		Runtime.getRuntime().addShutdownHook( new Thread( channel::shutdown ) );
 		ViewServiceClient client = new ViewServiceClient( channel, appModel );
-		StopWatch watch = StopWatch.createAndStart();
 		client.transferCoordinates( model.getGraph() );
 		client.transferColors();
 		int timepoint = client.timePointModel.getTimepoint();
@@ -305,7 +303,6 @@ public class ViewServiceClient
 		client.transferTimePoint( timepoint );
 		client.synchronizeFocusedObject();
 		client.synchronizeTagSetList();
-		System.out.println( watch );
 	}
 
 	private void synchronizeTagSetList()
