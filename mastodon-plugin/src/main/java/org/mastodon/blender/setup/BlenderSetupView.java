@@ -82,15 +82,15 @@ public class BlenderSetupView extends JDialog
 		setLayout( new MigLayout("insets dialog, fill", "[][grow]") );
 
 		final String introText = "<html><body>"
-				+ "Mastodon can use Blender to visualise cell trackings in 3D. "
+				+ "Mastodon can use Blender to visualise a cell tracking in 3D. "
 				+ "In order to achieve this, it is required to install "
 				+ "the \"mastodon_blender_view\" addon to Blender.<br><br>"
-				+ "This dialog will guide you through the installation."
+				+ "This dialog will guide you through the installation process."
 				+ "</body></html>";
-		add( setFonStyle( new JLabel( introText ), Font.PLAIN ), "span, wrap, grow, width 0:0:pref" );
+		add( newJLabel( Font.PLAIN, introText ), "span, wrap, grow, width 0:0:pref" );
 
-		add( new JLabel( "1."), "gaptop unrelated" );
-		add( new JLabel("Install Blender:"), "wrap, wmin 0" );
+		add( newJLabel( Font.BOLD, "1." ), "gaptop unrelated" );
+		add( newJLabel( Font.BOLD, "Install Blender:" ), "wrap, wmin 0" );
 		final String blenderInstallText = "<html><body>"
 				+ "The first step is to install Blender. This needs to be done manually by you.<br>"
 				+ "Mastodon only supports the portable version of Blender.<br>"
@@ -98,10 +98,10 @@ public class BlenderSetupView extends JDialog
 				+ "<br>"
 				+ "Please download and install the <b>portable version of Blender</b>!"
 				+ "</body></html>";
-		add( setFonStyle( new JLabel( blenderInstallText ), Font.PLAIN ), "skip, wrap, grow, wmin 0" );
+		add( newJLabel( Font.PLAIN, blenderInstallText ), "skip, wrap, grow, wmin 0" );
 		add( initializeLinkButton(), "skip, wrap");
-		add( new JLabel( "2."), "gaptop unrelated" );
-		add( new JLabel("Select the path of your Blender installation:"), "wrap, wmin 0" );
+		add( newJLabel( Font.BOLD, "2." ), "gaptop unrelated" );
+		add( newJLabel( Font.BOLD, "Select the path of your Blender installation:" ), "wrap, wmin 0" );
 		pathTextArea = new JTextArea( 2, 50 );
 		pathTextArea.setBorder( BorderFactory.createLineBorder( Color.LIGHT_GRAY ) );
 		pathTextArea.setEditable( false );
@@ -109,29 +109,26 @@ public class BlenderSetupView extends JDialog
 		selectPathButton = new JButton( "select" );
 		selectPathButton.addActionListener( ignore -> onSelectPathClicked() );
 		add( selectPathButton, "skip, wrap");
-		pathFeedback = new JLabel( "" );
-		setFonStyle( pathFeedback, Font.ITALIC );
+		pathFeedback = newJLabel( Font.ITALIC, "" );
 		add( pathFeedback, "skip, wrap, wmin 0" );
 
-		add( new JLabel( "3."), "gaptop unrelated");
-		add( new JLabel("Install / update Blender addon"), "wrap, wmin 0" );
+		add( newJLabel( Font.BOLD, "3." ), "gaptop unrelated");
+		add( newJLabel( Font.BOLD, "Install / update Blender addon" ), "wrap, wmin 0" );
 		installAddonButton = new JButton( "install addon" );
 		installAddonButton.addActionListener( ignore -> listener.installAddonClicked() );
 		add( installAddonButton, "skip, wrap");
-		addonFeedback = new JLabel( "" );
-		setFonStyle( addonFeedback, Font.ITALIC );
+		addonFeedback = newJLabel( Font.ITALIC, "" );
 		add( addonFeedback, "skip, wrap, wmin 0" );
 
-		add( new JLabel( "4."), "gaptop unrelated");
-		add( new JLabel("Test Blender addon"), "wrap, wmin 0" );
+		add( newJLabel( Font.BOLD, "4." ), "gaptop unrelated");
+		add( newJLabel( Font.BOLD, "Test Blender addon" ), "wrap, wmin 0" );
 		testAddonButton = new JButton("test addon");
 		testAddonButton.addActionListener( ignore -> listener.testAddonClicked() );
 		add( testAddonButton, "skip, wrap" );
-		testFeedback = new JLabel( "" );
-		setFonStyle( testFeedback, Font.ITALIC );
+		testFeedback = newJLabel( Font.ITALIC, "" );
 		add( testFeedback, "skip, wrap, wmin 0" );
 
-		add( new JLabel(""), "push, wrap");
+		add( newJLabel( Font.PLAIN, "<html><body><br><br></body></html>" ), "push, wrap, hmin 0");
 
 		finishButton = new JButton( "Finish" );
 		finishButton.addActionListener( ignore -> listener.finishClicked() );
@@ -141,10 +138,17 @@ public class BlenderSetupView extends JDialog
 		add( cancelButton );
 	}
 
+	private JLabel newJLabel( int fontStyle, String introText )
+	{
+		JLabel label = new JLabel( introText );
+		setFontStyle( label, fontStyle );
+		return label;
+	}
+
 	private JButton initializeLinkButton()
 	{
 		JButton linkButton = new JButton( "<html><bode><a href=\"dummy\">https://blender.org/download</a></body></html>" );
-		setFonStyle( linkButton, Font.PLAIN );
+		setFontStyle( linkButton, Font.PLAIN );
 		linkButton.addActionListener( ignore -> onLinkClicked() );
 		linkButton.setBackground( new Color( 0, true ) );
 		linkButton.setBorder( BorderFactory.createEmptyBorder() );
@@ -165,12 +169,11 @@ public class BlenderSetupView extends JDialog
 		}
 	}
 
-	private JComponent setFonStyle( JComponent component, int style )
+	private void setFontStyle( JComponent component, int style )
 	{
 		Font boldFont = component.getFont();
 		Font normalFont = boldFont.deriveFont( style );
 		component.setFont( normalFont );
-		return component;
 	}
 
 	private void onSelectPathClicked()
