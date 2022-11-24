@@ -210,7 +210,7 @@ public class ViewServiceClient
 	private void onTimePointChange()
 	{
 		int timePoint = getTimePoint();
-		System.out.println("on time point changed to: " + timePoint);
+		//System.out.println("on time point changed to: " + timePoint);
 		if(timePoint == knownTimePoint)
 			return;
 		knownTimePoint = timePoint;
@@ -228,7 +228,7 @@ public class ViewServiceClient
 		if(known_active_object == id)
 			return;
 		known_active_object = id;
-		System.out.println( id );
+		//System.out.println("Blender => Mastodon: active spot changed to " + id);
 		if(id < 0)
 			return;
 		ModelGraph graph = appModel.getModel().getGraph();
@@ -323,7 +323,7 @@ public class ViewServiceClient
 		if( knownTimePoint == timePoint )
 			return;
 		knownTimePoint = timePoint;
-		System.out.println("set time point to " + timePoint);
+		//System.out.println("Mastodon -> Blender: set time point to " + timePoint);
 		blockingStub.setTimePoint( SetTimePointRequest.newBuilder()
 				.setTimepoint(timePoint)
 				.build());
