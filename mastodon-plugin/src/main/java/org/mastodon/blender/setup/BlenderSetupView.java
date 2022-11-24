@@ -128,7 +128,7 @@ public class BlenderSetupView extends JDialog
 		testFeedback = newJLabel( Font.ITALIC, "" );
 		add( testFeedback, "skip, wrap, wmin 0" );
 
-		add( newJLabel( Font.PLAIN, "<html><body><br><br></body></html>" ), "push, wrap, hmin 0");
+		add( new JLabel(), "push, wrap, height 0:100:");
 
 		finishButton = new JButton( "Finish" );
 		finishButton.addActionListener( ignore -> listener.finishClicked() );
