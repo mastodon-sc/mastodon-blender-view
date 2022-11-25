@@ -29,15 +29,14 @@
 import bpy
 from . import mb_server
 
-
-def update_sphere_size(properties_group, context):
-    sphere_size = properties_group.sphere_size
-    if mb_server.mastodon_blender_server is not None:
-        mb_server.mastodon_blender_server.many_spheres.set_sphere_size(
-            sphere_size)
-
-
 class BlenderMastodonViewProperties(bpy.types.PropertyGroup):
+
+    def update_sphere_size(self, context):
+        sphere_size = self.sphere_size
+        if mb_server.mastodon_blender_server is not None:
+            mb_server.mastodon_blender_server.many_spheres.set_sphere_size(
+                sphere_size)
+
     sphere_size: bpy.props.FloatProperty(name="Sphere Size", soft_min=0.05,
                                          soft_max=1.0, default=0.1,
                                          update=update_sphere_size)
@@ -105,8 +104,7 @@ class TestPanel(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-        row = layout.row()
-        row.label(text="Synchronization Group (TODO)", icon='LOCKED')
+        layout.label(text="Synchronization Group", icon='LOCKED')
         property_group = context.scene.blender_mastodon_view_properties
         layout.prop(property_group, "sync_group", expand=True)
         layout.row().label(text="Visualization Settings", icon='SETTINGS')
