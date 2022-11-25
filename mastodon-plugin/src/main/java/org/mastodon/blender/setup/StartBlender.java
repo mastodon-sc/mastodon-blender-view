@@ -28,23 +28,31 @@
  */
 package org.mastodon.blender.setup;
 
+import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.jetbrains.annotations.NotNull;
 import org.mastodon.blender.ViewServiceClient;
 import org.scijava.Context;
 import org.scijava.prefs.PrefService;
 
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.StringJoiner;
 
 public class StartBlender
 {
@@ -75,9 +83,44 @@ public class StartBlender
 		command.add("--");
 		command.add("--mastodon-port");
 		command.add(Integer.toString( port ));
-		Process process = new ProcessBuilder( command.toArray(new String[0]) ).start();
-		ViewServiceClient.waitForConnection( port );
+		ProcessBuilder builder = new ProcessBuilder( command.toArray( new String[ 0 ] ) );
+		Process process = builder.start();
+		try {
+			ViewServiceClient.waitForConnection( port );
+		}
+		catch (Throwable error )	{
+			throwException( command, process, error );
+		}
 		return process;
+	}
+
+	private static void throwException( List<String> command, Process process, Throwable error )
+			throws IOException
+	{
+		StringJoiner joiner = new StringJoiner( "\n" );
+		joiner.add( "Failed to connect to Blender." );
+		joiner.add( "=== Blender command line ===" );
+		joiner.add( String.join( " ", command ) );
+		joiner.add( "=== Blender console output ===" );
+		joiner.add( toStringIfAvailable( process.getInputStream() ) );
+		joiner.add( "=== Java stack trace ===" );
+		throw new RuntimeException(joiner.toString(), error );
+	}
+
+	private static String toStringIfAvailable( InputStream inputStream )
+			throws IOException
+	{
+		final InputStreamReader reader = new InputStreamReader( inputStream,
+				Charsets.toCharset( StandardCharsets.UTF_8 ));
+		final BufferedReader bufferedReader = IOUtils.toBufferedReader( reader );
+		final StringJoiner joiner = new StringJoiner("\n");
+		while ( bufferedReader.ready()) {
+			String line = bufferedReader.readLine();
+			if(line == null)
+				break;
+			joiner.add(line);
+		}
+		return joiner.toString();
 	}
 
 	private static List<String> screenSize()

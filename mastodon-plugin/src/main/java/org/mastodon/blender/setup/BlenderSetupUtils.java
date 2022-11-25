@@ -89,7 +89,9 @@ public class BlenderSetupUtils
 			throws IOException, InterruptedException
 	{
 		String script = "import mastodon_blender_view.mb_server as mb_server;" //
-				+ " mb_server.delayed_start_server();import time; time.sleep(2)";
+				+ "import time;"
+				+ "mb_server.delayed_start_server();"
+				+ "time.sleep(8)";
 		int port = StartBlender.getFreePort();
 		Process process = StartBlender.startBlender( blenderPath, //
 				port,
