@@ -29,8 +29,6 @@
 package org.mastodon.blender.setup;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.ArrayUtils;
-import org.mastodon.blender.Blender3dViewPlugin;
 import org.mastodon.blender.ViewServiceClient;
 import org.scijava.Context;
 import org.scijava.prefs.PrefService;
@@ -38,7 +36,6 @@ import org.scijava.prefs.PrefService;
 import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.net.SocketException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -92,7 +89,7 @@ public class StartBlender
 		try
 		{
 			PrefService service = context.service( PrefService.class );
-			String blender_path = service.get( Blender3dViewPlugin.class, BLENDER_PATH_ENTRY );
+			String blender_path = service.get( StartBlender.class, BLENDER_PATH_ENTRY );
 			return Paths.get( blender_path );
 		}
 		catch ( Throwable ignore ) {
@@ -103,7 +100,7 @@ public class StartBlender
 	public static void setBlenderPath( Context context, Path blenderPath )
 	{
 		PrefService service = context.service( PrefService.class );
-		service.put( Blender3dViewPlugin.class, BLENDER_PATH_ENTRY, blenderPath.toString() );
+		service.put( StartBlender.class, BLENDER_PATH_ENTRY, blenderPath.toString() );
 	}
 
 	public static String emptyBlenderProject() {
