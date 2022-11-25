@@ -28,14 +28,16 @@
  */
 package org.mastodon.blender;
 
-import org.mastodon.mamut.launcher.MastodonLauncherCommand;
+import org.mastodon.mamut.launcher.MastodonLauncher;
 import org.scijava.Context;
-import org.scijava.command.CommandService;
-import org.scijava.ui.UIService;
 
 /**
- * Shows the ImageJ main window and Mastodon launcher.
- *
+ * Shows the Mastodon launcher.
+ * <p>
+ * Can be executed via command line:
+ * <pre>
+ * mvn -Dexec.mainClass=org.mastodon.blender.StartMastodonLauncher -Dexec.classpathScope=test clean test-compile exec:java
+ * </pre>
  * @author Matthias Arzt
  */
 public class StartMastodonLauncher
@@ -43,10 +45,9 @@ public class StartMastodonLauncher
 
 	public static void main( final String... args )
 	{
-		final Context context = new Context();
-		final UIService uiService = context.service( UIService.class );
-		uiService.showUI();
-		final CommandService commandService = context.service( CommandService.class );
-		commandService.run( MastodonLauncherCommand.class, true );
+		MastodonLauncher launcher = new MastodonLauncher( new Context() );
+		launcher.setLocationByPlatform( true );
+		launcher.setLocationRelativeTo( null );
+		launcher.setVisible( true );
 	}
 }
