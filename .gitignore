@@ -11,5 +11,7 @@ target/
 /mastodon/
 /mastodon-graph/
 /mastodon-collection/
-
+/mastodon-plugin/src/test/java/ExampleDatasets.java
+/mastodon-plugin/src/test/java/StartMastodon.java
+/mastodon-plugin/src/test/java/StartBlenderAndMastodon.java
 

@@ -287,7 +287,7 @@ public class ViewServiceClient
 		}
 	}
 
-	static void start( int port, MamutAppModel appModel )
+	public static void start( int port, MamutAppModel appModel )
 	{
 		Model model = appModel.getModel();
 		//MastodonUtils.logMastodonEvents(appModel);
