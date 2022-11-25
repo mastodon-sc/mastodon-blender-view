@@ -29,6 +29,7 @@
 import bpy
 from . import mb_server
 
+
 class BlenderMastodonViewProperties(bpy.types.PropertyGroup):
 
     def update_sphere_size(self, context):
@@ -81,9 +82,9 @@ class BlenderMastodonViewProperties(bpy.types.PropertyGroup):
 
 
 class BlenderMastodonUpdateTags(bpy.types.Operator):
-    """Add a simple box mesh"""
+    """Update the tags from Mastodon"""
     bl_idname = "mastodon.update_tags"
-    bl_label = "Update Tags"
+    bl_label = "Update"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
@@ -103,14 +104,22 @@ class TestPanel(bpy.types.Panel):
     bl_category = 'Mastodon 3D View'
 
     def draw(self, context):
-        layout = self.layout
-        layout.label(text="Synchronization Group", icon='LOCKED')
         property_group = context.scene.blender_mastodon_view_properties
-        layout.prop(property_group, "sync_group", expand=True)
-        layout.row().label(text="Visualization Settings", icon='SETTINGS')
-        layout.prop(property_group, "sphere_size")
-        layout.prop(property_group, "tag_set")
-        layout.row().operator('mastodon.update_tags')
+
+        layout = self.layout
+
+        box = layout.box()
+        box.label(text="Synchronization Group", icon='LOCKED')
+        box.row().prop(property_group, "sync_group", expand=True)
+
+        box = layout.box()
+        box.label(text = "Sphere Size", icon='SPHERE')
+        box.prop(property_group, "sphere_size", text='')
+
+        box = layout.box()
+        box.label(text="Mastodon Tag Set", icon='COLORSET_12_VEC')
+        box.prop(property_group, "tag_set", text='')
+        box.row().operator('mastodon.update_tags')
 
 
 classes = [TestPanel, BlenderMastodonViewProperties, BlenderMastodonUpdateTags]
