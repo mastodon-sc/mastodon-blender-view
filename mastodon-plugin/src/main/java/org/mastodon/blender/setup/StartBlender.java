@@ -29,10 +29,13 @@
 package org.mastodon.blender.setup;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.mastodon.blender.ViewServiceClient;
 import org.scijava.Context;
 import org.scijava.prefs.PrefService;
 
+import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -64,6 +67,10 @@ public class StartBlender
 		command.add( emptyBlenderProject() );
 		command.add( "--addons" );
 		command.add( ADDON_NAME );
+		boolean background = ArrayUtils.contains( args, "--background" )
+				|| ArrayUtils.contains( args, "-b" );
+		if ( ! background )
+			command.addAll( screenSize() );
 		command.addAll( Arrays.asList(args) );
 		command.add("--");
 		command.add("--mastodon-port");
@@ -71,6 +78,18 @@ public class StartBlender
 		Process process = new ProcessBuilder( command.toArray(new String[0]) ).start();
 		ViewServiceClient.waitForConnection( port );
 		return process;
+	}
+
+	private static List<String> screenSize()
+	{
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		List<String> command = new ArrayList<>();
+		command.add( "--window-geometry" );
+		command.add( Integer.toString( screenSize.width / 4  ) );
+		command.add( Integer.toString( screenSize.height / 4  ) );
+		command.add( Integer.toString( screenSize.height * 3 / 4  ) );
+		command.add( Integer.toString( screenSize.height / 2  ) );
+		return command;
 	}
 
 	public static int getFreePort()
