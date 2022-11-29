@@ -1,7 +1,0 @@
-__init__.py
-mastodon_blender_view_pb2.py
-mastodon_blender_view_pb2_grpc.py
-mb_panel.py
-mb_scene.py
-mb_server.py
-mb_utils.py
