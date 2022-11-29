@@ -16,7 +16,7 @@ Please don't confuse it for the social network called Mastodon.)
 2. Next step is to [active](https://imagej.net/update-sites/following) the "Tomancak" update site in Fiji.
 3. In Mastodon's main menu, you will find an entry ```Plugins > Setup Blender Addon ...```, click it and follow the instruction. 
 
-That's it, you are ready to use it.
+That's it, the Mastodon Blender View is ready to be used. Simply click: ```Window > New Blender Window```.
    
 ## Usage
 
