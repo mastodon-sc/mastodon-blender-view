@@ -9,9 +9,15 @@
         <fileSet>
             <includes>
                 <include>*.py</include>
-                <include>*.txt</include>
             </includes>
             <directory>../blender-addon</directory>
+            <outputDirectory>/</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <includes>
+                <include>*.proto</include>
+            </includes>
+            <directory>../proto</directory>
             <outputDirectory>/</outputDirectory>
         </fileSet>
     </fileSets>

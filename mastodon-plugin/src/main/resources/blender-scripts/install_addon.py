@@ -31,6 +31,7 @@ import ensurepip
 import subprocess
 import bpy
 import sys
+import addon_utils
 
 # install pip
 
@@ -60,9 +61,10 @@ try:
     import bidict
     import grpc
     import google.protobuf
-    print("dependencies installed")
 except ModuleNotFoundError:
     raise Exception("dependency installation failed")
+
+print("dependencies installed")
 
 # install addon
 
@@ -70,4 +72,16 @@ argv = sys.argv
 addon_zip = argv[argv.index('--') + 1]
 bpy.ops.preferences.addon_install(filepath=addon_zip)
 
-print("mastodon blender view installed")
+print("mastodon blender view addon installed")
+
+filename_init_py = [m.__file__ for m in addon_utils.modules() if m.__name__ == "mastodon_blender_view"][0]
+addon_dir = os.path.dirname(filename_init_py)
+subprocess.check_output([python_path, '-m', 'grpc_tools.protoc', '-I.', '--python_out=.', '--grpc_python_out=.', 'mastodon_blender_view/mastodon-blender-view.proto'], cwd=os.path.dirname(addon_dir))
+
+try:
+    from mastodon_blender_view import mastodon_blender_view_pb2
+    from mastodon_blender_view import mastodon_blender_view_pb2_grpc
+except ModuleNotFoundError:
+    raise Exception("installing google RPC generated code failed")
+
+print("google RPC code compiled")

@@ -65,7 +65,9 @@ public class BlenderSetupUtils
 				"--", addonZip.toAbsolutePath().toString() ); //
 		if ( !output.contains( "dependencies installed" ) )
 			throw new RuntimeException( "Installation of the dependencies for the mastodon_blender_view addon failed:\n" + output );
-		if ( !output.contains( "mastodon blender view installed" ) )
+		if ( !output.contains( "mastodon blender view addon installed" ) )
+			throw new RuntimeException( "Installation of the mastodon_blender_view addon failed:\n" + output );
+		if ( !output.contains( "google RPC code compiled" ))
 			throw new RuntimeException( "Installation of the mastodon_blender_view addon failed:\n" + output );
 		Files.delete( pythonScript );
 		Files.delete( addonZip );
