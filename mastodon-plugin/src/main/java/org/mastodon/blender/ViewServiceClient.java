@@ -233,7 +233,10 @@ public class ViewServiceClient
 			public void onError( Throwable throwable )
 			{
 				if( isUnavailableException( throwable ) )
-					System.out.println( "Connection to Blender is lost.");
+				{
+					System.out.println( "Connection to Blender is lost." );
+					listener.onConnectionLost();
+				}
 				else
 					throwable.printStackTrace();
 			}
@@ -286,5 +289,7 @@ public class ViewServiceClient
 		void onUpdateColorsRequest();
 
 		void onSelectedTagSetChanged();
+
+		void onConnectionLost();
 	}
 }

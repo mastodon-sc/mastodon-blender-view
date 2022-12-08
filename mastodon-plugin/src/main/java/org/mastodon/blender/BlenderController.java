@@ -11,11 +11,14 @@ import org.mastodon.mamut.model.Model;
 import org.mastodon.mamut.model.ModelGraph;
 import org.mastodon.mamut.model.Spot;
 import org.mastodon.model.AutoNavigateFocusModel;
+import org.mastodon.model.FocusListener;
 import org.mastodon.model.FocusModel;
 import org.mastodon.model.NavigationHandler;
 import org.mastodon.model.SelectionModel;
+import org.mastodon.model.TimepointListener;
 import org.mastodon.model.TimepointModel;
 import org.mastodon.model.tag.ObjTagMap;
+import org.mastodon.model.tag.TagSetModel;
 import org.mastodon.model.tag.TagSetStructure;
 import org.scijava.Context;
 
@@ -36,11 +39,15 @@ public class BlenderController
 
 	private final GroupHandle groupHandle;
 
-	private final NavigationHandler<Spot, Link> navigationModel;
-
 	private final FocusModel<Spot, Link> focusModel;
 
 	private final TimepointModel timePointModel;
+
+	private final FocusListener focusListener = this::onFocusModelEvent;
+
+	private final TimepointListener timepointListener = this::onTimepointModelEvent;
+
+	private final TagSetModel.TagSetModelListener tagSetModelListener = this::sendTagSetList;
 
 	private TagSetStructure.TagSet tagSet;
 
@@ -53,7 +60,7 @@ public class BlenderController
 		this.model = appModel.getModel();
 		this.groupHandle = appModel.getGroupManager().createGroupHandle();
 		this.groupHandle.setGroupId( -1 );
-		this.navigationModel = groupHandle.getModel( appModel.NAVIGATION );
+		NavigationHandler<Spot, Link> navigationModel = groupHandle.getModel( appModel.NAVIGATION );
 		this.focusModel = new AutoNavigateFocusModel<>( appModel.getFocusModel(), navigationModel );
 		this.timePointModel = groupHandle.getModel( appModel.TIMEPOINT );
 		this.client = new ViewServiceClient( context, new ViewServiceListener() );
@@ -62,10 +69,22 @@ public class BlenderController
 		sendTagSetList();
 		triggerRepaint();
 		client.subscribeToChangeEvents();
-		focusModel.listeners().add( this::onFocusModelEvent );
-		timePointModel.listeners().add( this::onTimepointModelEvent );
-		model.getTagSetModel().listeners().add( this::sendTagSetList );
+		subscribeListeners();
 		//MastodonUtils.logMastodonEvents(appModel);
+	}
+
+	private void subscribeListeners()
+	{
+		focusModel.listeners().add( focusListener );
+		timePointModel.listeners().add( timepointListener );
+		model.getTagSetModel().listeners().add( tagSetModelListener );
+	}
+
+	private void unsubscribeListeners()
+	{
+		focusModel.listeners().remove( focusListener );
+		timePointModel.listeners().remove( timepointListener );
+		model.getTagSetModel().listeners().remove( tagSetModelListener );
 	}
 
 	private void onFocusModelEvent()
@@ -226,6 +245,12 @@ public class BlenderController
 		{
 			tagSet = client.receiveTagSet(model.getTagSetModel().getTagSetStructure());
 			sendColors();
+		}
+
+		@Override
+		public void onConnectionLost()
+		{
+			unsubscribeListeners();
 		}
 	}
 }
