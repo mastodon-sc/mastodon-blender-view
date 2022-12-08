@@ -91,16 +91,20 @@ public class ViewServiceClient
 
 	private TagSetStructure.TagSet tagSet;
 
-	public ViewServiceClient( Channel channel, MamutAppModel appModel )
+	public static void start( int port, MamutAppModel appModel )
 	{
-		blockingStub = ViewServiceGrpc.newBlockingStub( channel );
-		nonBlockingStub = ViewServiceGrpc.newStub( channel );
-		this.appModel = appModel;
-		this.groupHandle = appModel.getGroupManager().createGroupHandle();
-		groupHandle.setGroupId( 0 );
-		navigationModel = groupHandle.getModel( appModel.NAVIGATION );
-		focusModel = new AutoNavigateFocusModel<>( appModel.getFocusModel(), navigationModel );
-		timePointModel = groupHandle.getModel( appModel.TIMEPOINT );
+		Model model = appModel.getModel();
+		//MastodonUtils.logMastodonEvents(appModel);
+		ManagedChannel channel = ManagedChannelBuilder.forTarget( URL + port ).usePlaintext().build();
+		Runtime.getRuntime().addShutdownHook( new Thread( channel::shutdown ) );
+		ViewServiceClient client = new ViewServiceClient( channel, appModel );
+		client.transferCoordinates( model.getGraph() );
+		client.transferColors();
+		int timepoint = client.timePointModel.getTimepoint();
+		client.transferTimePoint( timepoint + 1 );
+		client.transferTimePoint( timepoint );
+		client.synchronizeFocusedObject();
+		client.synchronizeTagSetList();
 	}
 
 	public static void waitForConnection( int port )
@@ -136,6 +140,18 @@ public class ViewServiceClient
 		{
 			channel.shutdown();
 		}
+	}
+
+	public ViewServiceClient( Channel channel, MamutAppModel appModel )
+	{
+		blockingStub = ViewServiceGrpc.newBlockingStub( channel );
+		nonBlockingStub = ViewServiceGrpc.newStub( channel );
+		this.appModel = appModel;
+		this.groupHandle = appModel.getGroupManager().createGroupHandle();
+		groupHandle.setGroupId( 0 );
+		navigationModel = groupHandle.getModel( appModel.NAVIGATION );
+		focusModel = new AutoNavigateFocusModel<>( appModel.getFocusModel(), navigationModel );
+		timePointModel = groupHandle.getModel( appModel.TIMEPOINT );
 	}
 
 	private void synchronizeFocusedObject()
@@ -296,22 +312,6 @@ public class ViewServiceClient
 			graph.releaseRef( ref );
 			graph.releaseRef( ref2 );
 		}
-	}
-
-	public static void start( int port, MamutAppModel appModel )
-	{
-		Model model = appModel.getModel();
-		//MastodonUtils.logMastodonEvents(appModel);
-		ManagedChannel channel = ManagedChannelBuilder.forTarget( URL + port ).usePlaintext().build();
-		Runtime.getRuntime().addShutdownHook( new Thread( channel::shutdown ) );
-		ViewServiceClient client = new ViewServiceClient( channel, appModel );
-		client.transferCoordinates( model.getGraph() );
-		client.transferColors();
-		int timepoint = client.timePointModel.getTimepoint();
-		client.transferTimePoint( timepoint + 1 );
-		client.transferTimePoint( timepoint );
-		client.synchronizeFocusedObject();
-		client.synchronizeTagSetList();
 	}
 
 	private void synchronizeTagSetList()
