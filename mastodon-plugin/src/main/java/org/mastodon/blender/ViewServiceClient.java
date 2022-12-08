@@ -32,6 +32,8 @@ import javax.swing.SwingUtilities;
 import io.grpc.Channel;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
@@ -159,7 +161,16 @@ public class ViewServiceClient
 			@Override
 			public void onError( Throwable throwable )
 			{
-				throwable.printStackTrace();
+				if( isUnavailableException( throwable ) )
+					System.out.println( "Connection to Blender is lost.");
+				else
+					throwable.printStackTrace();
+			}
+
+			private boolean isUnavailableException( Throwable throwable )
+			{
+				return throwable instanceof StatusRuntimeException
+						&& Status.Code.UNAVAILABLE == ( ( StatusRuntimeException ) throwable ).getStatus().getCode();
 			}
 
 			@Override
