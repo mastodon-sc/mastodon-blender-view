@@ -28,8 +28,6 @@
  */
 package org.mastodon.blender;
 
-import javax.swing.SwingUtilities;
-import io.grpc.Channel;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.Status;
@@ -37,7 +35,6 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
-import net.imglib2.util.Pair;
 import org.mastodon.AddMovingSpotRequest;
 import org.mastodon.ChangeMessage;
 import org.mastodon.Empty;
@@ -46,25 +43,16 @@ import org.mastodon.SetSpotColorsRequest;
 import org.mastodon.SetTagSetListRequest;
 import org.mastodon.SetTimePointRequest;
 import org.mastodon.ViewServiceGrpc;
-import org.mastodon.collection.RefList;
+import org.mastodon.blender.setup.StartBlender;
 import org.mastodon.collection.RefSet;
-import org.mastodon.graph.GraphIdBimap;
-import org.mastodon.grouping.GroupHandle;
-import org.mastodon.mamut.MamutAppModel;
-import org.mastodon.mamut.model.Link;
-import org.mastodon.mamut.model.Model;
 import org.mastodon.mamut.model.ModelGraph;
 import org.mastodon.mamut.model.Spot;
-import org.mastodon.model.AutoNavigateFocusModel;
-import org.mastodon.model.FocusModel;
-import org.mastodon.model.NavigationHandler;
-import org.mastodon.model.SelectionModel;
-import org.mastodon.model.TimepointModel;
 import org.mastodon.model.tag.TagSetStructure;
+import org.scijava.Context;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
+import java.util.function.ToIntFunction;
 
 public class ViewServiceClient
 {
@@ -75,37 +63,7 @@ public class ViewServiceClient
 
 	private final ViewServiceGrpc.ViewServiceStub nonBlockingStub;
 
-	private final MamutAppModel appModel;
-
-	private final GroupHandle groupHandle;
-
-	private final NavigationHandler<Spot, Link> navigationModel;
-
-	private final FocusModel<Spot, Link> focusModel;
-
-	private final TimepointModel timePointModel;
-
-	int known_active_object = -1;
-
-	int knownTimePoint = 0;
-
-	private TagSetStructure.TagSet tagSet;
-
-	public static void start( int port, MamutAppModel appModel )
-	{
-		Model model = appModel.getModel();
-		//MastodonUtils.logMastodonEvents(appModel);
-		ManagedChannel channel = ManagedChannelBuilder.forTarget( URL + port ).usePlaintext().build();
-		Runtime.getRuntime().addShutdownHook( new Thread( channel::shutdown ) );
-		ViewServiceClient client = new ViewServiceClient( channel, appModel );
-		client.transferCoordinates( model.getGraph() );
-		client.transferColors();
-		int timepoint = client.timePointModel.getTimepoint();
-		client.transferTimePoint( timepoint + 1 );
-		client.transferTimePoint( timepoint );
-		client.synchronizeFocusedObject();
-		client.synchronizeTagSetList();
-	}
+	private final Listener listener;
 
 	public static void waitForConnection( int port )
 	{
@@ -142,224 +100,83 @@ public class ViewServiceClient
 		}
 	}
 
-	public ViewServiceClient( Channel channel, MamutAppModel appModel )
+	public ViewServiceClient( final Context context, final Listener listener )
 	{
+		this.listener = listener;
+		int port = StartBlender.getFreePort();
+		try {
+			StartBlender.startBlender( context, port );
+		}
+		catch( Throwable throwable ) {
+			throw new StartBlenderException(throwable);
+		}
+		ManagedChannel channel = ManagedChannelBuilder.forTarget( URL + port ).usePlaintext().build();
+		Runtime.getRuntime().addShutdownHook( new Thread( channel::shutdown ) );
 		blockingStub = ViewServiceGrpc.newBlockingStub( channel );
 		nonBlockingStub = ViewServiceGrpc.newStub( channel );
-		this.appModel = appModel;
-		this.groupHandle = appModel.getGroupManager().createGroupHandle();
-		groupHandle.setGroupId( 0 );
-		navigationModel = groupHandle.getModel( appModel.NAVIGATION );
-		focusModel = new AutoNavigateFocusModel<>( appModel.getFocusModel(), navigationModel );
-		timePointModel = groupHandle.getModel( appModel.TIMEPOINT );
 	}
 
-	private void synchronizeFocusedObject()
+	// getters
+
+	public int receiveSyncGroupIndex()
 	{
-		ModelGraph graph = appModel.getModel().getGraph();
-		GraphIdBimap<Spot, Link> graphIdBimap = graph.getGraphIdBimap();
-		focusModel.listeners().add( () -> {
-			sendFocusedSpot( graph, graphIdBimap );
-		} );
-		timePointModel.listeners().add( () -> {
-			int timepoint = timePointModel.getTimepoint();
-			transferTimePoint( timepoint );
-		} );
-
-		nonBlockingStub.subscribeToChange( Empty.newBuilder().build(), new StreamObserver<ChangeMessage>()
-		{
-			@Override
-			public void onNext( ChangeMessage changeMessage )
-			{
-				processChangeMessage( changeMessage );
-			}
-
-			@Override
-			public void onError( Throwable throwable )
-			{
-				if( isUnavailableException( throwable ) )
-					System.out.println( "Connection to Blender is lost.");
-				else
-					throwable.printStackTrace();
-			}
-
-			private boolean isUnavailableException( Throwable throwable )
-			{
-				return throwable instanceof StatusRuntimeException
-						&& Status.Code.UNAVAILABLE == ( ( StatusRuntimeException ) throwable ).getStatus().getCode();
-			}
-
-			@Override
-			public void onCompleted()
-			{
-
-			}
-		} );
+		return blockingStub.getSelectedSyncGroup( Empty.newBuilder().build() ).getIndex();
 	}
 
-	private void processChangeMessage( ChangeMessage changeMessage )
-	{
-		switch ( changeMessage.getId() ) {
-		case TIME_POINT:
-			SwingUtilities.invokeLater( this::onTimePointChange );
-			break;
-		case ACTIVE_SPOT:
-			SwingUtilities.invokeLater( this::onActiveSpotChange );
-			break;
-		case UPDATE_COLORS_REQUEST:
-			transferColors();
-			break;
-		case SELECTED_TAG_SET:
-			getSelectedTagSet();
-			transferColors();
-			break;
-		case SYNC_GROUP:
-			updateSyncGroup();
-			break;
-		default:
-			System.err.println("Unexpected event received from blender mastodon plugin.");
-		}
-	}
-
-	private void updateSyncGroup()
-	{
-		int index = blockingStub.getSelectedSyncGroup( Empty.newBuilder().build() ).getIndex();
-		groupHandle.setGroupId( index );
-	}
-
-	private void getSelectedTagSet()
-	{
-		int index = blockingStub.getSelectedTagSet( Empty.newBuilder().build() ).getIndex();
-		List<TagSetStructure.TagSet> tagSets = appModel.getModel().getTagSetModel().getTagSetStructure().getTagSets();
-		tagSet = index >= 0 && index < tagSets.size() ? tagSets.get( index ) : null;
-	}
-
-	private void onTimePointChange()
-	{
-		int timePoint = getTimePoint();
-		//System.out.println("on time point changed to: " + timePoint);
-		if(timePoint == knownTimePoint)
-			return;
-		knownTimePoint = timePoint;
-		timePointModel.setTimepoint( timePoint );
-	}
-
-	private int getTimePoint()
+	public int receiveTimepoint()
 	{
 		return blockingStub.getTimePoint( Empty.newBuilder().build() ).getTimePoint();
 	}
 
-	private void onActiveSpotChange()
-	{
-		int id = getActiveSpotId();
-		if(known_active_object == id)
-			return;
-		known_active_object = id;
-		//System.out.println("Blender => Mastodon: active spot changed to " + id);
-		if(id < 0)
-			return;
-		ModelGraph graph = appModel.getModel().getGraph();
-		Spot ref = graph.vertexRef();
-		Spot ref2 = graph.vertexRef();
-		try {
-			GraphIdBimap<Spot, Link> graphIdBimap = appModel.getModel().getGraphIdBimap();
-			Spot branchStart = graphIdBimap.getVertex( id, ref );
-			selectAllBranchNodesAndEdges( branchStart );
-			focusModel.focusVertex( BranchGraphUtils.findVertexForTimePoint(branchStart, knownTimePoint, ref2) );
-		}
-		finally {
-			graph.releaseRef( ref );
-			graph.releaseRef( ref2 );
-		}
-	}
-
-	private int getActiveSpotId()
+	public int receiveActiveSpotId()
 	{
 		return blockingStub.getActiveSpot( Empty.newBuilder().build() ).getId();
 	}
 
-	private void selectAllBranchNodesAndEdges( Spot branchStart )
+	public TagSetStructure.TagSet receiveTagSet(TagSetStructure tagSetStructure)
 	{
-		ModelGraph graph = appModel.getModel().getGraph();
-		SelectionModel<Spot, Link> selectionModel = appModel.getSelectionModel();
-		selectionModel.clearSelection();
-		Pair<RefList<Spot>, RefList<Link>> pair = BranchGraphUtils.getBranchSpotsAndLinks( graph, branchStart );
-		RefList<Spot> branchSpots = pair.getA();
-		RefList<Link> branchEdges = pair.getB();
-		selectionModel.setVerticesSelected( branchSpots, true );
-		selectionModel.setEdgesSelected( branchEdges, true );
+		int index = blockingStub.getSelectedTagSet( Empty.newBuilder().build() ).getIndex();
+		List<TagSetStructure.TagSet> tagSets = tagSetStructure.getTagSets();
+		return index >= 0 && index < tagSets.size() ? tagSets.get( index ) : null;
 	}
 
-	private void sendFocusedSpot( ModelGraph graph, GraphIdBimap<Spot, Link> graphIdBimap )
+	// setters
+
+	public void sendActiveSpotId( int id )
 	{
-		Spot ref = graph.vertexRef();
-		Spot ref2 = graph.vertexRef();
-		try
-		{
-			Spot focusedSpot = focusModel.getFocusedVertex( ref );
-			if(focusedSpot == null)
-				return;
-			Spot focusedBranchStart = BranchGraphUtils.getBranchStart(focusedSpot, ref2 );
-			int id = graphIdBimap.vertexIdBimap().getId( focusedBranchStart );
-			if(known_active_object == id)
-				return;
-			known_active_object = id;
-			SetActiveSpotRequest request = SetActiveSpotRequest.newBuilder().setId( id ).build();
-			blockingStub.setActiveSpot( request );
-		}
-		finally
-		{
-			graph.releaseRef( ref );
-			graph.releaseRef( ref2 );
-		}
+		blockingStub.setActiveSpot( SetActiveSpotRequest.newBuilder().setId( id ).build() );
 	}
 
-	private void synchronizeTagSetList()
+	public void sendTagSetList( List<TagSetStructure.TagSet> tagSetList )
 	{
-		transferTagSetList();
-		appModel.getModel().getTagSetModel().listeners().add( this::transferTagSetList );
-	}
-
-	private void transferTagSetList()
-	{
-		List<TagSetStructure.TagSet> tagSets = appModel.getModel().getTagSetModel().getTagSetStructure().getTagSets();
 		SetTagSetListRequest.Builder request = SetTagSetListRequest.newBuilder();
-		for(TagSetStructure.TagSet tagSet : tagSets)
+		for(TagSetStructure.TagSet tagSet : tagSetList )
 			request.addTagSetNames(tagSet.getName());
 		blockingStub.setTagSetList(request.build());
 	}
 
-	private void transferTimePoint( int timePoint )
+	public void sendTimepoint( int timePoint )
 	{
-		if( knownTimePoint == timePoint )
-			return;
-		knownTimePoint = timePoint;
 		//System.out.println("Mastodon -> Blender: set time point to " + timePoint);
 		blockingStub.setTimePoint( SetTimePointRequest.newBuilder()
 				.setTimepoint(timePoint)
 				.build());
 	}
 
-	private void transferCoordinates( ModelGraph graph )
+	public void sendCoordinates( ModelGraph graph )
 	{
 		AffineTransform3D transform = PointCloudNormalizationUtils.getNormalizingTransform( graph.vertices() );
 		for ( Spot spot : BranchGraphUtils.getAllBranchStarts( graph ) )
 			transferTracklet( graph, spot, transform );
 	}
 
-	private void transferColors()
+	public void sendColors( ModelGraph graph, ToIntFunction<Spot> spotToColor )
 	{
-		Model model = appModel.getModel();;
-		int defaultColor = 0x444444;
 		SetSpotColorsRequest.Builder request = SetSpotColorsRequest.newBuilder();
-		Function<Spot, TagSetStructure.Tag> spotToTag = tagSet == null ?
-				spot -> null :
-				model.getTagSetModel().getVertexTags().tags( tagSet )::get;
-		RefSet<Spot> trackletStarts = BranchGraphUtils.getAllBranchStarts( model.getGraph() );
+		RefSet<Spot> trackletStarts = BranchGraphUtils.getAllBranchStarts( graph );
 		for ( Spot spot : trackletStarts ) {
-			TagSetStructure.Tag tag = spotToTag.apply( spot );
 			request.addIds( spot.getInternalPoolIndex() );
-			request.addColors( tag == null ? defaultColor : tag.color() );
+			request.addColors( spotToColor.applyAsInt( spot ) );
 		}
 		blockingStub.setSpotColors( request.build() );
 	}
@@ -399,4 +216,75 @@ public class ViewServiceClient
 		request.addTimepoints( spot.getTimepoint() );
 	}
 
+	// callback
+
+	public void subscribeToChangeEvents()
+	{
+
+		nonBlockingStub.subscribeToChange( Empty.newBuilder().build(), new StreamObserver<ChangeMessage>()
+		{
+			@Override
+			public void onNext( ChangeMessage changeMessage )
+			{
+				processChangeMessage( changeMessage );
+			}
+
+			@Override
+			public void onError( Throwable throwable )
+			{
+				if( isUnavailableException( throwable ) )
+					System.out.println( "Connection to Blender is lost.");
+				else
+					throwable.printStackTrace();
+			}
+
+			private boolean isUnavailableException( Throwable throwable )
+			{
+				return throwable instanceof StatusRuntimeException
+						&& Status.Code.UNAVAILABLE == ( ( StatusRuntimeException ) throwable ).getStatus().getCode();
+			}
+
+			@Override
+			public void onCompleted()
+			{
+
+			}
+		} );
+	}
+
+	private void processChangeMessage( ChangeMessage changeMessage )
+	{
+		switch ( changeMessage.getId() ) {
+		case TIME_POINT:
+			listener.onTimepointChanged();
+			break;
+		case ACTIVE_SPOT:
+			listener.onActiveSpotChanged();
+			break;
+		case UPDATE_COLORS_REQUEST:
+			listener.onUpdateColorsRequest();
+			break;
+		case SELECTED_TAG_SET:
+			listener.onSelectedTagSetChanged();
+			break;
+		case SYNC_GROUP:
+			listener.onSyncGroupChanged();
+			break;
+		default:
+			System.err.println("Unexpected event received from blender mastodon plugin.");
+		}
+	}
+
+	public interface Listener {
+
+		void onSyncGroupChanged();
+
+		void onTimepointChanged();
+
+		void onActiveSpotChanged();
+
+		void onUpdateColorsRequest();
+
+		void onSelectedTagSetChanged();
+	}
 }

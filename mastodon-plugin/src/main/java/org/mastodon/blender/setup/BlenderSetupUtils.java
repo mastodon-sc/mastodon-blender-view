@@ -99,7 +99,6 @@ public class BlenderSetupUtils
 				port,
 				"--background", //
 				"--python-expr", script );
-		ViewServiceClient.closeBlender(port);
 		process.waitFor();
 	}
 

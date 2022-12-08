@@ -147,7 +147,7 @@ public class Blender3dViewPlugin extends AbstractContextual implements MamutPlug
 		{
 			new Thread(() -> {
 				try {
-					new BlenderManager( context, pluginAppModel.getAppModel() );
+					new BlenderController( context, pluginAppModel.getAppModel() );
 				}
 				catch ( StartBlenderException e ) {
 					BlenderSetup.startSetupWithMessage( context, e );
