@@ -50,7 +50,6 @@ import org.mastodon.model.tag.TagSetModel;
 import org.scijava.Context;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 public class MastodonUtils
 {
@@ -89,14 +88,14 @@ public class MastodonUtils
 		}
 	}
 
-	public static MamutAppModel showGuiAndGetAppModel(String projectPath) {
+	public static WindowManager showGui(String projectPath) {
 		try {
 			final WindowManager windowManager = new WindowManager( new Context() );
 			windowManager.getProjectManager().open( new MamutProjectIO().load( projectPath ) );
 			final MainWindow mainWindow = new MainWindow(windowManager);
 			mainWindow.setVisible( true );
 			mainWindow.setDefaultCloseOperation( WindowConstants.EXIT_ON_CLOSE );
-			return windowManager.getAppModel();
+			return windowManager;
 		} catch (IOException | SpimDataException e) {
 			throw new RuntimeException(e);
 		}

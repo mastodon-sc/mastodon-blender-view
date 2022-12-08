@@ -30,7 +30,6 @@ package org.mastodon.blender;
 
 import org.mastodon.app.ui.ViewMenuBuilder;
 import org.mastodon.blender.setup.BlenderSetup;
-import org.mastodon.blender.setup.StartBlender;
 import org.mastodon.mamut.MamutAppModel;
 import org.mastodon.mamut.plugin.MamutPlugin;
 import org.mastodon.mamut.plugin.MamutPluginAppModel;
@@ -147,15 +146,12 @@ public class Blender3dViewPlugin extends AbstractContextual implements MamutPlug
 		if ( pluginAppModel != null )
 		{
 			new Thread(() -> {
-				int port = StartBlender.getFreePort();
 				try {
-					StartBlender.startBlender( context, port );
+					new BlenderManager( context, pluginAppModel.getAppModel() );
 				}
-				catch ( Throwable e ) {
+				catch ( StartBlenderException e ) {
 					BlenderSetup.startSetupWithMessage( context, e );
-					return;
 				}
-				ViewServiceClient.start( port, pluginAppModel.getAppModel() );
 			}).start();
 		}
 	}
