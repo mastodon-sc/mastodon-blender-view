@@ -174,7 +174,12 @@ public class BlenderController
 	}
 
 	private void sendColors() {
-		client.sendColors( model.getGraph(), getSpotToColorFunction() );
+		sendColors( getSpotToColorFunction() );
+	}
+
+	public void sendColors( ToIntFunction< Spot > spotToColorFunction )
+	{
+		client.sendColors( model.getGraph(), spotToColorFunction );
 	}
 
 	private ToIntFunction<Spot> getSpotToColorFunction()
