@@ -87,30 +87,16 @@ class ManySpheres:
         reference_sphere.active_material = ManySpheres.init_sphere_material()
         return reference_sphere
 
-    def add_moving_spot(self, request):
+    def add_spot(self, request):
         sphere = self.reference_sphere.copy()
         sphere.name = request.label
         sphere.parent = self.parent_object
         sphere.scale = (0.1, 0.1, 0.1)
-        sphere.color = (random.random(), random.random(), random.random(), 1)
+        sphere.color = mb_utils.to_blender_color(request.color)
         x = request.coordinates[0]
         y = request.coordinates[1]
         z = request.coordinates[2]
         sphere.location = (x, y, z)
-        # mb_utils.hide_object(sphere, time=0)
-        # mb_utils.show_object(sphere, time=request.timepoints[0])
-        #
-        # last_time = 0
-        # for i in range(len(request.timepoints)):
-        #     x = request.coordinates[i * 3]
-        #     y = request.coordinates[i * 3 + 1]
-        #     z = request.coordinates[i * 3 + 2]
-        #     time = request.timepoints[i]
-        #     sphere.location = (x, y, z)
-        #     sphere.keyframe_insert(data_path="location", frame=time)
-        #     last_time = time
-        #
-        # mb_utils.hide_object(sphere, time=last_time + 1)
         self.collection.objects.link(sphere)
         self.ids_to_spheres[request.id] = sphere
         return
@@ -127,22 +113,18 @@ class ManySpheres:
             color = colors[i]
             self.ids_to_spheres[id].color = mb_utils.to_blender_color(color)
 
-    def set_spot_properties(self, request):
+    def set_spot_visibility_and_position(self, request):
         ids = request.ids
-        colors = request.colors
         coordinates = request.coordinates
-        hidden_ids = request.hiddenIds
+        hidden = set(self.ids_to_spheres.values())
 
         for i in range(len(ids)):
-            id = ids[i]
-            color = colors[i]
-            sphere = self.ids_to_spheres[id]
-            sphere.color = to_blender_color(color)
+            sphere = self.ids_to_spheres[ids[i]]
             sphere.location = (coordinates[3*i], coordinates[3*i + 1], coordinates[3*i + 2])
             set_visible(sphere, True)
+            hidden.remove(sphere)
 
-        for id in hidden_ids:
-            sphere = self.ids_to_spheres[id]
+        for sphere in hidden:
             set_visible(sphere, False)
 
     def set_time_point(self, request):

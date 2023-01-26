@@ -35,12 +35,13 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
-import org.mastodon.AddMovingSpotRequest;
+
+import org.mastodon.AddSpotRequest;
 import org.mastodon.ChangeMessage;
 import org.mastodon.Empty;
 import org.mastodon.SetActiveSpotRequest;
 import org.mastodon.SetSpotColorsRequest;
-import org.mastodon.SetSpotPropertiesRequest;
+import org.mastodon.SetSpotPositionRequest;
 import org.mastodon.SetTagSetListRequest;
 import org.mastodon.SetTimePointRequest;
 import org.mastodon.ViewServiceGrpc;
@@ -167,8 +168,18 @@ public class ViewServiceClient
 	public void sendCoordinates( ModelGraph graph )
 	{
 		AffineTransform3D transform = PointCloudNormalizationUtils.getNormalizingTransform( graph.vertices() );
+		RealPoint point = new RealPoint( 3 );
 		for ( Spot spot : BranchGraphUtils.getAllBranchStarts( graph ) )
-			transferTracklet( graph, spot, transform );
+		{
+			AddSpotRequest.Builder request = AddSpotRequest.newBuilder();
+			request.setId( spot.getInternalPoolIndex() );
+			request.setLabel( spot.getLabel() );
+			transform.apply( spot, point );
+			request.addCoordinates( point.getFloatPosition( 0 ) );
+			request.addCoordinates( point.getFloatPosition( 1 ) );
+			request.addCoordinates( point.getFloatPosition( 2 ) );
+			blockingStub.addSpot( request.build() );
+		}
 	}
 
 	public void sendColors( ModelGraph graph, ToIntFunction<Spot> spotToColor )
@@ -180,41 +191,6 @@ public class ViewServiceClient
 			request.addColors( spotToColor.applyAsInt( spot ) );
 		}
 		blockingStub.setSpotColors( request.build() );
-	}
-
-	private void transferTracklet( ModelGraph graph, Spot start, AffineTransform3D transform )
-	{
-		Spot spot = graph.vertexRef();
-		try
-		{
-			AddMovingSpotRequest.Builder request = AddMovingSpotRequest.newBuilder();
-			request.setId( start.getInternalPoolIndex() );
-			request.setLabel( start.getLabel() );
-			spot.refTo( start );
-			coordinates( request, spot, transform );
-			while ( spot.outgoingEdges().size() == 1 )
-			{
-				spot.outgoingEdges().iterator().next().getTarget( spot );
-				if ( spot.incomingEdges().size() != 1 )
-					break;
-				coordinates( request, spot, transform );
-			}
-			blockingStub.addMovingSpot( request.build() );
-		}
-		finally
-		{
-			graph.releaseRef( spot );
-		}
-	}
-
-	private void coordinates( AddMovingSpotRequest.Builder request, Spot spot, AffineTransform3D transform )
-	{
-		RealPoint point = new RealPoint( 3 );
-		transform.apply( spot, point );
-		request.addCoordinates( point.getFloatPosition( 0 ) );
-		request.addCoordinates( point.getFloatPosition( 1 ) );
-		request.addCoordinates( point.getFloatPosition( 2 ) );
-		request.addTimepoints( spot.getTimepoint() );
 	}
 
 	// callback
@@ -279,9 +255,9 @@ public class ViewServiceClient
 		}
 	}
 
-	public void sendProperties( SetSpotPropertiesRequest request )
+	public void sendSpotVisibilityAndPosition( SetSpotPositionRequest request )
 	{
-		blockingStub.setSpotProperties( request );
+		blockingStub.setSpotVisibilityAndPosition( request );
 	}
 
 	public interface Listener {

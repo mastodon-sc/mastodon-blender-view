@@ -60,9 +60,9 @@ class ViewService(rpc.ViewServiceServicer):
             partial(bpy.ops.wm.quit_blender))
         return pb.Empty()
 
-    def addMovingSpot(self, request, context):
+    def addSpot(self, request, context):
         mb_utils.run_in_main_thread(
-            partial(self.many_spheres.add_moving_spot, request))
+            partial(self.many_spheres.add_spot, request))
         return pb.Empty()
 
     def setSpotColors(self, request, context):
@@ -70,9 +70,9 @@ class ViewService(rpc.ViewServiceServicer):
             partial(self.many_spheres.set_spot_colors, request))
         return pb.Empty()
 
-    def setSpotProperties(self, request, context):
+    def setSpotVisibilityAndPosition(self, request, context):
         mb_utils.run_in_main_thread(
-            partial(self.many_spheres.set_spot_properties, request))
+            partial(self.many_spheres.set_spot_visibility_and_position, request))
         return pb.Empty()
 
     def setTimePoint(self, request, context):

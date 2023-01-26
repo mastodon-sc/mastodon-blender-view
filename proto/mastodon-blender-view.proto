@@ -27,11 +27,11 @@ service ViewService {
 
   rpc closeAll(Empty) returns (Empty) {}
 
-  rpc addMovingSpot(AddMovingSpotRequest) returns (Empty) {}
+  rpc addSpot(AddSpotRequest) returns (Empty) {}
 
   rpc setSpotColors(SetSpotColorsRequest) returns (Empty) {}
 
-  rpc setSpotProperties(SetSpotPropertiesRequest) returns (Empty) {}
+  rpc setSpotVisibilityAndPosition(SetSpotPositionRequest) returns (Empty) {}
 
   rpc setTimePoint(SetTimePointRequest) returns (Empty) {}
 
@@ -56,11 +56,11 @@ message VersionResponse {
   string version = 1;
 }
 
-message AddMovingSpotRequest {
+message AddSpotRequest {
   uint32 id = 1;
   string label = 2;
-  repeated float coordinates = 3;
-  repeated int32 timepoints = 4;
+  uint32 color = 3;
+  repeated float coordinates = 4;
 }
 
 message SetSpotColorsRequest {
@@ -68,11 +68,9 @@ message SetSpotColorsRequest {
   repeated uint32 colors = 2;
 }
 
-message SetSpotPropertiesRequest {
+message SetSpotPositionRequest {
   repeated uint32 ids = 1;
-  repeated uint32 colors = 2;
-  repeated float coordinates = 3;
-  repeated uint32 hiddenIds = 4;
+  repeated float coordinates = 2;
 }
 
 message SetTimePointRequest {

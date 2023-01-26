@@ -33,7 +33,7 @@ import javax.swing.SwingUtilities;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.util.Pair;
 
-import org.mastodon.SetSpotPropertiesRequest;
+import org.mastodon.SetSpotPositionRequest;
 import org.mastodon.collection.RefList;
 import org.mastodon.graph.GraphIdBimap;
 import org.mastodon.grouping.GroupHandle;
@@ -58,7 +58,6 @@ import org.scijava.Context;
 import java.util.List;
 import java.util.function.ToIntFunction;
 
-import gnu.trove.iterator.TIntIterator;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
@@ -167,25 +166,19 @@ public class BlenderController
 
 	private void sendProperties()
 	{
-		SetSpotPropertiesRequest.Builder request = SetSpotPropertiesRequest.newBuilder();
+		SetSpotPositionRequest.Builder request = SetSpotPositionRequest.newBuilder();
 		SpatialIndex< Spot > spotsOfTimepoint = model.getSpatioTemporalIndex().getSpatialIndex( timePointModel.getTimepoint() );
-		TIntSet hidden = new TIntHashSet( startIds );
 		float[] position = new float[3];
 		for( Spot spotB : spotsOfTimepoint ) {
 			int branchId = spotIdToBranchId.get( spotB.getInternalPoolIndex() );
 			spotB.localize( position );
-			hidden.remove( branchId );
 			request.addIds( branchId );
-			request.addColors( 0xff444444 );
 			transform.apply( position, position );
 			request.addCoordinates( position[ 0 ] );
 			request.addCoordinates( position[ 1 ] );
 			request.addCoordinates( position[ 2 ] );
 		}
-		TIntIterator iterator = hidden.iterator();
-		while( iterator.hasNext() )
-			request.addHiddenIds( iterator.next() );
-		client.sendProperties(request.build());
+		client.sendSpotVisibilityAndPosition(request.build());
 	}
 
 	private void prepareSendProperties()
