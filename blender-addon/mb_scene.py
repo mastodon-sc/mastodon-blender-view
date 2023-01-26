@@ -33,6 +33,13 @@ import random
 from . import mb_utils
 
 
+def set_visible(sphere, visible):
+    hide = not visible
+    if sphere.hide_viewport != hide:
+        sphere.hide_viewport = hide
+        sphere.hide_render = hide
+
+
 class ManySpheres:
 
     def __init__(self):
@@ -132,13 +139,11 @@ class ManySpheres:
             sphere = self.ids_to_spheres[id]
             sphere.color = to_blender_color(color)
             sphere.location = (coordinates[3*i], coordinates[3*i + 1], coordinates[3*i + 2])
-            sphere.hide_viewport = False
-            sphere.hide_render = False
+            set_visible(sphere, True)
 
         for id in hidden_ids:
             sphere = self.ids_to_spheres[id]
-            sphere.hide_viewport = True
-            sphere.hide_render = True
+            set_visible(sphere, False)
 
     def set_time_point(self, request):
         time_point = request.timepoint
