@@ -29,7 +29,11 @@
 package org.mastodon.blender;
 
 import javax.swing.SwingUtilities;
+
+import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.util.Pair;
+
+import org.mastodon.SetSpotPropertiesRequest;
 import org.mastodon.collection.RefList;
 import org.mastodon.graph.GraphIdBimap;
 import org.mastodon.grouping.GroupHandle;
@@ -48,10 +52,16 @@ import org.mastodon.model.TimepointModel;
 import org.mastodon.model.tag.ObjTagMap;
 import org.mastodon.model.tag.TagSetModel;
 import org.mastodon.model.tag.TagSetStructure;
+import org.mastodon.spatial.SpatialIndex;
 import org.scijava.Context;
 
 import java.util.List;
 import java.util.function.ToIntFunction;
+
+import gnu.trove.iterator.TIntIterator;
+import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * Manages a Blender window.
@@ -83,6 +93,12 @@ public class BlenderController
 
 	int known_active_object = -1;
 
+	private TIntIntHashMap spotIdToBranchId;
+
+	private TIntSet startIds;
+
+	private AffineTransform3D transform;
+
 	public BlenderController( Context context, MamutAppModel appModel ) {
 		this.appModel = appModel;
 		this.model = appModel.getModel();
@@ -98,6 +114,7 @@ public class BlenderController
 		triggerRepaint();
 		client.subscribeToChangeEvents();
 		subscribeListeners();
+		prepareSendProperties();
 		//MastodonUtils.logMastodonEvents(appModel);
 	}
 
@@ -144,7 +161,59 @@ public class BlenderController
 
 	private void onTimepointModelEvent()
 	{
-		sendTimepoint();
+		//sendTimepoint();
+		sendProperties();
+	}
+
+	private void sendProperties()
+	{
+		SetSpotPropertiesRequest.Builder request = SetSpotPropertiesRequest.newBuilder();
+		SpatialIndex< Spot > spotsOfTimepoint = model.getSpatioTemporalIndex().getSpatialIndex( timePointModel.getTimepoint() );
+		TIntSet hidden = new TIntHashSet( startIds );
+		float[] position = new float[3];
+		for( Spot spotB : spotsOfTimepoint ) {
+			int branchId = spotIdToBranchId.get( spotB.getInternalPoolIndex() );
+			spotB.localize( position );
+			hidden.remove( branchId );
+			request.addIds( branchId );
+			request.addColors( 0xff444444 );
+			transform.apply( position, position );
+			request.addCoordinates( position[ 0 ] );
+			request.addCoordinates( position[ 1 ] );
+			request.addCoordinates( position[ 2 ] );
+		}
+		TIntIterator iterator = hidden.iterator();
+		while( iterator.hasNext() )
+			request.addHiddenIds( iterator.next() );
+		client.sendProperties(request.build());
+	}
+
+	private void prepareSendProperties()
+	{
+		ModelGraph graph = model.getGraph();
+		spotIdToBranchId = new TIntIntHashMap();
+		startIds = new TIntHashSet();
+		transform = PointCloudNormalizationUtils.getNormalizingTransform( graph.vertices() );
+		Spot spot = graph.vertexRef();
+		try
+		{
+			for ( Spot start : BranchGraphUtils.getAllBranchStarts( model.getGraph() ) ) {
+				spot.refTo( start );
+				startIds.add( start.getInternalPoolIndex() );
+				spotIdToBranchId.put( spot.getInternalPoolIndex(), start.getInternalPoolIndex() );
+				while ( spot.outgoingEdges().size() == 1 )
+				{
+					spot.outgoingEdges().iterator().next().getTarget( spot );
+					if ( spot.incomingEdges().size() != 1 )
+						break;
+					spotIdToBranchId.put( spot.getInternalPoolIndex(), start.getInternalPoolIndex() );
+				}
+			}
+		}
+		finally
+		{
+			graph.releaseRef( spot );
+		}
 	}
 
 	private void triggerRepaint()

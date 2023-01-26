@@ -40,6 +40,7 @@ import org.mastodon.ChangeMessage;
 import org.mastodon.Empty;
 import org.mastodon.SetActiveSpotRequest;
 import org.mastodon.SetSpotColorsRequest;
+import org.mastodon.SetSpotPropertiesRequest;
 import org.mastodon.SetTagSetListRequest;
 import org.mastodon.SetTimePointRequest;
 import org.mastodon.ViewServiceGrpc;
@@ -276,6 +277,11 @@ public class ViewServiceClient
 		default:
 			System.err.println("Unexpected event received from blender mastodon plugin.");
 		}
+	}
+
+	public void sendProperties( SetSpotPropertiesRequest request )
+	{
+		blockingStub.setSpotProperties( request );
 	}
 
 	public interface Listener {

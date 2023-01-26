@@ -70,6 +70,11 @@ class ViewService(rpc.ViewServiceServicer):
             partial(self.many_spheres.set_spot_colors, request))
         return pb.Empty()
 
+    def setSpotProperties(self, request, context):
+        mb_utils.run_in_main_thread(
+            partial(self.many_spheres.set_spot_properties, request))
+        return pb.Empty()
+
     def setTimePoint(self, request, context):
         self.time_point = request.timepoint
         mb_utils.run_in_main_thread(
