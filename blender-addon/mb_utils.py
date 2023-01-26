@@ -29,11 +29,14 @@
 import bpy
 import queue
 
+
 # Implement run in main thread
 
 class MainThreadQueue:
-    execution_queue = queue.Queue()
-    waiting = False
+
+    def __init__(self):
+        self.execution_queue = queue.Queue()
+        self.waiting = False
 
     def enqueue(self, function):
         self.execution_queue.put(function)
@@ -48,7 +51,9 @@ class MainThreadQueue:
         self.waiting = False
         return None
 
+
 main_thread_queue = MainThreadQueue()
+
 
 def run_in_main_thread(function):
     main_thread_queue.enqueue(function)
@@ -67,3 +72,14 @@ def insert_visibility_keyframe(obj, time, visible):
     obj.hide_render = not visible
     obj.keyframe_insert(data_path="hide_viewport", frame=time)
     obj.keyframe_insert(data_path="hide_render", frame=time)
+
+
+def get_color_channel(color_as_int, channel):
+    return float((color_as_int >> (8 * channel)) & 0xff) / 255
+
+
+def to_blender_color(color_as_int):
+    red = get_color_channel(color_as_int, 2)
+    green = get_color_channel(color_as_int, 1)
+    blue = get_color_channel(color_as_int, 0)
+    return red, green, blue, 1

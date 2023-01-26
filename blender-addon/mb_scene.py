@@ -44,10 +44,6 @@ def to_blender_color(color_as_int):
 
 
 class ManySpheres:
-    collection = None
-    parent_object = None
-    reference_sphere = None
-    ids_to_spheres = bidict.bidict()
 
     def __init__(self):
 
@@ -82,6 +78,10 @@ class ManySpheres:
                                          principled_node.inputs[0])
             self.reference_sphere.active_material = material
 
+        self.collection = None
+        self.parent_object = None
+        self.reference_sphere = None
+        self.ids_to_spheres = bidict.bidict()
         init_collection()
         init_parent_object()
         init_reference_sphere()
