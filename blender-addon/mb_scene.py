@@ -29,63 +29,56 @@
 import bpy
 import bidict
 import random
+
 from . import mb_utils
-
-
-def get_color_channel(color_as_int, channel):
-    return float((color_as_int >> (8 * channel)) & 0xff) / 255
-
-
-def to_blender_color(color_as_int):
-    red = get_color_channel(color_as_int, 2)
-    green = get_color_channel(color_as_int, 1)
-    blue = get_color_channel(color_as_int, 0)
-    return red, green, blue, 1
 
 
 class ManySpheres:
 
     def __init__(self):
-
-        def init_collection():
-            self.collection = bpy.data.collections.new("mastodon_blender_view")
-            bpy.context.scene.collection.children.link(self.collection)
-
-        def init_parent_object():
-            bpy.ops.object.empty_add(type='PLAIN_AXES', align='WORLD',
-                                     location=(0, 0, 0), scale=(1, 1, 1))
-            self.parent_object = bpy.context.active_object
-            bpy.ops.collection.objects_remove_all()
-            self.collection.objects.link(self.parent_object)
-
-        def init_reference_sphere():
-            bpy.ops.mesh.primitive_ico_sphere_add(enter_editmode=False,
-                                                  align='WORLD',
-                                                  location=(0, 0, 0),
-                                                  scale=(1, 1, 1))
-            bpy.ops.object.shade_smooth()
-            self.reference_sphere = bpy.context.active_object
-            bpy.ops.collection.objects_remove_all()  # remove the sphere from its collection
-
-        def init_sphere_material():
-            material = bpy.data.materials.new(name="Object Color")
-            material.use_nodes = True
-            principled_node = material.node_tree.nodes.get('Principled BSDF')
-            principled_node.inputs[0].default_value = (1, 0, 0, 1)
-            object_info_node = material.node_tree.nodes.new(
-                'ShaderNodeObjectInfo')
-            material.node_tree.links.new(object_info_node.outputs[1],
-                                         principled_node.inputs[0])
-            self.reference_sphere.active_material = material
-
-        self.collection = None
-        self.parent_object = None
-        self.reference_sphere = None
+        self.collection = ManySpheres.init_collection()
+        self.parent_object = ManySpheres.init_parent_object(self.collection)
+        self.reference_sphere = ManySpheres.init_reference_sphere()
         self.ids_to_spheres = bidict.bidict()
-        init_collection()
-        init_parent_object()
-        init_reference_sphere()
-        init_sphere_material()
+
+    @staticmethod
+    def init_collection():
+        collection = bpy.data.collections.new("mastodon_blender_view")
+        bpy.context.scene.collection.children.link(collection)
+        return collection
+
+    @staticmethod
+    def init_parent_object(collection):
+        bpy.ops.object.empty_add(type='PLAIN_AXES', align='WORLD',
+                                 location=(0, 0, 0), scale=(1, 1, 1))
+        parent_object = bpy.context.active_object
+        bpy.ops.collection.objects_remove_all()
+        collection.objects.link(parent_object)
+        return parent_object
+
+    @staticmethod
+    def init_sphere_material():
+        material = bpy.data.materials.new(name="Object Color")
+        material.use_nodes = True
+        principled_node = material.node_tree.nodes.get('Principled BSDF')
+        principled_node.inputs[0].default_value = (1, 0, 0, 1)
+        object_info_node = material.node_tree.nodes.new(
+            'ShaderNodeObjectInfo')
+        material.node_tree.links.new(object_info_node.outputs[1],
+                                     principled_node.inputs[0])
+        return material
+
+    @staticmethod
+    def init_reference_sphere():
+        bpy.ops.mesh.primitive_ico_sphere_add(enter_editmode=False,
+                                              align='WORLD',
+                                              location=(0, 0, 0),
+                                              scale=(1, 1, 1))
+        bpy.ops.object.shade_smooth()
+        reference_sphere = bpy.context.active_object
+        bpy.ops.collection.objects_remove_all()  # remove the sphere from its collection
+        reference_sphere.active_material = ManySpheres.init_sphere_material()
+        return reference_sphere
 
     def add_moving_spot(self, request):
         sphere = self.reference_sphere.copy()
@@ -121,7 +114,7 @@ class ManySpheres:
         for i in range(len(ids)):
             id = ids[i]
             color = colors[i]
-            self.ids_to_spheres[id].color = to_blender_color(color)
+            self.ids_to_spheres[id].color = mb_utils.to_blender_color(color)
 
     def set_time_point(self, request):
         time_point = request.timepoint
