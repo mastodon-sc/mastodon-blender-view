@@ -40,18 +40,16 @@ from functools import partial
 
 
 class ViewService(rpc.ViewServiceServicer):
-    many_spheres : mb_scene.ManySpheres = None
-    active_spot_id = None
-    time_point = None
-    changes_queue = queue.Queue()
-    tag_set_list = []
-    tag_set_index = -1
-    sync_group_index = -1
 
     def __init__(self, many_spheres):
         self.many_spheres = many_spheres
-        callback = self.active_object_changed_callback
-        subscribe_to_active_object_change_event(self, callback)
+        self.active_spot_id = None
+        self.time_point = None
+        self.changes_queue = queue.Queue()
+        self.tag_set_list = []
+        self.tag_set_index = -1
+        self.sync_group_index = -1
+        subscribe_to_active_object_change_event(self, self.active_object_changed_callback)
         bpy.app.handlers.frame_change_post.append(self.frame_change_callback)
 
     def getVersion(self, request, context):
@@ -144,8 +142,6 @@ def subscribe_to_active_object_change_event(owner, callback):
 
 
 class MastodonBlenderServer:
-    many_spheres = None
-    view_service = None
 
     def __init__(self):
         self.many_spheres = mb_scene.ManySpheres()

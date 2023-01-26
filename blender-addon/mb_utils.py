@@ -29,11 +29,14 @@
 import bpy
 import queue
 
+
 # Implement run in main thread
 
 class MainThreadQueue:
-    execution_queue = queue.Queue()
-    waiting = False
+
+    def __init__(self):
+        self.execution_queue = queue.Queue()
+        self.waiting = False
 
     def enqueue(self, function):
         self.execution_queue.put(function)
@@ -48,7 +51,9 @@ class MainThreadQueue:
         self.waiting = False
         return None
 
+
 main_thread_queue = MainThreadQueue()
+
 
 def run_in_main_thread(function):
     main_thread_queue.enqueue(function)
