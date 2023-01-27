@@ -75,6 +75,11 @@ class ViewService(rpc.ViewServiceServicer):
             partial(self.many_spheres.set_spot_visibility_and_position, request))
         return pb.Empty()
 
+    def setSelection(self, request, context):
+        mb_utils.run_in_main_thread(
+            partial(self.many_spheres.set_selection, request))
+        return pb.Empty()
+
     def setTimePoint(self, request, context):
         self.time_point = request.timepoint
         mb_utils.run_in_main_thread(

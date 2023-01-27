@@ -127,6 +127,11 @@ class ManySpheres:
         for sphere in hidden:
             set_visible(sphere, False)
 
+    def set_selection(self, request):
+        ids = set(request.ids)
+        for id, sphere in self.ids_to_spheres.items():
+            sphere.select_set(id in ids)
+
     def set_time_point(self, request):
         time_point = request.timepoint
         bpy.context.scene.frame_set(time_point)

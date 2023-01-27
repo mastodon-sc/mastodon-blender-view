@@ -40,6 +40,7 @@ import org.mastodon.AddSpotRequest;
 import org.mastodon.ChangeMessage;
 import org.mastodon.Empty;
 import org.mastodon.SetActiveSpotRequest;
+import org.mastodon.SetSelectionRequest;
 import org.mastodon.SetSpotColorsRequest;
 import org.mastodon.SetSpotPositionRequest;
 import org.mastodon.SetTagSetListRequest;
@@ -258,6 +259,11 @@ public class ViewServiceClient
 	public void sendSpotVisibilityAndPosition( SetSpotPositionRequest request )
 	{
 		blockingStub.setSpotVisibilityAndPosition( request );
+	}
+
+	public void sendSelection( SetSelectionRequest request )
+	{
+		blockingStub.setSelection( request );
 	}
 
 	public interface Listener {

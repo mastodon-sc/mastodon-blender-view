@@ -33,6 +33,8 @@ service ViewService {
 
   rpc setSpotVisibilityAndPosition(SetSpotPositionRequest) returns (Empty) {}
 
+  rpc setSelection(SetSelectionRequest) returns (Empty) {}
+
   rpc setTimePoint(SetTimePointRequest) returns (Empty) {}
 
   rpc getTimePoint(Empty) returns (TimePointResponse) {}
@@ -71,6 +73,10 @@ message SetSpotColorsRequest {
 message SetSpotPositionRequest {
   repeated uint32 ids = 1;
   repeated float coordinates = 2;
+}
+
+message SetSelectionRequest {
+  repeated uint32 ids = 1;
 }
 
 message SetTimePointRequest {

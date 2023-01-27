@@ -33,6 +33,7 @@ import javax.swing.SwingUtilities;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.util.Pair;
 
+import org.mastodon.SetSelectionRequest;
 import org.mastodon.SetSpotPositionRequest;
 import org.mastodon.collection.RefList;
 import org.mastodon.graph.GraphIdBimap;
@@ -162,6 +163,19 @@ public class BlenderController
 	{
 		//sendTimepoint();
 		sendProperties();
+		sendSelection();
+	}
+
+	private void sendSelection()
+	{
+		SetSelectionRequest.Builder request = SetSelectionRequest.newBuilder();
+		int timepoint = timePointModel.getTimepoint();
+		SelectionModel< Spot, Link > selection = appModel.getSelectionModel();
+		for ( Spot spot : selection.getSelectedVertices() ) {
+			if(timepoint == spot.getTimepoint())
+				request.addIds( spotIdToBranchId.get( spot.getInternalPoolIndex() ) );
+		}
+		client.sendSelection( request.build() );
 	}
 
 	private void sendProperties()
