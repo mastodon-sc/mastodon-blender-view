@@ -72,3 +72,14 @@ def insert_visibility_keyframe(obj, time, visible):
     obj.hide_render = not visible
     obj.keyframe_insert(data_path="hide_viewport", frame=time)
     obj.keyframe_insert(data_path="hide_render", frame=time)
+
+
+def get_color_channel(color_as_int, channel):
+    return float((color_as_int >> (8 * channel)) & 0xff) / 255
+
+
+def to_blender_color(color_as_int):
+    red = get_color_channel(color_as_int, 2)
+    green = get_color_channel(color_as_int, 1)
+    blue = get_color_channel(color_as_int, 0)
+    return red, green, blue, 1
