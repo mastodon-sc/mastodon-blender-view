@@ -65,6 +65,8 @@ public class ViewServiceClient
 
 	private final Listener listener;
 
+	private int timeScalingFactor = 10;
+
 	public static void waitForConnection( int port )
 	{
 		ManagedChannel channel = ManagedChannelBuilder.forTarget( URL + port ).usePlaintext().build();
@@ -125,7 +127,7 @@ public class ViewServiceClient
 
 	public int receiveTimepoint()
 	{
-		return blockingStub.getTimePoint( Empty.newBuilder().build() ).getTimePoint();
+		return Math.round( (float) blockingStub.getTimePoint( Empty.newBuilder().build() ).getTimePoint() / timeScalingFactor );
 	}
 
 	public int receiveActiveSpotId()
@@ -159,7 +161,7 @@ public class ViewServiceClient
 	{
 		//System.out.println("Mastodon -> Blender: set time point to " + timePoint);
 		blockingStub.setTimePoint( SetTimePointRequest.newBuilder()
-				.setTimepoint(timePoint)
+				.setTimepoint(timePoint * timeScalingFactor)
 				.build());
 	}
 
@@ -189,20 +191,35 @@ public class ViewServiceClient
 			AddMovingSpotRequest.Builder request = AddMovingSpotRequest.newBuilder();
 			request.setId( start.getInternalPoolIndex() );
 			request.setLabel( start.getLabel() );
-			spot.refTo( start );
-			coordinates( request, spot, transform );
-			while ( spot.outgoingEdges().size() == 1 )
-			{
-				spot.outgoingEdges().iterator().next().getTarget( spot );
-				if ( spot.incomingEdges().size() != 1 )
-					break;
-				coordinates( request, spot, transform );
-			}
+			addIncomingSpotPositionToRequest( request, start, transform, spot ); // for better visualization of cell divisions in Blender
+			addEachSpotsCoordinatesToRequest( start, transform, spot, request );
 			blockingStub.addMovingSpot( request.build() );
 		}
 		finally
 		{
 			graph.releaseRef( spot );
+		}
+	}
+
+	private void addIncomingSpotPositionToRequest( AddMovingSpotRequest.Builder request, Spot branchStart, AffineTransform3D transform, Spot ref )
+	{
+		if ( branchStart.incomingEdges().size() == 1 )
+		{
+			branchStart.incomingEdges().iterator().next().getSource( ref );
+			coordinates( request, ref, transform );
+		}
+	}
+
+	private void addEachSpotsCoordinatesToRequest( Spot start, AffineTransform3D transform, Spot ref, AddMovingSpotRequest.Builder request )
+	{
+		Spot spot = ref.refTo( start );
+		coordinates( request, spot, transform );
+		while ( spot.outgoingEdges().size() == 1 )
+		{
+			spot = spot.outgoingEdges().iterator().next().getTarget( ref );
+			if ( spot.incomingEdges().size() != 1 )
+				break;
+			coordinates( request, spot, transform );
 		}
 	}
 
@@ -213,7 +230,7 @@ public class ViewServiceClient
 		request.addCoordinates( point.getFloatPosition( 0 ) );
 		request.addCoordinates( point.getFloatPosition( 1 ) );
 		request.addCoordinates( point.getFloatPosition( 2 ) );
-		request.addTimepoints( spot.getTimepoint() );
+		request.addTimepoints( spot.getTimepoint() * timeScalingFactor );
 	}
 
 	// callback
