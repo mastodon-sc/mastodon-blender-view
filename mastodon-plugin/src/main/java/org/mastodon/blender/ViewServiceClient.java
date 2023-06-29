@@ -56,6 +56,14 @@ import java.util.function.ToIntFunction;
 
 public class ViewServiceClient
 {
+	/**
+	 * Factor for scaling between Mastodon timepoints and Blender frames.
+	 * One Mastodon timepoint is mapped to the given number of Blender frames.
+	 * <p>
+	 * Mapping a timepoint to multiple frames in Blender has the advantage
+	 * that the Blender automatically interpolates between the timepoints.
+	 **/
+	private static final int TIME_SCALING_FACTOR = 10;
 
 	public static final String URL = "localhost:";
 
@@ -64,8 +72,6 @@ public class ViewServiceClient
 	private final ViewServiceGrpc.ViewServiceStub nonBlockingStub;
 
 	private final Listener listener;
-
-	private int timeScalingFactor = 10;
 
 	public static void waitForConnection( int port )
 	{
@@ -127,7 +133,7 @@ public class ViewServiceClient
 
 	public int receiveTimepoint()
 	{
-		return Math.round( (float) blockingStub.getTimePoint( Empty.newBuilder().build() ).getTimePoint() / timeScalingFactor );
+		return Math.round( ( float ) blockingStub.getTimePoint( Empty.newBuilder().build() ).getTimePoint() / TIME_SCALING_FACTOR );
 	}
 
 	public int receiveActiveSpotId()
@@ -161,8 +167,8 @@ public class ViewServiceClient
 	{
 		//System.out.println("Mastodon -> Blender: set time point to " + timePoint);
 		blockingStub.setTimePoint( SetTimePointRequest.newBuilder()
-				.setTimepoint(timePoint * timeScalingFactor)
-				.build());
+				.setTimepoint( timePoint * TIME_SCALING_FACTOR )
+				.build() );
 	}
 
 	public void sendCoordinates( ModelGraph graph )
@@ -230,7 +236,7 @@ public class ViewServiceClient
 		request.addCoordinates( point.getFloatPosition( 0 ) );
 		request.addCoordinates( point.getFloatPosition( 1 ) );
 		request.addCoordinates( point.getFloatPosition( 2 ) );
-		request.addTimepoints( spot.getTimepoint() * timeScalingFactor );
+		request.addTimepoints( spot.getTimepoint() * TIME_SCALING_FACTOR );
 	}
 
 	// callback
