@@ -29,6 +29,7 @@
 import bpy
 import bidict
 import random
+import math
 
 from . import mb_utils
 
@@ -52,9 +53,27 @@ class ManySpheres:
         bpy.ops.object.empty_add(type='PLAIN_AXES', align='WORLD',
                                  location=(0, 0, 0), scale=(1, 1, 1))
         parent_object = bpy.context.active_object
+        ManySpheres.adapt_between_mastodon_and_blender_coordinates(parent_object)
         bpy.ops.collection.objects_remove_all()
         collection.objects.link(parent_object)
         return parent_object
+
+    @staticmethod
+    def adapt_between_mastodon_and_blender_coordinates(parent_object):
+        # Mastodon and Blender orient the coordinate system differently.
+        #
+        #            | up   | back | right
+        #  --------- | ---- | ---- | ----
+        #  Blender   | Z    | Y    | X
+        #  Mastodon  | -Y   | Z    | X
+        #
+        # There are two ways to adapt between the two coordinate systems:
+        # 1. Rotate the parent object by 180 degrees around the x-axis.
+        #  - Y axis becomes -Y axis, Z axis becomes -Z axis.
+        #  - Front view in Mastodon is top view in Blender.
+        # 2. Rotate the parent object by -90 degrees around the x-axis.
+        #  - Correctly maps front, back and up view but flips the Y and Z axis.
+        parent_object.rotation_euler = (math.radians(180), 0, 0)
 
     @staticmethod
     def init_sphere_material():
