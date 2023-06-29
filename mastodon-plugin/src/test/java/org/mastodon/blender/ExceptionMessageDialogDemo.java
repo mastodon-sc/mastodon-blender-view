@@ -32,7 +32,7 @@ public class ExceptionMessageDialogDemo
 {
 	public static void main(String... args) {
 		Exception e = getSomeExceptions();
-		System.out.println(ExceptionDialog.showOkCancelDialog( null, "Some Error Occured", "This is what went wrong", e, "Hello", "Cancel" ));
+		System.out.println(ExceptionDialog.showOkCancelDialog( null, "Some Error Occurred", "This is what went wrong", e, "Hello", "Cancel" ));
 	}
 
 	private static Exception getSomeExceptions()
