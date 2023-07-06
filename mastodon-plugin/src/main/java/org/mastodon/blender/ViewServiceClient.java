@@ -56,6 +56,14 @@ import java.util.function.ToIntFunction;
 
 public class ViewServiceClient
 {
+	/**
+	 * Factor for scaling between Mastodon timepoints and Blender frames.
+	 * One Mastodon timepoint is mapped to the given number of Blender frames.
+	 * <p>
+	 * Mapping a timepoint to multiple frames in Blender has the advantage
+	 * that the Blender automatically interpolates between the timepoints.
+	 **/
+	private static final int TIME_SCALING_FACTOR = 10;
 
 	public static final String URL = "localhost:";
 
@@ -125,7 +133,7 @@ public class ViewServiceClient
 
 	public int receiveTimepoint()
 	{
-		return blockingStub.getTimePoint( Empty.newBuilder().build() ).getTimePoint();
+		return Math.round( ( float ) blockingStub.getTimePoint( Empty.newBuilder().build() ).getTimePoint() / TIME_SCALING_FACTOR );
 	}
 
 	public int receiveActiveSpotId()
@@ -159,8 +167,8 @@ public class ViewServiceClient
 	{
 		//System.out.println("Mastodon -> Blender: set time point to " + timePoint);
 		blockingStub.setTimePoint( SetTimePointRequest.newBuilder()
-				.setTimepoint(timePoint)
-				.build());
+				.setTimepoint( timePoint * TIME_SCALING_FACTOR )
+				.build() );
 	}
 
 	public void sendCoordinates( ModelGraph graph )
@@ -189,20 +197,35 @@ public class ViewServiceClient
 			AddMovingSpotRequest.Builder request = AddMovingSpotRequest.newBuilder();
 			request.setId( start.getInternalPoolIndex() );
 			request.setLabel( start.getLabel() );
-			spot.refTo( start );
-			coordinates( request, spot, transform );
-			while ( spot.outgoingEdges().size() == 1 )
-			{
-				spot.outgoingEdges().iterator().next().getTarget( spot );
-				if ( spot.incomingEdges().size() != 1 )
-					break;
-				coordinates( request, spot, transform );
-			}
+			addIncomingSpotPositionToRequest( request, start, transform, spot ); // for better visualization of cell divisions in Blender
+			addEachSpotsCoordinatesToRequest( start, transform, spot, request );
 			blockingStub.addMovingSpot( request.build() );
 		}
 		finally
 		{
 			graph.releaseRef( spot );
+		}
+	}
+
+	private void addIncomingSpotPositionToRequest( AddMovingSpotRequest.Builder request, Spot branchStart, AffineTransform3D transform, Spot ref )
+	{
+		if ( branchStart.incomingEdges().size() == 1 )
+		{
+			branchStart.incomingEdges().iterator().next().getSource( ref );
+			coordinates( request, ref, transform );
+		}
+	}
+
+	private void addEachSpotsCoordinatesToRequest( Spot start, AffineTransform3D transform, Spot ref, AddMovingSpotRequest.Builder request )
+	{
+		Spot spot = ref.refTo( start );
+		coordinates( request, spot, transform );
+		while ( spot.outgoingEdges().size() == 1 )
+		{
+			spot = spot.outgoingEdges().iterator().next().getTarget( ref );
+			if ( spot.incomingEdges().size() != 1 )
+				break;
+			coordinates( request, spot, transform );
 		}
 	}
 
@@ -213,7 +236,7 @@ public class ViewServiceClient
 		request.addCoordinates( point.getFloatPosition( 0 ) );
 		request.addCoordinates( point.getFloatPosition( 1 ) );
 		request.addCoordinates( point.getFloatPosition( 2 ) );
-		request.addTimepoints( spot.getTimepoint() );
+		request.addTimepoints( spot.getTimepoint() * TIME_SCALING_FACTOR );
 	}
 
 	// callback
