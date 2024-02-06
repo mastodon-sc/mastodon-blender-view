@@ -32,7 +32,6 @@ import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
-import org.jetbrains.annotations.NotNull;
 import org.mastodon.blender.ViewServiceClient;
 import org.scijava.Context;
 import org.scijava.prefs.PrefService;

@@ -30,16 +30,16 @@ package org.mastodon.blender;
 
 import org.mastodon.app.ui.ViewMenuBuilder;
 import org.mastodon.blender.setup.BlenderSetup;
-import org.mastodon.mamut.MamutAppModel;
+import org.mastodon.mamut.KeyConfigScopes;
+import org.mastodon.mamut.ProjectModel;
 import org.mastodon.mamut.plugin.MamutPlugin;
-import org.mastodon.mamut.plugin.MamutPluginAppModel;
-import org.mastodon.ui.keymap.CommandDescriptionProvider;
-import org.mastodon.ui.keymap.CommandDescriptions;
 import org.mastodon.ui.keymap.KeyConfigContexts;
 import org.scijava.AbstractContextual;
 import org.scijava.Context;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+import org.scijava.ui.behaviour.io.gui.CommandDescriptionProvider;
+import org.scijava.ui.behaviour.io.gui.CommandDescriptions;
 import org.scijava.ui.behaviour.util.AbstractNamedAction;
 import org.scijava.ui.behaviour.util.Actions;
 import org.scijava.ui.behaviour.util.RunnableAction;
@@ -80,7 +80,7 @@ public class Blender3dViewPlugin extends AbstractContextual implements MamutPlug
 	{
 		public Descriptions()
 		{
-			super( KeyConfigContexts.TRACKSCHEME, KeyConfigContexts.BIGDATAVIEWER );
+			super( KeyConfigScopes.MAMUT, KeyConfigContexts.TRACKSCHEME, KeyConfigContexts.BIGDATAVIEWER );
 		}
 
 		@Override
@@ -94,7 +94,7 @@ public class Blender3dViewPlugin extends AbstractContextual implements MamutPlug
 	private final AbstractNamedAction showInBlender;
 	private final AbstractNamedAction setupBlender;
 
-	private MamutPluginAppModel pluginAppModel;
+	private ProjectModel pluginAppModel;
 
 	public Blender3dViewPlugin()
 	{
@@ -104,7 +104,7 @@ public class Blender3dViewPlugin extends AbstractContextual implements MamutPlug
 	}
 
 	@Override
-	public void setAppPluginModel( final MamutPluginAppModel model )
+	public void setAppPluginModel( final ProjectModel model )
 	{
 		this.pluginAppModel = model;
 		updateEnabledActions();
@@ -136,9 +136,7 @@ public class Blender3dViewPlugin extends AbstractContextual implements MamutPlug
 
 	private void updateEnabledActions()
 	{
-		final MamutAppModel appModel = ( pluginAppModel == null ) ?
-				null : pluginAppModel.getAppModel();
-		showInBlender.setEnabled( appModel != null );
+		showInBlender.setEnabled( pluginAppModel != null );
 	}
 
 	private void startBlenderView()
@@ -147,7 +145,7 @@ public class Blender3dViewPlugin extends AbstractContextual implements MamutPlug
 		{
 			new Thread(() -> {
 				try {
-					new BlenderController( context, pluginAppModel.getAppModel() );
+					new BlenderController( pluginAppModel );
 				}
 				catch ( StartBlenderException e ) {
 					BlenderSetup.startSetupWithMessage( context, e );

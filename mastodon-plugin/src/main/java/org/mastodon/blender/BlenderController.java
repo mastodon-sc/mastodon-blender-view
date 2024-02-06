@@ -33,7 +33,7 @@ import net.imglib2.util.Pair;
 import org.mastodon.collection.RefList;
 import org.mastodon.graph.GraphIdBimap;
 import org.mastodon.grouping.GroupHandle;
-import org.mastodon.mamut.MamutAppModel;
+import org.mastodon.mamut.ProjectModel;
 import org.mastodon.mamut.model.Link;
 import org.mastodon.mamut.model.Model;
 import org.mastodon.mamut.model.ModelGraph;
@@ -48,7 +48,6 @@ import org.mastodon.model.TimepointModel;
 import org.mastodon.model.tag.ObjTagMap;
 import org.mastodon.model.tag.TagSetModel;
 import org.mastodon.model.tag.TagSetStructure;
-import org.scijava.Context;
 
 import java.util.List;
 import java.util.function.ToIntFunction;
@@ -61,13 +60,13 @@ public class BlenderController
 
 	private final ViewServiceClient client;
 
-	private final MamutAppModel appModel;
+	private final ProjectModel projectModel;
 
 	private final Model model;
 
 	private final GroupHandle groupHandle;
 
-	private final FocusModel<Spot, Link> focusModel;
+	private final FocusModel<Spot> focusModel;
 
 	private final TimepointModel timePointModel;
 
@@ -83,22 +82,22 @@ public class BlenderController
 
 	int known_active_object = -1;
 
-	public BlenderController( Context context, MamutAppModel appModel ) {
-		this.appModel = appModel;
-		this.model = appModel.getModel();
-		this.groupHandle = appModel.getGroupManager().createGroupHandle();
+	public BlenderController( ProjectModel projectModel ) {
+		this.projectModel = projectModel;
+		this.model = projectModel.getModel();
+		this.groupHandle = projectModel.getGroupManager().createGroupHandle();
 		this.groupHandle.setGroupId( -1 );
-		NavigationHandler<Spot, Link> navigationModel = groupHandle.getModel( appModel.NAVIGATION );
-		this.focusModel = new AutoNavigateFocusModel<>( appModel.getFocusModel(), navigationModel );
-		this.timePointModel = groupHandle.getModel( appModel.TIMEPOINT );
-		this.client = new ViewServiceClient( context, new ViewServiceListener() );
+		NavigationHandler<Spot, Link> navigationModel = groupHandle.getModel( projectModel.NAVIGATION );
+		this.focusModel = new AutoNavigateFocusModel<>( projectModel.getFocusModel(), navigationModel );
+		this.timePointModel = groupHandle.getModel( projectModel.TIMEPOINT );
+		this.client = new ViewServiceClient( projectModel.getContext(), new ViewServiceListener() );
 		sendCoordinates();
 		sendColors();
 		sendTagSetList();
 		triggerRepaint();
 		client.subscribeToChangeEvents();
 		subscribeListeners();
-		//MastodonUtils.logMastodonEvents(appModel);
+		//MastodonUtils.logMastodonEvents(projectModel);
 	}
 
 	private void subscribeListeners()
@@ -240,11 +239,11 @@ public class BlenderController
 			//System.out.println("Blender => Mastodon: active spot changed to " + id);
 			if(id < 0)
 				return;
-			ModelGraph graph = appModel.getModel().getGraph();
+			ModelGraph graph = projectModel.getModel().getGraph();
 			Spot ref = graph.vertexRef();
 			Spot ref2 = graph.vertexRef();
 			try {
-				GraphIdBimap<Spot, Link> graphIdBimap = appModel.getModel().getGraphIdBimap();
+				GraphIdBimap<Spot, Link> graphIdBimap = projectModel.getModel().getGraphIdBimap();
 				Spot branchStart = graphIdBimap.getVertex( id, ref );
 				selectAllBranchNodesAndEdges( branchStart );
 				focusModel.focusVertex( BranchGraphUtils.findVertexForTimePoint(branchStart, knownTimepoint, ref2) );
@@ -257,8 +256,8 @@ public class BlenderController
 
 		private void selectAllBranchNodesAndEdges( Spot branchStart )
 		{
-			ModelGraph graph = appModel.getModel().getGraph();
-			SelectionModel<Spot, Link> selectionModel = appModel.getSelectionModel();
+			ModelGraph graph = projectModel.getModel().getGraph();
+			SelectionModel<Spot, Link> selectionModel = projectModel.getSelectionModel();
 			selectionModel.clearSelection();
 			Pair<RefList<Spot>, RefList<Link>> pair = BranchGraphUtils.getBranchSpotsAndLinks( graph, branchStart );
 			RefList<Spot> branchSpots = pair.getA();

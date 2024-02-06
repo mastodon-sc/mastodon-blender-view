@@ -33,15 +33,15 @@ import mpicbg.spim.data.SpimDataException;
 import org.mastodon.graph.io.RawGraphIO;
 import org.mastodon.grouping.GroupHandle;
 import org.mastodon.mamut.MainWindow;
-import org.mastodon.mamut.MamutAppModel;
-import org.mastodon.mamut.WindowManager;
+import org.mastodon.mamut.ProjectModel;
 import org.mastodon.mamut.feature.MamutRawFeatureModelIO;
+import org.mastodon.mamut.io.ProjectLoader;
+import org.mastodon.mamut.io.project.MamutProject;
+import org.mastodon.mamut.io.project.MamutProjectIO;
 import org.mastodon.mamut.model.Link;
 import org.mastodon.mamut.model.Model;
 import org.mastodon.mamut.model.ModelGraph;
 import org.mastodon.mamut.model.Spot;
-import org.mastodon.mamut.project.MamutProject;
-import org.mastodon.mamut.project.MamutProjectIO;
 import org.mastodon.model.FocusModel;
 import org.mastodon.model.NavigationHandler;
 import org.mastodon.model.NavigationListener;
@@ -64,7 +64,7 @@ public class MastodonUtils
 	{
 		try
 		{
-			MamutProject project = new MamutProjectIO().load( projectPath );
+			MamutProject project = MamutProjectIO.load( projectPath );
 			final Model model = new Model( project.getSpaceUnits(), project.getTimeUnits() );
 			final boolean isNewProject = project.getProjectRoot() == null;
 			if ( !isNewProject )
@@ -88,33 +88,32 @@ public class MastodonUtils
 		}
 	}
 
-	public static WindowManager showGui(String projectPath) {
+	public static ProjectModel showGui(String projectPath) {
 		try {
-			final WindowManager windowManager = new WindowManager( new Context() );
-			windowManager.getProjectManager().open( new MamutProjectIO().load( projectPath ) );
-			final MainWindow mainWindow = new MainWindow(windowManager);
+			ProjectModel projectModel = ProjectLoader.open( projectPath, new Context(), true, true );
+			final MainWindow mainWindow = new MainWindow( projectModel );
 			mainWindow.setVisible( true );
 			mainWindow.setDefaultCloseOperation( WindowConstants.EXIT_ON_CLOSE );
-			return windowManager;
+			return projectModel;
 		} catch (IOException | SpimDataException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	static void logMastodonEvents( MamutAppModel appModel )
+	static void logMastodonEvents( ProjectModel projectModel )
 	{
-		GroupHandle groupHandle = appModel.getGroupManager().createGroupHandle();
+		GroupHandle groupHandle = projectModel.getGroupManager().createGroupHandle();
 		groupHandle.setGroupId( 0 );
-		logNavigationHandle( groupHandle.getModel( appModel.NAVIGATION ) );
-		logTimePointModel(groupHandle.getModel( appModel.TIMEPOINT ) );
-		logFocusModel(appModel);
-		logTagSetModel(appModel);
+		logNavigationHandle( groupHandle.getModel( projectModel.NAVIGATION ) );
+		logTimePointModel(groupHandle.getModel( projectModel.TIMEPOINT ) );
+		logFocusModel( projectModel );
+		logTagSetModel( projectModel );
 	}
 
-	private static void logFocusModel( MamutAppModel appModel )
+	private static void logFocusModel( ProjectModel projectModel )
 	{
-		FocusModel<Spot, Link> focusModel = appModel.getFocusModel();
-		ModelGraph graph = appModel.getModel().getGraph();
+		FocusModel<Spot> focusModel = projectModel.getFocusModel();
+		ModelGraph graph = projectModel.getModel().getGraph();
 		focusModel.listeners().add(() -> {
 			Spot ref = graph.vertexRef();
 			Spot focusedSpot = focusModel.getFocusedVertex( ref );
@@ -146,10 +145,10 @@ public class MastodonUtils
 		model.listeners().add( () -> log( "Time point changed: (to " + model.getTimepoint() + ")" ) );
 	}
 
-	private static void logTagSetModel( MamutAppModel appModel )
+	private static void logTagSetModel( ProjectModel projectModel )
 	{
 		// TODO
-		Model model = appModel.getModel();
+		Model model = projectModel.getModel();
 		TagSetModel<Spot, Link> tagSetModel = model.getTagSetModel();
 		tagSetModel.listeners().add( () -> log( "tag set changed" ) );
 	}
