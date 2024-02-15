@@ -52,7 +52,7 @@ os.environ.pop("PIP_REQ_TRACKER", None)
 # install dependencies
 
 python_path = get_python_path()
-packages = {'grpcio', 'bidict', 'grpcio-tools'}
+packages = {'grpcio', 'bidict', 'grpcio-tools', 'pandas'}
 subprocess.check_output([python_path, '-m', 'pip', 'install', *packages])
 
 # test if dependencies are installed
@@ -61,6 +61,7 @@ try:
     import bidict
     import grpc
     import google.protobuf
+    import pandas
 except ModuleNotFoundError:
     raise Exception("dependency installation failed")
 
