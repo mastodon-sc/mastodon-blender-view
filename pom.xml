@@ -14,7 +14,7 @@
 
 	<name>Mastodon Blender View</name>
 	<description>A Mastodon plugin data allows to show the embryo in Blender.</description>
-	<url>https://github.com/maarzt/mastodon-blender-view</url>
+	<url>https://github.com/mastodon-sc/mastodon-blender-view</url>
 	<inceptionYear>2022</inceptionYear>
 	<organization>
 		<name>CSBD</name>
@@ -70,18 +70,18 @@
 	</repositories>
 
 	<scm>
-		<connection>scm:git:https://github.com/maarzt/mastodon-blender-view</connection>
-		<developerConnection>scm:git:git@github.com:maarzt/mastodon-blender-view</developerConnection>
+		<connection>scm:git:https://github.com/mastodon-sc/mastodon-blender-view</connection>
+		<developerConnection>scm:git:git@github.com:mastodon-sc/mastodon-blender-view</developerConnection>
 		<tag>HEAD</tag>
-		<url>https://github.com/maarzt/mastodon-blender-view</url>
+		<url>https://github.com/mastodon-sc/mastodon-blender-view</url>
 	</scm>
 	<issueManagement>
 		<system>GitHub</system>
-		<url>https://github.com/maarzt/mastodon-blender-view/issues</url>
+		<url>https://github.com/mastodon-sc/mastodon-blender-view/issues</url>
 	</issueManagement>
 	<ciManagement>
 		<system>GitHub Actions</system>
-		<url>https://github.com/maarzt/mastodon-blender-view/actions</url>
+		<url>https://github.com/mastodon-sc/mastodon-blender-view/actions</url>
 	</ciManagement>
 
 	<properties>
