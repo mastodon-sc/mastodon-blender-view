@@ -68,7 +68,7 @@ public class Blender3dViewPlugin extends AbstractContextual implements MamutPlug
 
 	static
 	{
-		menuTexts.put( SHOW_IN_BLENDER, "New Blender Window" );
+		menuTexts.put( SHOW_IN_BLENDER, "New Interactive Blender Window" );
 		menuTexts.put( SETUP_BLENDER, "Setup Blender Addon ..." );
 	}
 
@@ -115,10 +115,11 @@ public class Blender3dViewPlugin extends AbstractContextual implements MamutPlug
 	{
 		return Arrays.asList(
 				menu( "Window",
-						item( SHOW_IN_BLENDER )),
+						item( SHOW_IN_BLENDER ) ),
 				menu( "Plugins",
-						item( SETUP_BLENDER )) );
-
+						menu( "Blender",
+								item( SHOW_IN_BLENDER ),
+								item( SETUP_BLENDER ) ) ) );
 	}
 
 	@Override

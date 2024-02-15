@@ -32,7 +32,7 @@ public class ExportGraphAsCsvPlugin implements MamutPlugin
 
 	private static final String[] KEYS = { "not mapped" };
 
-	private static final Map< String, String > menuTexts = Collections.singletonMap( ID, "CSV for Blender" );
+	private static final Map< String, String > menuTexts = Collections.singletonMap( ID, "Export CSV for Blender" );
 
 	private ProjectModel projectModel = null;
 
@@ -77,7 +77,7 @@ public class ExportGraphAsCsvPlugin implements MamutPlugin
 	@Override
 	public List< ViewMenuBuilder.MenuItem > getMenuItems()
 	{
-		return Collections.singletonList( menu( "Plugins", menu( "Exports", item( ID ) ) ) );
+		return Collections.singletonList( menu( "Plugins", menu( "Blender", item( ID ) ) ) );
 	}
 
 	@Override
