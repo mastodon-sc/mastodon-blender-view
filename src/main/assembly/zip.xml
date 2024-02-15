@@ -10,14 +10,14 @@
             <includes>
                 <include>*.py</include>
             </includes>
-            <directory>../blender-addon</directory>
+            <directory>blender-addon</directory>
             <outputDirectory>/</outputDirectory>
         </fileSet>
         <fileSet>
             <includes>
                 <include>*.proto</include>
             </includes>
-            <directory>../proto</directory>
+            <directory>proto</directory>
             <outputDirectory>/</outputDirectory>
         </fileSet>
     </fileSets>
