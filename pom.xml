@@ -56,16 +56,9 @@
 		See: https://issues.apache.org/jira/browse/MNG-5220
 		-->
 		<contributor>
-			<name>Tobias Pietzsch</name>
-			<url>https://imagej.net/people/tpietzsch</url>
-		</contributor>
-        <contributor>
-			<name>Deborah Schmidt</name>
-			<url>https://imagej.net/people/frauzufall</url>
-		</contributor>
-		<contributor>
-			<name>Philipp Hanslovsky</name>
-            <url>https://imagej.net/people/hanslovsky</url>
+			<name>Vladimír Ulman</name>
+			<url>https://github.com/xulman</url>
+			<properties><id>xulman</id></properties>
 		</contributor>
 	</contributors>
 
