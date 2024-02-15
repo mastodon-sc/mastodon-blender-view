@@ -1,3 +1,5 @@
+[![Build Status](https://github.com/mastodon-sc/mastodon-blender-view/actions/workflows/build.yml/badge.svg)](https://github.com/mastodon-sc/mastodon-blender-view/actions/workflows/build.yml)
+
 # Mastodon Blender View - An easy to use interactive 3D viewer for the Mastodon cell tracking software
 
 The Mastodon Blender View is a plugin for the [Mastodon](https://github.com/mastodon-sc/mastodon/) cell tracking software.
