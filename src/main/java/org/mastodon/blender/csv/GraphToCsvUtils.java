@@ -50,7 +50,7 @@ public class GraphToCsvUtils
 
 	private static void writeHeader( BufferedWriter writer, List< TagSetStructure.TagSet > tagSets ) throws IOException
 	{
-		writer.write( "id, label, timepoint, x, y, z, parent_id" );
+		writer.write( "id, label, timepoint, x, y, z, radius, parent_id" );
 		for ( TagSetStructure.TagSet tagSet : tagSets )
 			writer.write( ", " + tagSet.getName() );
 		writer.newLine();
@@ -65,7 +65,8 @@ public class GraphToCsvUtils
 		writer.write( spot.getDoublePosition( 0 ) + ", " );
 		writer.write( spot.getDoublePosition( 1 ) + ", " );
 		writer.write( spot.getDoublePosition( 2 ) + ", " );
-		writer.write( "" + getParentId( spot, ref ) );
+		writer.write( Math.sqrt( spot.getBoundingSphereRadiusSquared() ) + ", " );
+		writer.write( getParentId( spot, ref ) );
 		writeColors( writer, spot, tagMaps );
 		writer.newLine();
 		writer.flush();
