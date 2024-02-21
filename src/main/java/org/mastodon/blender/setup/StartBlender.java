@@ -185,15 +185,13 @@ public class StartBlender
 
 	public static void startBlenderRunPythonScript( Context context, String blenderFile, String pythonScript, Map< String, String > environment ) throws IOException
 	{
-		List< String > args = Arrays.asList(
-				blenderFile,
-				"--python",
-				pythonScript
-		);
 		Path blenderPath = getBlenderPath( context );
 		List< String > command = new ArrayList<>();
 		command.add( blenderPath.toString() );
-		command.addAll( args );
+		command.add( blenderFile );
+		command.add( "--python" );
+		command.add( pythonScript );
+		command.addAll( screenSize() );
 		ProcessBuilder builder = new ProcessBuilder( command.toArray( new String[ 0 ] ) );
 		builder.environment().putAll( environment );
 		builder.start();
