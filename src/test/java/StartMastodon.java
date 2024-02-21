@@ -27,7 +27,7 @@
  * #L%
  */
 
-import org.mastodon.blender.MastodonUtils;
+import org.mastodon.blender.utils.MastodonUtils;
 
 /**
  * Starts Mastodon on the given project.

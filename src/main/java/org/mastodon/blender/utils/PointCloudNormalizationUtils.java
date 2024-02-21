@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package org.mastodon.blender;
+package org.mastodon.blender.utils;
 
 import net.imglib2.RealLocalizable;
 import net.imglib2.RealPoint;

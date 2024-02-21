@@ -44,6 +44,8 @@ import org.mastodon.SetTagSetListRequest;
 import org.mastodon.SetTimePointRequest;
 import org.mastodon.ViewServiceGrpc;
 import org.mastodon.blender.setup.StartBlender;
+import org.mastodon.blender.utils.BranchGraphUtils;
+import org.mastodon.blender.utils.PointCloudNormalizationUtils;
 import org.mastodon.collection.RefSet;
 import org.mastodon.mamut.model.ModelGraph;
 import org.mastodon.mamut.model.Spot;

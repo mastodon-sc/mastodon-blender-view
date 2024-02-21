@@ -29,7 +29,7 @@
 package org.mastodon.blender.setup;
 
 import javax.swing.SwingUtilities;
-import org.mastodon.blender.ExceptionDialog;
+import org.mastodon.blender.utils.ExceptionDialog;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
