@@ -14,6 +14,8 @@ import javax.swing.JOptionPane;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.mastodon.blender.StartBlenderException;
+import org.mastodon.blender.setup.BlenderSetup;
 import org.mastodon.blender.setup.StartBlender;
 import org.mastodon.mamut.ProjectModel;
 import org.mastodon.mamut.model.Model;
@@ -34,7 +36,14 @@ public class StartBlenderWithCsvAction
 			try
 			{
 				String csv = createCsv( projectModel );
-				startBlenderWithCsv( projectModel, tagset, csv );
+				try
+				{
+					startBlenderWithCsv( projectModel, tagset, csv );
+				}
+				catch ( Exception e )
+				{
+					BlenderSetup.startSetupWithMessage( projectModel.getContext(), e );
+				}
 			}
 			catch ( Throwable e )
 			{

@@ -213,7 +213,7 @@ enum State
 
 	TESTING_ADDON( //
 			"ok:Addon is installed.", //
-			"todo:Testing addon ...", //
+			"todo:Testing addon ... (takes about 10 seconds)", //
 			"" ), //
 
 	TEST_FAILED( //
