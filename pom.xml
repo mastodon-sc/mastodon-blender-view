@@ -10,7 +10,7 @@
 
 	<groupId>org.mastodon</groupId>
 	<artifactId>mastodon-blender-view</artifactId>
-	<version>0.2.1-SNAPSHOT</version>
+	<version>0.3.0</version>
 
 	<name>Mastodon Blender View</name>
 	<description>A Mastodon plugin data allows to show the embryo in Blender.</description>
@@ -72,7 +72,7 @@
 	<scm>
 		<connection>scm:git:https://github.com/mastodon-sc/mastodon-blender-view</connection>
 		<developerConnection>scm:git:git@github.com:mastodon-sc/mastodon-blender-view</developerConnection>
-		<tag>HEAD</tag>
+		<tag>mastodon-blender-view-0.3.0</tag>
 		<url>https://github.com/mastodon-sc/mastodon-blender-view</url>
 	</scm>
 	<issueManagement>
