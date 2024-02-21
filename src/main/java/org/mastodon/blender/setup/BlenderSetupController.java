@@ -29,7 +29,7 @@
 package org.mastodon.blender.setup;
 
 import javax.swing.SwingUtilities;
-import org.mastodon.blender.ExceptionDialog;
+import org.mastodon.blender.utils.ExceptionDialog;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -213,7 +213,7 @@ enum State
 
 	TESTING_ADDON( //
 			"ok:Addon is installed.", //
-			"todo:Testing addon ...", //
+			"todo:Testing addon ... (takes about 10 seconds)", //
 			"" ), //
 
 	TEST_FAILED( //

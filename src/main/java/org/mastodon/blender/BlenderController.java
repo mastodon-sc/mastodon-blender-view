@@ -30,6 +30,8 @@ package org.mastodon.blender;
 
 import javax.swing.SwingUtilities;
 import net.imglib2.util.Pair;
+
+import org.mastodon.blender.utils.BranchGraphUtils;
 import org.mastodon.collection.RefList;
 import org.mastodon.graph.GraphIdBimap;
 import org.mastodon.grouping.GroupHandle;

@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package org.mastodon.blender;
+package org.mastodon.blender.utils;
 
 import javax.swing.WindowConstants;
 import mpicbg.spim.data.SpimDataException;

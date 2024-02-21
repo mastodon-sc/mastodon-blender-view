@@ -36,7 +36,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.mastodon.blender.BlenderController;
-import org.mastodon.blender.MastodonUtils;
+import org.mastodon.blender.utils.MastodonUtils;
 import org.mastodon.mamut.ProjectModel;
 
 public class StartBlenderAndMastodon

@@ -28,7 +28,7 @@
  */
 package org.mastodon.blender.setup;
 
-import org.mastodon.blender.ExceptionDialog;
+import org.mastodon.blender.utils.ExceptionDialog;
 import org.scijava.Context;
 
 import java.nio.file.Files;

@@ -26,7 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package org.mastodon.blender;
+package org.mastodon.blender.utils;
 
 import net.imglib2.util.Pair;
 import net.imglib2.util.ValuePair;
@@ -44,7 +44,7 @@ public class BranchGraphUtils
 		// prevent instantiation
 	}
 
-	static Spot getBranchStart( Spot spot, Spot ref )
+	public static Spot getBranchStart( Spot spot, Spot ref )
 	{
 		Spot s = spot;
 		while(s.incomingEdges().size() == 1)
@@ -70,7 +70,7 @@ public class BranchGraphUtils
 		return s;
 	}
 
-	static Spot findVertexForTimePoint( Spot branchStart, int timePoint, Spot ref )
+	public static Spot findVertexForTimePoint( Spot branchStart, int timePoint, Spot ref )
 	{
 		Spot spot = branchStart;
 		if(spot.getTimepoint() >= timePoint)
@@ -83,7 +83,7 @@ public class BranchGraphUtils
 		return spot;
 	}
 
-	static Pair<RefList<Spot>, RefList<Link>> getBranchSpotsAndLinks( ModelGraph graph, Spot branchStart )
+	public static Pair<RefList<Spot>, RefList<Link>> getBranchSpotsAndLinks( ModelGraph graph, Spot branchStart )
 	{
 		RefList<Link> links = new RefArrayList<>( graph.edges().getRefPool() );
 		RefList<Spot> spots = new RefArrayList<>( graph.vertices().getRefPool() );
@@ -102,7 +102,7 @@ public class BranchGraphUtils
 		return new ValuePair<>( spots, links );
 	}
 
-	static RefSet<Spot> getAllBranchStarts( ModelGraph graph )
+	public static RefSet<Spot> getAllBranchStarts( ModelGraph graph )
 	{
 		Spot ref = graph.vertexRef();
 		try {

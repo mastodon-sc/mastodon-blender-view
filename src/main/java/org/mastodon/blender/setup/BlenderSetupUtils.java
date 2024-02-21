@@ -30,7 +30,6 @@ package org.mastodon.blender.setup;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.mastodon.blender.ViewServiceClient;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -92,6 +91,10 @@ public class BlenderSetupUtils
 	{
 		String script = "import mastodon_blender_view.mb_server as mb_server;" //
 				+ "import time;"
+				+ "import bidict;" // import packages that are not necessary for the test but required for correct plugin execution
+				+ "import grpc;"
+				+ "import google.protobuf;"
+				+ "import pandas;"
 				+ "mb_server.delayed_start_server();"
 				+ "time.sleep(8)";
 		int port = StartBlender.getFreePort();
