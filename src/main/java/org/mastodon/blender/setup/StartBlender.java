@@ -51,6 +51,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.StringJoiner;
 
 public class StartBlender
@@ -180,5 +181,21 @@ public class StartBlender
 			e.printStackTrace();
 			return "";
 		}
+	}
+
+	public static void startBlenderRunPythonScript( Context context, String blenderFile, String pythonScript, Map< String, String > environment ) throws IOException
+	{
+		List< String > args = Arrays.asList(
+				blenderFile,
+				"--python",
+				pythonScript
+		);
+		Path blenderPath = getBlenderPath( context );
+		List< String > command = new ArrayList<>();
+		command.add( blenderPath.toString() );
+		command.addAll( args );
+		ProcessBuilder builder = new ProcessBuilder( command.toArray( new String[ 0 ] ) );
+		builder.environment().putAll( environment );
+		builder.start();
 	}
 }
