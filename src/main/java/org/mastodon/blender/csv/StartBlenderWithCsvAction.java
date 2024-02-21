@@ -1,8 +1,5 @@
 package org.mastodon.blender.csv;
 
-import static org.mastodon.app.ui.ViewMenuBuilder.item;
-import static org.mastodon.app.ui.ViewMenuBuilder.menu;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -10,9 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CancellationException;
 import java.util.stream.Collectors;
 
@@ -20,93 +15,18 @@ import javax.swing.JOptionPane;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.mastodon.app.ui.ViewMenuBuilder;
 import org.mastodon.blender.setup.StartBlender;
-import org.mastodon.mamut.KeyConfigScopes;
 import org.mastodon.mamut.ProjectModel;
-import org.mastodon.mamut.plugin.MamutPlugin;
 import org.mastodon.model.tag.TagSetStructure;
-import org.mastodon.ui.keymap.KeyConfigContexts;
 import org.scijava.Context;
-import org.scijava.plugin.Plugin;
-import org.scijava.ui.behaviour.io.gui.CommandDescriptionProvider;
-import org.scijava.ui.behaviour.io.gui.CommandDescriptions;
-import org.scijava.ui.behaviour.util.AbstractNamedAction;
-import org.scijava.ui.behaviour.util.Actions;
-import org.scijava.ui.behaviour.util.RunnableAction;
 
 /**
  * Export the Mastodon graph as CSV file such that it can be opened with Blender.
  */
-@Plugin( type = MamutPlugin.class )
-public class OpenCsvWithBlenderPlugin implements MamutPlugin
+public class StartBlenderWithCsvAction
 {
 
-	private static final String ID = "[mastodon-blender-view] open csv in blender";
-
-	private static final String[] KEYS = { "not mapped" };
-
-	private static final Map< String, String > menuTexts = Collections.singletonMap( ID, "Open CSV in Blender" );
-
-	private ProjectModel projectModel = null;
-
-	@Plugin( type = CommandDescriptionProvider.class )
-	public static class Descriptions extends CommandDescriptionProvider
-	{
-		public Descriptions()
-		{
-			super( KeyConfigScopes.MAMUT, KeyConfigContexts.TRACKSCHEME, KeyConfigContexts.BIGDATAVIEWER );
-		}
-
-		@Override
-		public void getCommandDescriptions( CommandDescriptions descriptions )
-		{
-			descriptions.add( ID, KEYS, "Export the graph as CSV and open it with Blender." );
-		}
-	}
-
-	private final AbstractNamedAction action;
-
-	public OpenCsvWithBlenderPlugin()
-	{
-		action = new RunnableAction( ID, () -> {
-			if ( projectModel != null )
-				run();
-		} );
-		updateEnabledActions();
-	}
-
-	@Override
-	public void setAppPluginModel( ProjectModel model )
-	{
-		this.projectModel = model;
-		updateEnabledActions();
-	}
-
-	private void updateEnabledActions()
-	{
-		action.setEnabled( projectModel != null );
-	}
-
-	@Override
-	public List< ViewMenuBuilder.MenuItem > getMenuItems()
-	{
-		return Collections.singletonList( menu( "Plugins", menu( "Blender", item( ID ) ) ) );
-	}
-
-	@Override
-	public Map< String, String > getMenuTexts()
-	{
-		return menuTexts;
-	}
-
-	@Override
-	public void installGlobalActions( Actions actions )
-	{
-		actions.namedAction( action, KEYS );
-	}
-
-	private void run()
+	public static void run(ProjectModel projectModel)
 	{
 		try
 		{
