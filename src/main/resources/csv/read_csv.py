@@ -6,13 +6,13 @@
 # %%
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 # 1. Redistributions of source code must retain the above copyright notice,
 #    this list of conditions and the following disclaimer.
 # 2. Redistributions in binary form must reproduce the above copyright notice,
 #    this list of conditions and the following disclaimer in the documentation
 #    and/or other materials provided with the distribution.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 # IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -43,7 +43,7 @@ def read_csv(filename):
     return pd.read_csv(filename, sep=",", skipinitialspace=True, quoting=csv.QUOTE_ALL, dtype=dtype)
 
 
-def add_mesh(name, vertices, edges=[], faces=[],  collection_name="Collection"):    
+def add_mesh(name, vertices, edges=[], faces=[],  collection_name="Collection"):
     mesh = bpy.data.meshes.new("mesh")
     mesh.from_pydata(vertices, edges, faces)
     obj = bpy.data.objects.new(mesh.name, mesh)
@@ -55,9 +55,9 @@ def add_mesh(name, vertices, edges=[], faces=[],  collection_name="Collection"):
 
 def bring_object_to_scene(object, collection_name="Collection"):
     col = bpy.data.collections[collection_name]
-    col.objects.link(object) 
+    col.objects.link(object)
     bpy.context.view_layer.objects.active = object
-    
+
 
 def extract_vertices(df):
     df_xyz = df.filter(items=["x","y","z"])
@@ -66,10 +66,14 @@ def extract_vertices(df):
 
 def normalize(df):
     xyz = df[['x','y','z']]
+    radius = df['radius']
     xyz = xyz - xyz.mean()
     variance = (xyz**2).sum().sum() / len(xyz)
-    xyz = xyz / ( variance**0.5 )
+    factor = 1 / ( variance ** 0.5 )
+    xyz = xyz * factor
+    radius = radius * factor
     df[['x','y','z']] = xyz
+    df['radius'] = radius
 
 
 #filename = '/home/arzt/Datasets/Mette/E1.csv'
@@ -85,7 +89,7 @@ def colorStringToInt(s):
     try:
         return int(s[1:], 16)
     except ValueError:
-        return default_color    
+        return default_color
 
 
 def convert_color(color_code):
@@ -99,7 +103,7 @@ mesh.attributes.new('timepoint', 'FLOAT', 'POINT')
 d = mesh.attributes['timepoint'].data
 for index, t in df['timepoint'].items():
     d[index].value = t
-    
+
 mesh.attributes.new('radius', 'FLOAT', 'POINT')
 d = mesh.attributes['radius'].data
 for index, r in df['radius'].items():
