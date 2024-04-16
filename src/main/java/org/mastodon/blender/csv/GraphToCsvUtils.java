@@ -80,7 +80,7 @@ public class GraphToCsvUtils
 	{
 		writer.write( "id, label, timepoint, x, y, z, radius, parent_id" );
 		for ( TagSetStructure.TagSet tagSet : tagSets )
-			writer.write( ", " + tagSet.getName() );
+			writer.write( ", " + encodeString( tagSet.getName() ) );
 		writer.newLine();
 		writer.flush();
 	}
@@ -88,7 +88,7 @@ public class GraphToCsvUtils
 	private static void writeSpot( BufferedWriter writer, Spot spot, List< ObjTagMap< Spot, TagSetStructure.Tag > > tagMaps, Spot ref ) throws IOException
 	{
 		writer.write( spot.getInternalPoolIndex() + ", " );
-		writer.write( "\"" + spot.getLabel() + "\", " );
+		writer.write( encodeString( spot.getLabel() ) + ", " );
 		writer.write( spot.getTimepoint() + ", " );
 		writer.write( spot.getDoublePosition( 0 ) + ", " );
 		writer.write( spot.getDoublePosition( 1 ) + ", " );
@@ -98,6 +98,11 @@ public class GraphToCsvUtils
 		writeColors( writer, spot, tagMaps );
 		writer.newLine();
 		writer.flush();
+	}
+
+	private static String encodeString( String value )
+	{
+		return "\"" + value.replace( "\"", "\"\"" ) + "\"";
 	}
 
 	private static void writeColors( BufferedWriter writer, Spot spot, List< ObjTagMap< Spot, TagSetStructure.Tag > > tagMaps ) throws IOException
