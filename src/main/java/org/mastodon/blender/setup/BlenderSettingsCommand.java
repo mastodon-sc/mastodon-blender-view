@@ -12,6 +12,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import org.apache.commons.io.FileUtils;
 import org.scijava.Cancelable;
 import org.scijava.Initializable;
+import org.scijava.ItemVisibility;
 import org.scijava.command.Command;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -25,27 +26,33 @@ import org.scijava.widget.Button;
 public class BlenderSettingsCommand implements Command, Initializable, Cancelable
 {
 
+	private final String DEFAULT = "<default>";
+
+	private final File DEFAULT_FILE = new File( DEFAULT );
+
+	@Parameter( visibility = ItemVisibility.MESSAGE )
+	private String INTERACTIVE_DESCRIPTION = "Blender file that is used as empty template for interactive 3D view:";
+
 	@Parameter
 	private BlenderSettingsService blenderSettingsService;
 
-	private static final String DEFAULT = "Use default template";
-
-	private static final String CUSTOM = "Use custom template";
-
-	@Parameter( label = "Interactive Blender", choices = { DEFAULT, CUSTOM }, style="radioButtonHorizontal", persist = false )
-	private String useInteractiveTemple = DEFAULT;
-
-	@Parameter( label = "Custom *.blend Template", style = "file, extensions:blend", required = false, persist = false, callback = "customInteractiveTemplateChange" )
+	@Parameter( label = "Blender File", style = "file, extensions:blend", required = false, persist = false, callback = "customInteractiveTemplateChange" )
 	private File interactiveTemplate = null;
+
+	@Parameter( label = "Reset to Default", callback = "resetInteractiveTemplate" )
+	private Button resetInteractiveTemplate;
 
 	@Parameter( label = "Save Default Template As...", callback = "saveDefaultInteractiveTemplate" )
 	private Button saveDefaultInteractiveTemplate;
 
-	@Parameter( label = "CSV Blender", choices = { DEFAULT, CUSTOM }, style="radioButtonHorizontal", persist = false )
-	private String useCsvTemplate = DEFAULT;
+	@Parameter( visibility = ItemVisibility.MESSAGE )
+	private String CSV_DESCRIPTION = "Blender file that is used as empty template for CSV Blender view:";
 
-	@Parameter( label = "Custom *.blend Template", style = "file, extensions:blend", required = false, persist = false, callback = "customCsvTemplateChange" )
+	@Parameter( label = "Blender File", style = "file, extensions:blend", required = false, persist = false, callback = "customCsvTemplateChange" )
 	private File csvTemplate = null;
+
+	@Parameter( label = "Reset to Default", callback = "resetCsvTemplate" )
+	private Button resetCsvTemplate;
 
 	@Parameter( label = "Save Default Template As...", callback = "saveDefaultCsvTemplate" )
 	private Button saveDefaultCsvTemplate;
@@ -55,36 +62,32 @@ public class BlenderSettingsCommand implements Command, Initializable, Cancelabl
 	{
 		String interactiveTemplate = blenderSettingsService.getInteractiveBlenderTemplate();
 		String csvTemplate = blenderSettingsService.getCsvBlenderTemplate();
-
-		useInteractiveTemple = interactiveTemplate.isEmpty() ? DEFAULT : CUSTOM;
-		useCsvTemplate = csvTemplate.isEmpty() ? DEFAULT : CUSTOM;
-
-		this.interactiveTemplate = interactiveTemplate.isEmpty() ? null : new File( interactiveTemplate );
-		this.csvTemplate = csvTemplate.isEmpty() ? null : new File( csvTemplate );
+		this.interactiveTemplate = interactiveTemplate.isEmpty() ? DEFAULT_FILE : new File( interactiveTemplate );
+		this.csvTemplate = csvTemplate.isEmpty() ? DEFAULT_FILE : new File( csvTemplate );
 	}
 
 	@Override
 	public void run()
 	{
-		if ( useInteractiveTemple.equals( DEFAULT ) || interactiveTemplate == null )
-			blenderSettingsService.setInteractiveBlenderTemplate( "" );
-		else if ( interactiveTemplate.exists() )
-			blenderSettingsService.setInteractiveBlenderTemplate( interactiveTemplate.getAbsolutePath() );
-		else
-		{
-			blenderSettingsService.setInteractiveBlenderTemplate( "" );
-			JOptionPane.showMessageDialog( null, "Template file does not exist:\n" + csvTemplate, "Error", JOptionPane.ERROR_MESSAGE );
-		}
+		blenderSettingsService.setInteractiveBlenderTemplate( extracted( interactiveTemplate ) );
+		blenderSettingsService.setCsvBlenderTemplate( extracted( csvTemplate ) );
+	}
 
-		if ( useCsvTemplate.equals( DEFAULT ) || csvTemplate == null )
-			blenderSettingsService.setCsvBlenderTemplate( "" );
-		else if ( csvTemplate.exists() )
-			blenderSettingsService.setCsvBlenderTemplate( csvTemplate.getAbsolutePath() );
-		else
+	private String extracted( File template )
+	{
+		if ( isDefault( template ) )
+			return "";
+		if ( ! template.exists() )
 		{
-			blenderSettingsService.setCsvBlenderTemplate( "" );
-			JOptionPane.showMessageDialog( null, "Template file does not exist:\n" + csvTemplate, "Error", JOptionPane.ERROR_MESSAGE );
+			JOptionPane.showMessageDialog( null, "Template file does not exist:\n" + template, "Error", JOptionPane.ERROR_MESSAGE );
+			return "";
 		}
+		return template.getAbsolutePath();
+	}
+
+	public boolean isDefault( File file )
+	{
+		return file == null || DEFAULT.equals( file.toString() );
 	}
 
 	@Override
@@ -106,15 +109,15 @@ public class BlenderSettingsCommand implements Command, Initializable, Cancelabl
 	}
 
 	@SuppressWarnings( "unused" )
-	private void customInteractiveTemplateChange()
+	private void resetInteractiveTemplate()
 	{
-		useInteractiveTemple = CUSTOM;
+		interactiveTemplate = DEFAULT_FILE;
 	}
 
 	@SuppressWarnings( "unused" )
-	private void customCsvTemplateChange()
+	private void resetCsvTemplate()
 	{
-		useCsvTemplate = CUSTOM;
+		csvTemplate = DEFAULT_FILE;
 	}
 
 	@SuppressWarnings( "unused" )
