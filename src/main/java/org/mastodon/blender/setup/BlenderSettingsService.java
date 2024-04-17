@@ -19,6 +19,10 @@ import org.scijava.service.SciJavaService;
 public class BlenderSettingsService extends AbstractService implements SciJavaService
 {
 
+	public static final URL DEFAULT_INTERACTIVE_TEMPLATE = BlenderSettingsService.class.getResource( "/blender-scripts/empty.blend" );
+
+	public static final URL DEFAULT_CSV_TEMPLATE = BlenderSettingsService.class.getResource( "/csv/empty_with_geometry_nodes.blend" );
+
 	@Parameter
 	private PrefService prefService;
 
@@ -40,30 +44,29 @@ public class BlenderSettingsService extends AbstractService implements SciJavaSe
 
 	public File getCopyOfInteractiveBlenderTemplate() throws IOException
 	{
-		return getTemplateCopy( "mastodon-bender", "/blender-scripts/empty.blend", getInteractiveBlenderTemplate() );
+		return getTemplateCopy( DEFAULT_INTERACTIVE_TEMPLATE, getInteractiveBlenderTemplate() );
 	}
 
 	public File getCopyOfCsvBlenderTemplate() throws IOException
 	{
-		return getTemplateCopy( "mastodon-bender", "/csv/empty_with_geometry_nodes.blend", getCsvBlenderTemplate() );
+		return getTemplateCopy( DEFAULT_CSV_TEMPLATE, getCsvBlenderTemplate() );
 	}
 
-	private static File getTemplateCopy( String filename, String defaultResource, String interactiveTemplate ) throws IOException
+	private static File getTemplateCopy( URL defaultResource, String interactiveTemplate ) throws IOException
 	{
-		File tmp = File.createTempFile( filename, ".blend" );
+		File tmp = File.createTempFile( "mastodon-bender", ".blend" );
 		URL source = getUrl( defaultResource, interactiveTemplate );
 		FileUtils.copyURLToFile(source, tmp);
 		return tmp;
 	}
 
-	private static URL getUrl( String defaultResource, String interactiveTemplate )
+	private static URL getUrl( URL defaultResource, String interactiveTemplate )
 	{
-		URL defaultTemplate = BlenderSettingsService.class.getResource( defaultResource );
 		if ( interactiveTemplate == null || interactiveTemplate.isEmpty() )
-			return defaultTemplate;
+			return defaultResource;
 		File file = new File( interactiveTemplate );
 		if ( !file.exists() )
-			return defaultTemplate;
+			return defaultResource;
 		try
 		{
 			return file.toURI().toURL();
