@@ -31,6 +31,7 @@ package org.mastodon.blender;
 import org.mastodon.app.ui.ViewMenuBuilder;
 import org.mastodon.blender.csv.ExportGraphAsCsvAction;
 import org.mastodon.blender.csv.StartBlenderWithCsvAction;
+import org.mastodon.blender.setup.BlenderSettingsCommand;
 import org.mastodon.blender.setup.BlenderSetup;
 import org.mastodon.mamut.KeyConfigScopes;
 import org.mastodon.mamut.ProjectModel;
@@ -38,6 +39,7 @@ import org.mastodon.mamut.plugin.MamutPlugin;
 import org.mastodon.ui.keymap.KeyConfigContexts;
 import org.scijava.AbstractContextual;
 import org.scijava.Context;
+import org.scijava.command.CommandService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.ui.behaviour.io.gui.CommandDescriptionProvider;
@@ -65,6 +67,8 @@ public class Blender3dViewPlugin extends AbstractContextual implements MamutPlug
 
 	private static final String SETUP_BLENDER = "[blender-3d-view] setup blender";
 
+	private static final String BLENDER_SETTINGS = "[blender-3d-view] blender settings";
+
 	private static final String EXPORT_CSV = "[blender-3d-view] export graph as csv";
 
 	private static final String START_BLENDER_WITH_CSV = "[blender-3d-view] start blender with csv";
@@ -79,6 +83,7 @@ public class Blender3dViewPlugin extends AbstractContextual implements MamutPlug
 		menuTexts.put( SETUP_BLENDER, "Setup Blender Addon ..." );
 		menuTexts.put( EXPORT_CSV, "Export CSV for Blender" );
 		menuTexts.put( START_BLENDER_WITH_CSV, "Open CSV in Blender" );
+		menuTexts.put( BLENDER_SETTINGS, "Configure Blender Template Files" );
 	}
 
 	/*
@@ -97,6 +102,7 @@ public class Blender3dViewPlugin extends AbstractContextual implements MamutPlug
 		{
 			descriptions.add( SHOW_IN_BLENDER, NO_KEYS, "Show the spots in a Blender 3D view." );
 			descriptions.add( SETUP_BLENDER, NO_KEYS, "Show a setup window that helps to configure Blender to be used from Mastodon." );
+			descriptions.add( BLENDER_SETTINGS, NO_KEYS, "Define template files to be used for the Mastodon Blender visualizations." );
 			descriptions.add( EXPORT_CSV, NO_KEYS, "Export the Graph As CSV" );
 			descriptions.add( START_BLENDER_WITH_CSV, NO_KEYS, "Export the graph as CSV and open it with Blender." );
 		}
@@ -105,6 +111,8 @@ public class Blender3dViewPlugin extends AbstractContextual implements MamutPlug
 	private final AbstractNamedAction showInBlender;
 
 	private final AbstractNamedAction setupBlender;
+
+	private final AbstractNamedAction blenderSettings;
 
 	private final AbstractNamedAction exportCsv;
 
@@ -116,6 +124,7 @@ public class Blender3dViewPlugin extends AbstractContextual implements MamutPlug
 	{
 		showInBlender = new RunnableAction( SHOW_IN_BLENDER, this::startBlenderView );
 		setupBlender = new RunnableAction( SETUP_BLENDER, this::showSetup );
+		blenderSettings = new RunnableAction( BLENDER_SETTINGS, this::showBlenderSettings );
 		exportCsv = new RunnableAction( EXPORT_CSV, this::exportCsv );
 		startBlenderWithCsv = new RunnableAction( START_BLENDER_WITH_CSV, this::startBlenderWithCsv );
 		updateEnabledActions();
@@ -138,6 +147,7 @@ public class Blender3dViewPlugin extends AbstractContextual implements MamutPlug
 						menu( "Blender",
 								item( SHOW_IN_BLENDER ),
 								item( SETUP_BLENDER ),
+								item( BLENDER_SETTINGS ),
 								item( START_BLENDER_WITH_CSV ),
 								item( EXPORT_CSV ) ) ) );
 	}
@@ -153,6 +163,7 @@ public class Blender3dViewPlugin extends AbstractContextual implements MamutPlug
 	{
 		actions.namedAction( showInBlender, NO_KEYS );
 		actions.namedAction( setupBlender, NO_KEYS );
+		actions.namedAction( blenderSettings, NO_KEYS );
 		actions.namedAction( exportCsv, NO_KEYS );
 		actions.namedAction( startBlenderWithCsv, NO_KEYS );
 	}
@@ -182,6 +193,11 @@ public class Blender3dViewPlugin extends AbstractContextual implements MamutPlug
 	private void showSetup()
 	{
 		new Thread(() -> BlenderSetup.showSetup( context ) ).start();
+	}
+
+	private void showBlenderSettings()
+	{
+		context.service( CommandService.class ).run( BlenderSettingsCommand.class, true );
 	}
 
 	private void exportCsv()

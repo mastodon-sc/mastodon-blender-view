@@ -48,6 +48,7 @@ import org.mastodon.model.NavigationListener;
 import org.mastodon.model.TimepointModel;
 import org.mastodon.model.tag.TagSetModel;
 import org.scijava.Context;
+import org.scijava.ui.UIService;
 
 import java.io.IOException;
 
@@ -90,7 +91,9 @@ public class MastodonUtils
 
 	public static ProjectModel showGui(String projectPath) {
 		try {
-			ProjectModel projectModel = ProjectLoader.open( projectPath, new Context(), true, true );
+			Context context = new Context();
+			context.service( UIService.class ).showUI();
+			ProjectModel projectModel = ProjectLoader.open( projectPath, context, true, true );
 			final MainWindow mainWindow = new MainWindow( projectModel );
 			mainWindow.setVisible( true );
 			mainWindow.setDefaultCloseOperation( WindowConstants.EXIT_ON_CLOSE );

@@ -99,6 +99,7 @@ public class BlenderSetupUtils
 				+ "time.sleep(8)";
 		int port = StartBlender.getFreePort();
 		Process process = StartBlender.startBlender( blenderPath, //
+				null, //
 				port,
 				"--background", //
 				"--python-expr", script );

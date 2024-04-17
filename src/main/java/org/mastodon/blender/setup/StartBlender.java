@@ -64,15 +64,32 @@ public class StartBlender
 
 	public static void startBlender( Context context, int port ) throws IOException
 	{
-		startBlender( getBlenderPath( context ), port );
+		BlenderSettingsService settingsService = context.service( BlenderSettingsService.class );
+		Path blenderPath = getBlenderPath( context );
+		String blenderTemplate = tryGetTemplate( settingsService );
+		startBlender( blenderPath, blenderTemplate, port );
 	}
 
-	public static Process startBlender( Path blenderPath, int port, String... args )
+	private static String tryGetTemplate( BlenderSettingsService settingsService )
+	{
+		try
+		{
+			return settingsService.getCopyOfInteractiveBlenderTemplate().getAbsolutePath();
+		}
+		catch ( IOException e )
+		{
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public static Process startBlender( Path blenderPath, String blenderTemplate, int port, String... args )
 			throws IOException
 	{
 		List<String> command = new ArrayList<>();
 		command.add( blenderPath.toString() );
-		command.add( emptyBlenderProject() );
+		if (blenderTemplate != null )
+			command.add( blenderTemplate );
 		command.add( "--addons" );
 		command.add( ADDON_NAME );
 		boolean background = ArrayUtils.contains( args, "--background" )
