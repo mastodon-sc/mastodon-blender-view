@@ -79,10 +79,10 @@ public class Blender3dViewPlugin extends AbstractContextual implements MamutPlug
 
 	static
 	{
-		menuTexts.put( SHOW_IN_BLENDER, "New Interactive Blender Window" );
+		menuTexts.put( SHOW_IN_BLENDER, "Interactive Blender Window" );
 		menuTexts.put( SETUP_BLENDER, "Setup Blender Addon ..." );
 		menuTexts.put( EXPORT_CSV, "Export CSV for Blender" );
-		menuTexts.put( START_BLENDER_WITH_CSV, "Open CSV in Blender" );
+		menuTexts.put( START_BLENDER_WITH_CSV, "Geometry Nodes Blender Window" );
 		menuTexts.put( BLENDER_SETTINGS, "Configure Blender Template Files" );
 	}
 
@@ -142,13 +142,16 @@ public class Blender3dViewPlugin extends AbstractContextual implements MamutPlug
 	{
 		return Arrays.asList(
 				menu( "Window",
-						item( SHOW_IN_BLENDER ) ),
+						menu( "New Blender Window",
+								item( SHOW_IN_BLENDER ),
+								item( START_BLENDER_WITH_CSV ) ) ),
 				menu( "Plugins",
 						menu( "Blender",
-								item( SHOW_IN_BLENDER ),
+								menu( "New Blender Window",
+										item( SHOW_IN_BLENDER ),
+										item( START_BLENDER_WITH_CSV ) ),
 								item( SETUP_BLENDER ),
 								item( BLENDER_SETTINGS ),
-								item( START_BLENDER_WITH_CSV ),
 								item( EXPORT_CSV ) ) ) );
 	}
 
