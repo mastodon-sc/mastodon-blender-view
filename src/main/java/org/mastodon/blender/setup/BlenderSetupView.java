@@ -113,7 +113,8 @@ public class BlenderSetupView extends JDialog
 		add( pathFeedback, "skip, wrap, wmin 0" );
 
 		add( newJLabel( Font.BOLD, "3." ), "gaptop unrelated");
-		add( newJLabel( Font.BOLD, "Install / update Blender addon" ), "wrap, wmin 0" );
+		add( newJLabel( Font.BOLD, "Install / update Blender addon:" ), "wrap, wmin 0" );
+		add( newJLabel( Font.PLAIN, "(requires internet connection)" ), "skip, wrap" );
 		installAddonButton = new JButton( "install addon" );
 		installAddonButton.addActionListener( ignore -> listener.installAddonClicked() );
 		add( installAddonButton, "skip, wrap");
@@ -121,7 +122,7 @@ public class BlenderSetupView extends JDialog
 		add( addonFeedback, "skip, wrap, wmin 0" );
 
 		add( newJLabel( Font.BOLD, "4." ), "gaptop unrelated");
-		add( newJLabel( Font.BOLD, "Test Blender addon" ), "wrap, wmin 0" );
+		add( newJLabel( Font.BOLD, "Test Blender addon:" ), "wrap, wmin 0" );
 		testAddonButton = new JButton("test addon");
 		testAddonButton.addActionListener( ignore -> listener.testAddonClicked() );
 		add( testAddonButton, "skip, wrap" );

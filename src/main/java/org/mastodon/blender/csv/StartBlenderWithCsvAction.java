@@ -120,6 +120,7 @@ public class StartBlenderWithCsvAction
 		final String prefix = FilenameUtils.getBaseName( resourceName );
 		final String suffix = "." + FilenameUtils.getExtension( resourceName );
 		File tmp = File.createTempFile( prefix, suffix );
+		tmp.deleteOnExit();
 		URL source = StartBlender.class.getResource( resourceName );
 		if ( source == null )
 			throw new IOException( "Could not find resource: " + resourceName );

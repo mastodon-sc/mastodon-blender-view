@@ -171,6 +171,7 @@ public class StartBlender
 		try
 		{
 			File tmp = File.createTempFile( "empty", ".blend" );
+			tmp.deleteOnExit();
 			URL source = StartBlender.class.getResource( "/blender-scripts/empty.blend" );
 			FileUtils.copyURLToFile(source, tmp);
 			emptyBlenderProject = tmp.getAbsolutePath();
