@@ -110,6 +110,7 @@ public class StartBlenderWithCsvAction
 	private static String showSelectTagSetDialog( ProjectModel projectModel )
 	{
 		List< String > tagSets = projectModel.getModel().getTagSetModel().getTagSetStructure().getTagSets().stream().map( TagSetStructure.TagSet::getName ).collect( Collectors.toList() );
+		tagSets.add( 0, "[no tag set]" );
 		Object result = JOptionPane.showInputDialog( null, "Please select a tag set for visualization", "Blender Using Geometry Nodes",
 				JOptionPane.PLAIN_MESSAGE, null, tagSets.toArray(), tagSets.get( 0 ) );
 		return (String) result;
