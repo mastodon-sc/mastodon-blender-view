@@ -54,7 +54,7 @@ public class BlenderSettingsService extends AbstractService implements SciJavaSe
 
 	private static File getTemplateCopy( URL defaultResource, String interactiveTemplate ) throws IOException
 	{
-		File tmp = File.createTempFile( "mastodon-bender", ".blend" );
+		File tmp = File.createTempFile( "mastodon-blender", ".blend" );
 		URL source = getUrl( defaultResource, interactiveTemplate );
 		FileUtils.copyURLToFile(source, tmp);
 		return tmp;
