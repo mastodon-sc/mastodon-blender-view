@@ -5,11 +5,11 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Objects;
 
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.commons.io.FileUtils;
+import org.mastodon.ui.util.FileChooser;
 import org.scijava.Cancelable;
 import org.scijava.Initializable;
 import org.scijava.ItemVisibility;
@@ -19,24 +19,23 @@ import org.scijava.plugin.Plugin;
 import org.scijava.widget.Button;
 
 /**
- * This is basically a dialog that allows the user to configure the Blender
- * templates used by Mastodon.
+ * This dialog allows the user to configure the Blender templates used by Mastodon.
  */
 @Plugin( type = Command.class, name = "Configure Blender Templates" )
 public class BlenderSettingsCommand implements Command, Initializable, Cancelable
 {
 
-	private final String DEFAULT = "<default>";
+	private static final String DEFAULT = "<default>";
 
-	private final File DEFAULT_FILE = new File( DEFAULT );
-
-	@Parameter( visibility = ItemVisibility.MESSAGE )
-	private String INTERACTIVE_DESCRIPTION = "Blender file that is used as empty template for interactive 3D view:";
+	private static final File DEFAULT_FILE = new File( DEFAULT );
 
 	@Parameter
 	private BlenderSettingsService blenderSettingsService;
 
-	@Parameter( label = "Blender File", style = "file, extensions:blend", required = false, persist = false, callback = "customInteractiveTemplateChange" )
+	@Parameter( visibility = ItemVisibility.MESSAGE ) // Text that is displayed in the dialog and never changes.
+	private String interactiveDescription = "Blender file that is used as empty template for the \"Interactive Blender Window\":";
+
+	@Parameter( label = "Blender File", style = "open, extensions:blend", required = false, persist = false, callback = "customInteractiveTemplateChange" )
 	private File interactiveTemplate = null;
 
 	@Parameter( label = "Reset to Default", callback = "resetInteractiveTemplate" )
@@ -45,10 +44,10 @@ public class BlenderSettingsCommand implements Command, Initializable, Cancelabl
 	@Parameter( label = "Save Default Template As...", callback = "saveDefaultInteractiveTemplate" )
 	private Button saveDefaultInteractiveTemplate;
 
-	@Parameter( visibility = ItemVisibility.MESSAGE )
-	private String CSV_DESCRIPTION = "Blender file that is used as empty template for CSV Blender view:";
+	@Parameter( visibility = ItemVisibility.MESSAGE ) // Text that is displayed in the dialog and never changes.
+	private String csvDescription = "Blender file that is used as empty template for \"Geometry Nodes Blender Window\":";
 
-	@Parameter( label = "Blender File", style = "file, extensions:blend", required = false, persist = false, callback = "customCsvTemplateChange" )
+	@Parameter( label = "Blender File", style = "open, extensions:blend", required = false, persist = false, callback = "customCsvTemplateChange" )
 	private File csvTemplate = null;
 
 	@Parameter( label = "Reset to Default", callback = "resetCsvTemplate" )
@@ -60,10 +59,10 @@ public class BlenderSettingsCommand implements Command, Initializable, Cancelabl
 	@Override
 	public void initialize()
 	{
-		String interactiveTemplate = blenderSettingsService.getInteractiveBlenderTemplate();
-		String csvTemplate = blenderSettingsService.getCsvBlenderTemplate();
-		this.interactiveTemplate = interactiveTemplate.isEmpty() ? DEFAULT_FILE : new File( interactiveTemplate );
-		this.csvTemplate = csvTemplate.isEmpty() ? DEFAULT_FILE : new File( csvTemplate );
+		String interactiveTemplateString = blenderSettingsService.getInteractiveBlenderTemplate();
+		String csvTemplateString = blenderSettingsService.getCsvBlenderTemplate();
+		this.interactiveTemplate = interactiveTemplateString.isEmpty() ? DEFAULT_FILE : new File( interactiveTemplateString );
+		this.csvTemplate = csvTemplateString.isEmpty() ? DEFAULT_FILE : new File( csvTemplateString );
 	}
 
 	@Override
@@ -99,7 +98,7 @@ public class BlenderSettingsCommand implements Command, Initializable, Cancelabl
 	@Override
 	public void cancel( String reason )
 	{
-
+		// The goal is to have a cancel button in the dialog. This method does not need to do anything to achieve that.
 	}
 
 	@Override
@@ -123,28 +122,23 @@ public class BlenderSettingsCommand implements Command, Initializable, Cancelabl
 	@SuppressWarnings( "unused" )
 	private void saveDefaultInteractiveTemplate()
 	{
-		saveDefaultTempate( BlenderSettingsService.DEFAULT_INTERACTIVE_TEMPLATE, "Save Default Interactive Template" );
+		saveDefaultTempate( BlenderSettingsService.DEFAULT_INTERACTIVE_TEMPLATE, "Save Default Interactive Blender Template", "interactive_template.blend" );
 	}
 
 	@SuppressWarnings( "unused" )
 	private void saveDefaultCsvTemplate()
 	{
-		saveDefaultTempate( BlenderSettingsService.DEFAULT_CSV_TEMPLATE, "Save Default CSV Template" );
+		saveDefaultTempate( BlenderSettingsService.DEFAULT_CSV_TEMPLATE, "Save Default Geometry Nodes Blender Template", "geometry_nodes_template.blend" );
 	}
 
-	private static void saveDefaultTempate( URL defaultTemplate, String title )
+	private static void saveDefaultTempate( URL defaultTemplate, String title, String defaultFileName )
 	{
-		Objects.requireNonNull( defaultTemplate );
-		JFileChooser fileChooser = new JFileChooser( );
-		fileChooser.setSelectedFile( new File( "template.blend" ) );
-		fileChooser.setDialogTitle( title );
-		fileChooser.setFileFilter( new FileNameExtensionFilter( "Blender File", "blend" ) );
-		boolean ok = fileChooser.showSaveDialog( null ) == JFileChooser.APPROVE_OPTION;
-		if ( !ok )
-			return;
 		try
 		{
-			FileUtils.copyURLToFile( defaultTemplate, fileChooser.getSelectedFile() );
+			Objects.requireNonNull( defaultTemplate );
+			File file = FileChooser.chooseFile( null, defaultFileName, new FileNameExtensionFilter( "Blender File", "blend" ), title, FileChooser.DialogType.SAVE );
+			if ( file != null )
+				FileUtils.copyURLToFile( defaultTemplate, file );
 		}
 		catch ( IOException e )
 		{
