@@ -43,11 +43,13 @@ import javax.swing.JOptionPane;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.mastodon.blender.StartBlenderException;
+import org.mastodon.blender.setup.BlenderSettingsService;
 import org.mastodon.blender.setup.BlenderSetup;
 import org.mastodon.blender.setup.StartBlender;
 import org.mastodon.mamut.ProjectModel;
 import org.mastodon.mamut.model.Model;
 import org.mastodon.model.tag.TagSetStructure;
+import org.scijava.Context;
 
 /**
  * Export the Mastodon graph as CSV file such that it can be opened with Blender.
@@ -99,12 +101,14 @@ public class StartBlenderWithCsvAction
 
 	private static void startBlenderWithCsv( ProjectModel projectModel, String tagset, String csv ) throws IOException
 	{
-		String blenderFile = copyResource( "/csv/empty_with_geometry_nodes.blend" );
+		Context context = projectModel.getContext();
+		BlenderSettingsService service = context.service( BlenderSettingsService.class );
+		String blenderFile = service.getCopyOfCsvBlenderTemplate().getAbsolutePath();
 		String pythonScript = copyResource( "/csv/read_csv.py" );
 		Map<String, String> environment = new HashMap<>();
 		environment.put( "MASTODON_BLENDER_CSV_FILE", csv );
 		environment.put( "MASTODON_BLENDER_TAG_SET", tagset );
-		StartBlender.startBlenderRunPythonScript( projectModel.getContext(), blenderFile, pythonScript, environment );
+		StartBlender.startBlenderRunPythonScript( context, blenderFile, pythonScript, environment );
 	}
 
 	private static String showSelectTagSetDialog( ProjectModel projectModel )
