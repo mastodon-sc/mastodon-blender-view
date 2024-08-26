@@ -99,25 +99,20 @@ def convert_color(color_code):
     return (red, green, blue)
 
 
-mesh.attributes.new('timepoint', 'FLOAT', 'POINT')
-d = mesh.attributes['timepoint'].data
-for index, t in df['timepoint'].items():
-    d[index].value = t
+def add_attribute(mesh, data, attribute_name, attribute_type='FLOAT', object_type='POINT'):
+    mesh.attributes.new(attribute_name, attribute_type, object_type)
+    d = mesh.attributes[attribute_name].data
+    for index, value in data.items():
+        d[index].value = value
 
-mesh.attributes.new('radius', 'FLOAT', 'POINT')
-d = mesh.attributes['radius'].data
-for index, r in df['radius'].items():
-    d[index].value = r
 
-mesh.attributes.new('target_timepoint', 'FLOAT', 'EDGE')
-d = mesh.attributes['target_timepoint'].data
-for index, t in df_edges['timepoint'].items():
-    d[index].value = t
+add_attribute(mesh, df['timepoint'], attribute_name='timepoint')
+add_attribute(mesh, df['id'], attribute_name='id')
+add_attribute(mesh, df['radius'], attribute_name='radius')
+add_attribute(mesh, df_edges['timepoint'], attribute_name='target_timepoint', object_type='EDGE')
 
 if tag_set in df.columns:
-    mesh.attributes.new('color_vector', 'FLOAT_VECTOR', 'POINT')
-    d2 = mesh.attributes['color_vector'].data
-    for index, color_str in df[tag_set].items():
-        d2[index].vector = convert_color(colorStringToInt(str(color_str)))
+    colors = df[tag_set].map(lambda x: convert_color(colorStringToInt(str(x))))
+    add_attribute(mesh, colors, attribute_name='color_vector', attribute_type='FLOAT_VECTOR', object_type='POINT')
 
 
