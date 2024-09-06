@@ -29,9 +29,10 @@ public class GraphToCsvUtilsTest
 		GraphToCsvUtils.writeCsv( model, csvFile.getAbsolutePath() );
 		// test
 		String content = FileUtils.readFileToString( csvFile, StandardCharsets.UTF_8 );
-		String expected = "id, label, timepoint, x, y, z, radius, parent_id, \"tagset, with comma, and \"\"double quotes\"\"\"\n"
-				+ "0, \"spotA\", 0, 1.0, 2.0, 3.0, 1.0, , #AABBCC\n"
-				+ "1, \"spot,B\", 1, 3.0, 3.0, 4.0, 2.0, , #112233\n";
+		String newLine = System.lineSeparator();
+		String expected = "id, label, timepoint, x, y, z, radius, parent_id, \"tagset, with comma, and \"\"double quotes\"\"\"" + newLine
+				+ "0, \"spotA\", 0, 1.0, 2.0, 3.0, 1.0, , #AABBCC" + newLine
+				+ "1, \"spot,B\", 1, 3.0, 3.0, 4.0, 2.0, , #112233" + newLine;
 		assertEquals( expected, content );
 	}
 
