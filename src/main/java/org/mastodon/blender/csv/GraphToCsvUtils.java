@@ -28,20 +28,25 @@
  */
 package org.mastodon.blender.csv;
 
+import org.mastodon.graph.ref.IncomingEdges;
+import org.mastodon.mamut.ProjectModel;
+import org.mastodon.mamut.model.Link;
+import org.mastodon.mamut.model.Model;
+import org.mastodon.mamut.model.ModelGraph;
+import org.mastodon.mamut.model.Spot;
+import org.mastodon.mamut.model.branch.BranchLink;
+import org.mastodon.mamut.model.branch.BranchSpot;
+import org.mastodon.model.tag.ObjTagMap;
+import org.mastodon.model.tag.TagSetStructure;
+import org.mastodon.ui.coloring.ColoringModelMain;
+import org.mastodon.ui.coloring.feature.FeatureColorModeManager;
+
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
-
-import org.mastodon.graph.ref.IncomingEdges;
-import org.mastodon.mamut.model.Link;
-import org.mastodon.mamut.model.Model;
-import org.mastodon.mamut.model.ModelGraph;
-import org.mastodon.mamut.model.Spot;
-import org.mastodon.model.tag.ObjTagMap;
-import org.mastodon.model.tag.TagSetStructure;
 
 /**
  * Utility class to export a {@link Model} to a CSV file.
@@ -129,5 +134,13 @@ public class GraphToCsvUtils
 	private static String colorAsString( int color )
 	{
 		return String.format( "#%06X", ( 0xffffff & color ) );
+	}
+
+	static ColoringModelMain< Spot, Link, BranchSpot, BranchLink > createColoringModel( ProjectModel projectModel )
+	{
+		final FeatureColorModeManager featureColorModeManager = projectModel.getWindowManager().getManager( FeatureColorModeManager.class );
+		final Model model = projectModel.getModel();
+		return new ColoringModelMain<>( model.getTagSetModel(), featureColorModeManager, model.getFeatureModel(),
+				model.getBranchGraph() );
 	}
 }
