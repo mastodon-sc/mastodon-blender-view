@@ -38,12 +38,16 @@ import org.mastodon.mamut.model.branch.BranchLink;
 import org.mastodon.mamut.model.branch.BranchSpot;
 import org.mastodon.model.tag.ObjTagMap;
 import org.mastodon.model.tag.TagSetStructure;
+import org.mastodon.ui.coloring.ColoringModel;
 import org.mastodon.ui.coloring.ColoringModelMain;
+import org.mastodon.ui.coloring.feature.FeatureColorMode;
 import org.mastodon.ui.coloring.feature.FeatureColorModeManager;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
@@ -142,5 +146,19 @@ public class GraphToCsvUtils
 		final Model model = projectModel.getModel();
 		return new ColoringModelMain<>( model.getTagSetModel(), featureColorModeManager, model.getFeatureModel(),
 				model.getBranchGraph() );
+	}
+
+	static List< FeatureColorMode > getValidFeatureColorModes( ColoringModel coloringModel )
+	{
+		if ( coloringModel == null )
+			return Collections.emptyList();
+		FeatureColorModeManager colorModeManager = coloringModel.getFeatureColorModeManager();
+		if ( colorModeManager == null )
+			return Collections.emptyList();
+		List< FeatureColorMode > colorModes = new ArrayList<>();
+		colorModes.addAll( colorModeManager.getUserStyles() );
+		colorModes.addAll( colorModeManager.getBuiltinStyles() );
+		colorModes.removeIf( colorMode -> !coloringModel.isValid( colorMode ) );
+		return colorModes;
 	}
 }
