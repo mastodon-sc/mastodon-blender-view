@@ -46,7 +46,7 @@ public class ExportGraphAsCsvAction
 		boolean isCancelled = filename == null;
 		if ( isCancelled )
 			return;
-		GraphToCsvUtils.writeCsv( projectModel.getModel(), filename );
+		GraphToCsvUtils.writeCsv( projectModel, filename );
 	}
 
 	private static String saveCsvFileDialog( String defaultFile )

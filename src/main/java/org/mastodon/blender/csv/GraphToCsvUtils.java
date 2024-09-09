@@ -95,6 +95,14 @@ public class GraphToCsvUtils
 		writeCsv( model, filename, null );
 	}
 
+	/**
+	 * Write the specified {@link Model} to the specified CSV file.
+	 */
+	public static void writeCsv( ProjectModel projectModel, String filename )
+	{
+		writeCsv( projectModel.getModel(), filename, createColoringModel( projectModel ) );
+	}
+
 	private static void writeHeader( BufferedWriter writer, List< TagSetStructure.TagSet > tagSets, List< FeatureColorMode > colorModes )
 			throws IOException
 	{
