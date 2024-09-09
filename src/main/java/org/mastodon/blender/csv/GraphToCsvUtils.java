@@ -40,6 +40,7 @@ import org.mastodon.model.tag.ObjTagMap;
 import org.mastodon.model.tag.TagSetStructure;
 import org.mastodon.ui.coloring.ColoringModel;
 import org.mastodon.ui.coloring.ColoringModelMain;
+import org.mastodon.ui.coloring.GraphColorGenerator;
 import org.mastodon.ui.coloring.feature.FeatureColorMode;
 import org.mastodon.ui.coloring.feature.FeatureColorModeManager;
 
@@ -60,7 +61,7 @@ public class GraphToCsvUtils
 	/**
 	 * Write the specified {@link Model} to the specified CSV file.
 	 */
-	public static void writeCsv( Model model, String filename )
+	public static void writeCsv( Model model, String filename, ColoringModelMain< Spot, Link, BranchSpot, BranchLink > coloringModel )
 	{
 		ModelGraph graph = model.getGraph();
 		ReentrantReadWriteLock.ReadLock lock = graph.getLock().readLock();
@@ -68,11 +69,12 @@ public class GraphToCsvUtils
 		try (BufferedWriter writer = new BufferedWriter( new FileWriter( filename ) ))
 		{
 			List< TagSetStructure.TagSet > tagSets = model.getTagSetModel().getTagSetStructure().getTagSets();
-			writeHeader( writer, tagSets );
+			List< FeatureColorMode > colorModes = getValidFeatureColorModes( coloringModel );
+			writeHeader( writer, tagSets, colorModes );
 			List< ObjTagMap< Spot, TagSetStructure.Tag > > tagMaps = tagSets.stream().map( model.getTagSetModel().getVertexTags()::tags ).collect( Collectors.toList() );
 			Spot ref = graph.vertexRef();
 			for ( Spot spot : graph.vertices() )
-				writeSpot( writer, spot, tagMaps, ref );
+				writeSpot( writer, spot, tagMaps, coloringModel, colorModes, ref );
 			graph.releaseRef( ref );
 		}
 		catch ( IOException e )
@@ -85,16 +87,29 @@ public class GraphToCsvUtils
 		}
 	}
 
-	private static void writeHeader( BufferedWriter writer, List< TagSetStructure.TagSet > tagSets ) throws IOException
+	/**
+	 * Write the specified {@link Model} to the specified CSV file.
+	 */
+	public static void writeCsv( Model model, String filename )
+	{
+		writeCsv( model, filename, null );
+	}
+
+	private static void writeHeader( BufferedWriter writer, List< TagSetStructure.TagSet > tagSets, List< FeatureColorMode > colorModes )
+			throws IOException
 	{
 		writer.write( "id, label, timepoint, x, y, z, radius, parent_id" );
 		for ( TagSetStructure.TagSet tagSet : tagSets )
 			writer.write( ", " + encodeString( tagSet.getName() ) );
+		for ( FeatureColorMode colorMode : colorModes )
+			writer.write( ", " + encodeString( colorMode.getName() ) );
 		writer.newLine();
 		writer.flush();
 	}
 
-	private static void writeSpot( BufferedWriter writer, Spot spot, List< ObjTagMap< Spot, TagSetStructure.Tag > > tagMaps, Spot ref ) throws IOException
+	private static void writeSpot( BufferedWriter writer, Spot spot, List< ObjTagMap< Spot, TagSetStructure.Tag > > tagMaps,
+			ColoringModelMain< Spot, Link, BranchSpot, BranchLink > coloringModel, List< FeatureColorMode > colorModes, Spot ref )
+			throws IOException
 	{
 		writer.write( spot.getInternalPoolIndex() + ", " );
 		writer.write( encodeString( spot.getLabel() ) + ", " );
@@ -104,7 +119,7 @@ public class GraphToCsvUtils
 		writer.write( spot.getDoublePosition( 2 ) + ", " );
 		writer.write( Math.sqrt( spot.getBoundingSphereRadiusSquared() ) + ", " );
 		writer.write( getParentId( spot, ref ) );
-		writeColors( writer, spot, tagMaps );
+		writeColors( writer, spot, tagMaps, coloringModel, colorModes );
 		writer.newLine();
 		writer.flush();
 	}
@@ -114,10 +129,17 @@ public class GraphToCsvUtils
 		return "\"" + value.replace( "\"", "\"\"" ) + "\"";
 	}
 
-	private static void writeColors( BufferedWriter writer, Spot spot, List< ObjTagMap< Spot, TagSetStructure.Tag > > tagMaps ) throws IOException
+	private static void writeColors( BufferedWriter writer, Spot spot, List< ObjTagMap< Spot, TagSetStructure.Tag > > tagMaps,
+			ColoringModelMain< Spot, Link, BranchSpot, BranchLink > coloringModel, List< FeatureColorMode > colorModes ) throws IOException
 	{
 		for ( ObjTagMap< Spot, TagSetStructure.Tag > tagMap : tagMaps )
 			writer.write( ", " + colorAsString( tagMap.get( spot ) ) );
+		for ( FeatureColorMode colorMode : colorModes )
+		{
+			coloringModel.colorByFeature( colorMode );
+			GraphColorGenerator< Spot, Link > colorGenerator = coloringModel.getFeatureGraphColorGenerator();
+			writer.write( ", " + colorAsString( colorGenerator.color( spot ) ) );
+		}
 	}
 
 	private static String getParentId( Spot spot, Spot ref )
