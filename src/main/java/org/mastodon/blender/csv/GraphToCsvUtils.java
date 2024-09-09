@@ -123,6 +123,11 @@ public class GraphToCsvUtils
 	{
 		if ( tag == null )
 			return "";
-		return String.format( "#%06X", ( 0xffffff & tag.color() ) );
+		return colorAsString( tag.color() );
+	}
+
+	private static String colorAsString( int color )
+	{
+		return String.format( "#%06X", ( 0xffffff & color ) );
 	}
 }
