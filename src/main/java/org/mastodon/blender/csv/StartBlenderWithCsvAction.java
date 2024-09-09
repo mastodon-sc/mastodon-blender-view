@@ -33,22 +33,21 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.stream.Collectors;
-
-import javax.swing.JOptionPane;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.mastodon.blender.StartBlenderException;
 import org.mastodon.blender.setup.BlenderSettingsService;
 import org.mastodon.blender.setup.BlenderSetup;
 import org.mastodon.blender.setup.StartBlender;
 import org.mastodon.mamut.ProjectModel;
+import org.mastodon.mamut.model.Link;
 import org.mastodon.mamut.model.Model;
-import org.mastodon.model.tag.TagSetStructure;
+import org.mastodon.mamut.model.Spot;
+import org.mastodon.mamut.model.branch.BranchLink;
+import org.mastodon.mamut.model.branch.BranchSpot;
+import org.mastodon.ui.coloring.ColoringModelMain;
 import org.scijava.Context;
 
 /**
@@ -59,16 +58,17 @@ public class StartBlenderWithCsvAction
 
 	public static void run(ProjectModel projectModel)
 	{
-		String tagset = showSelectTagSetDialog( projectModel );
-		if ( tagset == null )
+		ColoringModelMain< Spot, Link, BranchSpot, BranchLink > coloringModel = GraphToCsvUtils.createColoringModel( projectModel );
+		String selectedColorScheme = ColorSchemeChoice.showDialog( projectModel, coloringModel );
+		if ( selectedColorScheme == null )
 			return;
 		new Thread(() -> {
 			try
 			{
-				String csv = createCsv( projectModel );
+				String csv = createCsv( projectModel, coloringModel );
 				try
 				{
-					startBlenderWithCsv( projectModel, tagset, csv );
+					startBlenderWithCsv( projectModel, selectedColorScheme, csv );
 				}
 				catch ( Exception e )
 				{
@@ -82,7 +82,8 @@ public class StartBlenderWithCsvAction
 		}).start();
 	}
 
-	private static String createCsv( ProjectModel projectModel ) throws IOException
+	private static String createCsv( ProjectModel projectModel, ColoringModelMain< Spot, Link, BranchSpot, BranchLink > coloringModel )
+			throws IOException
 	{
 		String csv = Files.createTempFile( "mastodon-graph", ".csv" ).toFile().getAbsolutePath();
 		Model model = projectModel.getModel();
@@ -90,7 +91,7 @@ public class StartBlenderWithCsvAction
 		lock.readLock().lock();
 		try
 		{
-			GraphToCsvUtils.writeCsv( model, csv );
+			GraphToCsvUtils.writeCsv( projectModel.getModel(), csv, coloringModel );
 		}
 		finally
 		{
@@ -109,15 +110,6 @@ public class StartBlenderWithCsvAction
 		environment.put( "MASTODON_BLENDER_CSV_FILE", csv );
 		environment.put( "MASTODON_BLENDER_TAG_SET", tagset );
 		StartBlender.startBlenderRunPythonScript( context, blenderFile, pythonScript, environment );
-	}
-
-	private static String showSelectTagSetDialog( ProjectModel projectModel )
-	{
-		List< String > tagSets = projectModel.getModel().getTagSetModel().getTagSetStructure().getTagSets().stream().map( TagSetStructure.TagSet::getName ).collect( Collectors.toList() );
-		tagSets.add( 0, "[no tag set]" );
-		Object result = JOptionPane.showInputDialog( null, "Please select a tag set for visualization", "Blender Using Geometry Nodes",
-				JOptionPane.PLAIN_MESSAGE, null, tagSets.toArray(), tagSets.get( 0 ) );
-		return (String) result;
 	}
 
 	private static String copyResource( String resourceName ) throws IOException
