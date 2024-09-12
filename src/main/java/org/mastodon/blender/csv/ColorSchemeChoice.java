@@ -10,7 +10,9 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
-import java.awt.Color;
+import javax.swing.JSeparator;
+import javax.swing.ListCellRenderer;
+
 import java.awt.Component;
 import java.awt.Font;
 import java.util.ArrayList;
@@ -23,13 +25,13 @@ import java.util.stream.Collectors;
  * This class provides can show an option dialog to let the user select a coloring scheme from a list,
  * including tag sets and feature color modes.
  */
-public class ColorSchemeChoice extends JComboBox< String >
+public class ColorSchemeChoice
 {
 	private static final String DEFAULT_OPTION = "[no coloring scheme]";
 
-	private static final String TAGS_HEADER = "Tags";
+	private static final String TAGS_HEADER = "Tags:";
 
-	private static final String FEATURE_COLOR_MODES_HEADER = "Feature Color Modes";
+	private static final String FEATURE_COLOR_MODES_HEADER = "Feature Color Modes:";
 
 	private static final String SEPARATOR = "-----------------";
 
@@ -41,7 +43,7 @@ public class ColorSchemeChoice extends JComboBox< String >
 	 */
 	public static String showDialog( ProjectModel projectModel, ColoringModel coloringModel )
 	{
-		JComboBox< Object > comboBox = getColorSchemesComboBox( projectModel, coloringModel );
+		JComboBox< String > comboBox = getColorSchemesComboBox( projectModel, coloringModel );
 
 		int result = JOptionPane.showOptionDialog(
 				null,
@@ -56,28 +58,27 @@ public class ColorSchemeChoice extends JComboBox< String >
 
 		if ( result == JOptionPane.OK_OPTION )
 		{
-			Object selectedItem = comboBox.getSelectedItem();
-			if ( selectedItem == null )
+			String selectedItem = (String) comboBox.getSelectedItem();
+			if ( selectedItem == null)
 				return null;
-			String option = selectedItem.toString();
-			switch ( option )
+
+			switch ( selectedItem )
 			{
-			case DEFAULT_OPTION:
 			case TAGS_HEADER:
 			case FEATURE_COLOR_MODES_HEADER:
 			case SEPARATOR:
 				return null;
 			default:
-				return option;
+				return selectedItem;
 			}
 		}
 		return null;
 	}
 
-	private static JComboBox< Object > getColorSchemesComboBox( ProjectModel projectModel, ColoringModel coloringModel )
+	private static JComboBox< String > getColorSchemesComboBox( ProjectModel projectModel, ColoringModel coloringModel )
 	{
 		List< String > options = getColorSchemeOptions( projectModel, coloringModel );
-		JComboBox< Object > comboBox = new JComboBox<>( options.toArray() );
+		JComboBox< String > comboBox = new JComboBox<>( options.toArray(new String[0]) );
 		comboBox.setRenderer( new ColorSchemeOptionsRenderer() );
 		return comboBox;
 	}
@@ -100,35 +101,28 @@ public class ColorSchemeChoice extends JComboBox< String >
 		return options;
 	}
 
-	private static class ColorSchemeOptionsRenderer extends DefaultListCellRenderer
+	private static class ColorSchemeOptionsRenderer implements ListCellRenderer< String >
 	{
-		@Override
-		public Component getListCellRendererComponent( JList< ? > list, Object value, int index, boolean isSelected,
-				boolean cellHasFocus )
-		{
-			JLabel renderer = ( JLabel ) super.getListCellRendererComponent( list, value, index, isSelected, cellHasFocus );
-			if ( value instanceof String )
-			{
-				String stringValue = ( String ) value;
 
-				switch ( stringValue )
-				{
-				case TAGS_HEADER:
-				case FEATURE_COLOR_MODES_HEADER:
-					renderer.setFont( renderer.getFont().deriveFont( Font.BOLD ) );
-					renderer.setForeground( Color.BLUE );
-					renderer.setBackground( Color.LIGHT_GRAY );
-					break;
-				case SEPARATOR:
-					renderer.setFont( renderer.getFont().deriveFont( Font.PLAIN ) );
-					renderer.setForeground( Color.GRAY );
-					renderer.setBackground( Color.WHITE );
-					break;
-				default:
-					renderer.setFont( renderer.getFont().deriveFont( Font.PLAIN ) );
-				}
+		private final DefaultListCellRenderer defaultRenderer = new DefaultListCellRenderer();
+
+		@Override
+		public Component getListCellRendererComponent( JList< ? extends String > list, String value, int index, boolean isSelected, boolean cellHasFocus )
+		{
+			switch ( value )
+			{
+			case TAGS_HEADER:
+			case FEATURE_COLOR_MODES_HEADER:
+				JLabel label = ( JLabel ) defaultRenderer.getListCellRendererComponent( list, value, index, false, cellHasFocus );
+				label.setFont( label.getFont().deriveFont( Font.BOLD ) );
+				return label;
+			case SEPARATOR:
+				return new JSeparator( JSeparator.HORIZONTAL );
+			default:
+				JLabel renderer = ( JLabel ) defaultRenderer.getListCellRendererComponent( list, value, index, isSelected, cellHasFocus );
+				renderer.setFont( renderer.getFont().deriveFont( Font.PLAIN ) );
+				return renderer;
 			}
-			return renderer;
 		}
 	}
 }
