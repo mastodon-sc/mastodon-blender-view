@@ -25,8 +25,13 @@ import java.util.stream.Collectors;
  * This class provides can show an option dialog to let the user select a coloring scheme from a list,
  * including tag sets and feature color modes.
  */
-public class ColorSchemeChoice
+public class ColorSchemeDialog
 {
+	private ColorSchemeDialog()
+	{
+		// prevent instantiation
+	}
+
 	private static final String DEFAULT_OPTION = "[no coloring scheme]";
 
 	private static final String TAGS_HEADER = "Tags:";

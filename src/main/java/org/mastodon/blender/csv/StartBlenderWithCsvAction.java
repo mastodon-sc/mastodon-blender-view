@@ -59,7 +59,7 @@ public class StartBlenderWithCsvAction
 	public static void run(ProjectModel projectModel)
 	{
 		ColoringModelMain< Spot, Link, BranchSpot, BranchLink > coloringModel = GraphToCsvUtils.createColoringModel( projectModel );
-		String selectedColorScheme = ColorSchemeChoice.showDialog( projectModel, coloringModel );
+		String selectedColorScheme = ColorSchemeDialog.showDialog( projectModel, coloringModel );
 		if ( selectedColorScheme == null )
 			return;
 		new Thread(() -> {
