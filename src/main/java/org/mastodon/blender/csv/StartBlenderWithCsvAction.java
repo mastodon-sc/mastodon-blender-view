@@ -28,6 +28,15 @@
  */
 package org.mastodon.blender.csv;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.mastodon.blender.setup.BlenderSettingsService;
+import org.mastodon.blender.setup.BlenderSetup;
+import org.mastodon.blender.setup.StartBlender;
+import org.mastodon.mamut.ProjectModel;
+import org.mastodon.mamut.model.Model;
+import org.scijava.Context;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -35,20 +44,6 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.mastodon.blender.setup.BlenderSettingsService;
-import org.mastodon.blender.setup.BlenderSetup;
-import org.mastodon.blender.setup.StartBlender;
-import org.mastodon.mamut.ProjectModel;
-import org.mastodon.mamut.model.Link;
-import org.mastodon.mamut.model.Model;
-import org.mastodon.mamut.model.Spot;
-import org.mastodon.mamut.model.branch.BranchLink;
-import org.mastodon.mamut.model.branch.BranchSpot;
-import org.mastodon.ui.coloring.ColoringModelMain;
-import org.scijava.Context;
 
 /**
  * Export the Mastodon graph as CSV file such that it can be opened with Blender.
@@ -58,14 +53,13 @@ public class StartBlenderWithCsvAction
 
 	public static void run(ProjectModel projectModel)
 	{
-		ColoringModelMain< Spot, Link, BranchSpot, BranchLink > coloringModel = GraphToCsvUtils.createColoringModel( projectModel );
-		String selectedColorScheme = ColorSchemeDialog.showDialog( projectModel, coloringModel );
+		String selectedColorScheme = ColorSchemeDialog.showDialog( projectModel );
 		if ( selectedColorScheme == null )
 			return;
 		new Thread(() -> {
 			try
 			{
-				String csv = createCsv( projectModel, coloringModel );
+				String csv = createCsv( projectModel );
 				try
 				{
 					startBlenderWithCsv( projectModel, selectedColorScheme, csv );
@@ -82,8 +76,7 @@ public class StartBlenderWithCsvAction
 		}).start();
 	}
 
-	private static String createCsv( ProjectModel projectModel, ColoringModelMain< Spot, Link, BranchSpot, BranchLink > coloringModel )
-			throws IOException
+	private static String createCsv( ProjectModel projectModel ) throws IOException
 	{
 		String csv = Files.createTempFile( "mastodon-graph", ".csv" ).toFile().getAbsolutePath();
 		Model model = projectModel.getModel();
@@ -91,7 +84,7 @@ public class StartBlenderWithCsvAction
 		lock.readLock().lock();
 		try
 		{
-			GraphToCsvUtils.writeCsv( projectModel.getModel(), csv, coloringModel );
+			GraphToCsvUtils.writeCsv( projectModel, csv );
 		}
 		finally
 		{

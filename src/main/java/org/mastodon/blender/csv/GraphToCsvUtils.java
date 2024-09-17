@@ -38,7 +38,6 @@ import org.mastodon.mamut.model.branch.BranchLink;
 import org.mastodon.mamut.model.branch.BranchSpot;
 import org.mastodon.model.tag.TagSetModel;
 import org.mastodon.ui.coloring.ColoringModelMain;
-import org.mastodon.ui.coloring.GraphColorGenerator;
 import org.mastodon.ui.coloring.feature.FeatureColorMode;
 import org.mastodon.ui.coloring.feature.FeatureColorModeManager;
 
@@ -46,7 +45,6 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
@@ -59,20 +57,19 @@ public class GraphToCsvUtils
 	/**
 	 * Write the specified {@link Model} to the specified CSV file.
 	 */
-	public static void writeCsv( Model model, String filename, ColoringModelMain< Spot, Link, BranchSpot, BranchLink > coloringModel )
+	public static void writeCsv( ProjectModel projectModel, String filename )
 	{
+		Model model = projectModel.getModel();
 		ModelGraph graph = model.getGraph();
 		ReentrantReadWriteLock.ReadLock lock = graph.getLock().readLock();
 		lock.lock();
 		try (BufferedWriter writer = new BufferedWriter( new FileWriter( filename ) ))
 		{
-			List< TagSetStructure.TagSet > tagSets = model.getTagSetModel().getTagSetStructure().getTagSets();
-			List< FeatureColorMode > colorModes = getValidFeatureColorModes( coloringModel );
-			writeHeader( writer, tagSets, colorModes );
-			List< ObjTagMap< Spot, TagSetStructure.Tag > > tagMaps = tagSets.stream().map( model.getTagSetModel().getVertexTags()::tags ).collect( Collectors.toList() );
+			List< ColorFunction > colorFunctions = getColorFunctions( projectModel );
+			writeHeader( writer, colorFunctions );
 			Spot ref = graph.vertexRef();
 			for ( Spot spot : graph.vertices() )
-				writeSpot( writer, spot, tagMaps, coloringModel, colorModes, ref );
+				writeSpot( writer, spot, colorFunctions, ref );
 			graph.releaseRef( ref );
 		}
 		catch ( IOException e )
@@ -85,37 +82,17 @@ public class GraphToCsvUtils
 		}
 	}
 
-	/**
-	 * Write the specified {@link Model} to the specified CSV file.
-	 */
-	public static void writeCsv( Model model, String filename )
-	{
-		writeCsv( model, filename, null );
-	}
-
-	/**
-	 * Write the specified {@link Model} to the specified CSV file.
-	 */
-	public static void writeCsv( ProjectModel projectModel, String filename )
-	{
-		writeCsv( projectModel.getModel(), filename, createColoringModel( projectModel ) );
-	}
-
-	private static void writeHeader( BufferedWriter writer, List< TagSetStructure.TagSet > tagSets, List< FeatureColorMode > colorModes )
+	private static void writeHeader( BufferedWriter writer, List< ColorFunction > colorFunctions )
 			throws IOException
 	{
 		writer.write( "id, label, timepoint, x, y, z, radius, parent_id" );
-		for ( TagSetStructure.TagSet tagSet : tagSets )
-			writer.write( ", " + encodeString( tagSet.getName() ) );
-		for ( FeatureColorMode colorMode : colorModes )
-			writer.write( ", " + encodeString( colorMode.getName() ) );
+		for ( ColorFunction colorFunction : colorFunctions )
+			writer.write( ", " + encodeString( colorFunction.toString() ) );
 		writer.newLine();
 		writer.flush();
 	}
 
-	private static void writeSpot( BufferedWriter writer, Spot spot, List< ObjTagMap< Spot, TagSetStructure.Tag > > tagMaps,
-			ColoringModelMain< Spot, Link, BranchSpot, BranchLink > coloringModel, List< FeatureColorMode > colorModes, Spot ref )
-			throws IOException
+	private static void writeSpot( BufferedWriter writer, Spot spot, List< ColorFunction > colorFunctions, Spot ref ) throws IOException
 	{
 		writer.write( spot.getInternalPoolIndex() + ", " );
 		writer.write( encodeString( spot.getLabel() ) + ", " );
@@ -125,7 +102,7 @@ public class GraphToCsvUtils
 		writer.write( spot.getDoublePosition( 2 ) + ", " );
 		writer.write( Math.sqrt( spot.getBoundingSphereRadiusSquared() ) + ", " );
 		writer.write( getParentId( spot, ref ) );
-		writeColors( writer, spot, tagMaps, coloringModel, colorModes );
+		writeColors( writer, spot, colorFunctions );
 		writer.newLine();
 		writer.flush();
 	}
@@ -135,17 +112,10 @@ public class GraphToCsvUtils
 		return "\"" + value.replace( "\"", "\"\"" ) + "\"";
 	}
 
-	private static void writeColors( BufferedWriter writer, Spot spot, List< ObjTagMap< Spot, TagSetStructure.Tag > > tagMaps,
-			ColoringModelMain< Spot, Link, BranchSpot, BranchLink > coloringModel, List< FeatureColorMode > colorModes ) throws IOException
+	private static void writeColors( BufferedWriter writer, Spot spot, List< ColorFunction > colorFunctions ) throws IOException
 	{
-		for ( ObjTagMap< Spot, TagSetStructure.Tag > tagMap : tagMaps )
-			writer.write( ", " + colorAsString( tagMap.get( spot ) ) );
-		for ( FeatureColorMode colorMode : colorModes )
-		{
-			coloringModel.colorByFeature( colorMode );
-			GraphColorGenerator< Spot, Link > colorGenerator = coloringModel.getFeatureGraphColorGenerator();
-			writer.write( ", " + colorAsString( colorGenerator.color( spot ) ) );
-		}
+		for ( ColorFunction colorFunction : colorFunctions )
+			writer.write( ", " + colorFunction.colorAsString( spot ) );
 	}
 
 	private static String getParentId( Spot spot, Spot ref )
@@ -156,17 +126,6 @@ public class GraphToCsvUtils
 		return "" + links.iterator().next().getSource( ref ).getInternalPoolIndex();
 	}
 
-	private static String colorAsString( TagSetStructure.Tag tag )
-	{
-		if ( tag == null )
-			return "";
-		return colorAsString( tag.color() );
-	}
-
-	private static String colorAsString( int color )
-	{
-		return String.format( "#%06X", ( 0xffffff & color ) );
-	}
 
 	static ColoringModelMain< Spot, Link, BranchSpot, BranchLink > createColoringModel( ProjectModel projectModel )
 	{
@@ -176,18 +135,11 @@ public class GraphToCsvUtils
 				model.getBranchGraph() );
 	}
 
-	static List< FeatureColorMode > getValidFeatureColorModes( ColoringModel coloringModel )
+	static List< ColorFunction > getColorFunctions( ProjectModel projectModel )
 	{
-		if ( coloringModel == null )
-			return Collections.emptyList();
-		FeatureColorModeManager colorModeManager = coloringModel.getFeatureColorModeManager();
-		if ( colorModeManager == null )
-			return Collections.emptyList();
-		List< FeatureColorMode > colorModes = new ArrayList<>();
-		colorModes.addAll( colorModeManager.getUserStyles() );
-		colorModes.addAll( colorModeManager.getBuiltinStyles() );
-		colorModes.removeIf( colorMode -> !coloringModel.isValid( colorMode ) );
-		return colorModes;
+		List< ColorFunction > colorFunctions = getTagSetColorFunctions( projectModel );
+		colorFunctions.addAll( getFeatureColorFunctions( projectModel ) );
+		return colorFunctions;
 	}
 
 	static List< ColorFunction > getTagSetColorFunctions( ProjectModel projectModel )
