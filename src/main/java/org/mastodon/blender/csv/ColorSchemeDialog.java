@@ -1,9 +1,7 @@
 package org.mastodon.blender.csv;
 
 import org.mastodon.mamut.ProjectModel;
-import org.mastodon.model.tag.TagSetStructure;
-import org.mastodon.ui.coloring.ColoringModel;
-import org.mastodon.ui.coloring.feature.FeatureColorMode;
+import org.mastodon.mamut.model.Spot;
 
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JComboBox;
@@ -12,12 +10,11 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JSeparator;
 import javax.swing.ListCellRenderer;
-
+import javax.swing.SwingConstants;
 import java.awt.Component;
 import java.awt.Font;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * A JComboBox for selecting a color scheme.
@@ -43,12 +40,11 @@ public class ColorSchemeDialog
 	/**
 	 * Show a dialog to let the user select a coloring scheme.
 	 * @param projectModel the project model
-	 * @param coloringModel the coloring model
 	 * @return the name of the selected coloring scheme, or {@code null} if none was selected.
 	 */
-	public static String showDialog( ProjectModel projectModel, ColoringModel coloringModel )
+	public static String showDialog( ProjectModel projectModel )
 	{
-		JComboBox< String > comboBox = getColorSchemesComboBox( projectModel, coloringModel );
+		JComboBox< ColorFunction > comboBox = getColorSchemesComboBox( projectModel );
 
 		int result = JOptionPane.showOptionDialog(
 				null,
@@ -63,71 +59,67 @@ public class ColorSchemeDialog
 
 		if ( result == JOptionPane.OK_OPTION )
 		{
-			String selectedItem = (String) comboBox.getSelectedItem();
-			if ( selectedItem == null)
+			ColorFunction selectedItem = ( ColorFunction ) comboBox.getSelectedItem();
+			if ( selectedItem == null )
 				return null;
-
-			switch ( selectedItem )
-			{
-			case TAGS_HEADER:
-			case FEATURE_COLOR_MODES_HEADER:
-			case SEPARATOR:
+			if ( selectedItem.getGroup() == null )
 				return null;
-			default:
-				return selectedItem;
-			}
+			return selectedItem.toString();
 		}
 		return null;
 	}
 
-	private static JComboBox< String > getColorSchemesComboBox( ProjectModel projectModel, ColoringModel coloringModel )
+	private static JComboBox< ColorFunction > getColorSchemesComboBox( ProjectModel projectModel )
 	{
-		List< String > options = getColorSchemeOptions( projectModel, coloringModel );
-		JComboBox< String > comboBox = new JComboBox<>( options.toArray(new String[0]) );
+		List< ColorFunction > options = getColorSchemeOptions( projectModel );
+		JComboBox< ColorFunction > comboBox = new JComboBox<>( options.toArray( new ColorFunction[ 0 ] ) );
 		comboBox.setRenderer( new ColorSchemeOptionsRenderer() );
 		return comboBox;
 	}
 
-	static List< String > getColorSchemeOptions( ProjectModel projectModel, ColoringModel coloringModel )
+	static List< ColorFunction > getColorSchemeOptions( ProjectModel projectModel )
 	{
-		List< String > tagSets = projectModel.getModel().getTagSetModel().getTagSetStructure().getTagSets().stream()
-				.map( TagSetStructure.TagSet::getName ).collect( Collectors.toList() );
-		List< String > featureColorModes =
-				GraphToCsvUtils.getValidFeatureColorModes( coloringModel ).stream().map( FeatureColorMode::getName )
-						.collect( Collectors.toList() );
-		List< String > options = new ArrayList<>();
-		options.add( DEFAULT_OPTION );
-		options.add( SEPARATOR );
-		options.add( TAGS_HEADER );
-		options.addAll( tagSets );
-		options.add( SEPARATOR );
-		options.add( FEATURE_COLOR_MODES_HEADER );
-		options.addAll( featureColorModes );
-		return options;
+		List< ColorFunction > colorFunctions = new ArrayList<>();
+		colorFunctions.add( new EmptyColorFunction( DEFAULT_OPTION ) );
+		colorFunctions.add( new EmptyColorFunction( SEPARATOR ) );
+		colorFunctions.add( new EmptyColorFunction( TAGS_HEADER ) );
+		colorFunctions.addAll( GraphToCsvUtils.getTagSetColorFunctions( projectModel ) );
+		colorFunctions.add( new EmptyColorFunction( SEPARATOR ) );
+		colorFunctions.add( new EmptyColorFunction( FEATURE_COLOR_MODES_HEADER ) );
+		colorFunctions.addAll( GraphToCsvUtils.getFeatureColorFunctions( projectModel ) );
+		return colorFunctions;
 	}
 
-	private static class ColorSchemeOptionsRenderer implements ListCellRenderer< String >
+	private static class ColorSchemeOptionsRenderer implements ListCellRenderer< ColorFunction >
 	{
 
 		private final DefaultListCellRenderer defaultRenderer = new DefaultListCellRenderer();
 
 		@Override
-		public Component getListCellRendererComponent( JList< ? extends String > list, String value, int index, boolean isSelected, boolean cellHasFocus )
+		public Component getListCellRendererComponent( final JList< ? extends ColorFunction > list, final ColorFunction colorFunction,
+				final int index, final boolean isSelected, final boolean cellHasFocus )
 		{
-			switch ( value )
+			if ( colorFunction.getGroup() == null )
 			{
-			case TAGS_HEADER:
-			case FEATURE_COLOR_MODES_HEADER:
-				JLabel label = ( JLabel ) defaultRenderer.getListCellRendererComponent( list, value, index, false, cellHasFocus );
-				label.setFont( label.getFont().deriveFont( Font.BOLD ) );
-				return label;
-			case SEPARATOR:
-				return new JSeparator( JSeparator.HORIZONTAL );
-			default:
-				JLabel renderer = ( JLabel ) defaultRenderer.getListCellRendererComponent( list, value, index, isSelected, cellHasFocus );
-				renderer.setFont( renderer.getFont().deriveFont( Font.PLAIN ) );
-				return renderer;
+				String name = colorFunction.toString();
+				switch ( name )
+				{
+				case TAGS_HEADER:
+				case FEATURE_COLOR_MODES_HEADER:
+					JLabel label =
+							( JLabel ) defaultRenderer.getListCellRendererComponent( list, colorFunction, index, false, cellHasFocus );
+					label.setFont( label.getFont().deriveFont( Font.BOLD ) );
+					return label;
+				case SEPARATOR:
+					return new JSeparator( SwingConstants.HORIZONTAL );
+				default:
+					return new JLabel( colorFunction.toString() );
+				}
 			}
+			JLabel renderer =
+					( JLabel ) defaultRenderer.getListCellRendererComponent( list, colorFunction, index, isSelected, cellHasFocus );
+			renderer.setFont( renderer.getFont().deriveFont( Font.PLAIN ) );
+			return renderer;
 		}
 	}
 
