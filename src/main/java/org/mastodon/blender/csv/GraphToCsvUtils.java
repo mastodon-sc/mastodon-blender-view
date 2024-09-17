@@ -36,9 +36,7 @@ import org.mastodon.mamut.model.ModelGraph;
 import org.mastodon.mamut.model.Spot;
 import org.mastodon.mamut.model.branch.BranchLink;
 import org.mastodon.mamut.model.branch.BranchSpot;
-import org.mastodon.model.tag.ObjTagMap;
-import org.mastodon.model.tag.TagSetStructure;
-import org.mastodon.ui.coloring.ColoringModel;
+import org.mastodon.model.tag.TagSetModel;
 import org.mastodon.ui.coloring.ColoringModelMain;
 import org.mastodon.ui.coloring.GraphColorGenerator;
 import org.mastodon.ui.coloring.feature.FeatureColorMode;
@@ -190,5 +188,26 @@ public class GraphToCsvUtils
 		colorModes.addAll( colorModeManager.getBuiltinStyles() );
 		colorModes.removeIf( colorMode -> !coloringModel.isValid( colorMode ) );
 		return colorModes;
+	}
+
+	static List< ColorFunction > getTagSetColorFunctions( ProjectModel projectModel )
+	{
+		TagSetModel< Spot, Link > tagSetModel = projectModel.getModel().getTagSetModel();
+		return tagSetModel.getTagSetStructure().getTagSets().stream()
+				.map( tagSet -> new TagSetColorFunction( tagSet, tagSetModel.getVertexTags().tags( tagSet ) ) )
+				.collect( Collectors.toList() );
+
+	}
+
+	static List< ColorFunction > getFeatureColorFunctions( ProjectModel projectModel )
+	{
+		ColoringModelMain< Spot, Link, BranchSpot, BranchLink > coloringModel = createColoringModel( projectModel );
+		FeatureColorModeManager colorModeManager = coloringModel.getFeatureColorModeManager();
+		List< FeatureColorMode > colorModes = new ArrayList<>();
+		colorModes.addAll( colorModeManager.getUserStyles() );
+		colorModes.addAll( colorModeManager.getBuiltinStyles() );
+		return colorModes.stream().filter( coloringModel::isValid )
+				.map( colorMode -> new FeatureColorFunction( coloringModel, colorMode ) )
+				.collect( Collectors.toList() );
 	}
 }
