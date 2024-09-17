@@ -130,4 +130,32 @@ public class ColorSchemeDialog
 			}
 		}
 	}
+
+	private static class EmptyColorFunction implements ColorFunction
+	{
+		private final String name;
+
+		private EmptyColorFunction( String name )
+		{
+			this.name = name;
+		}
+
+		@Override
+		public String toString()
+		{
+			return name;
+		}
+
+		@Override
+		public Group getGroup()
+		{
+			return null;
+		}
+
+		@Override
+		public Integer apply( final Spot spot )
+		{
+			return null;
+		}
+	}
 }
