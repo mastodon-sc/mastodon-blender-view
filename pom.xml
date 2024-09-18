@@ -60,6 +60,13 @@
 			<url>https://github.com/xulman</url>
 			<properties><id>xulman</id></properties>
 		</contributor>
+		<contributor>
+			<name>Stefan Hahmann</name>
+			<url>https://github.com/stefanhahmann</url>
+			<properties>
+				<id>stefanhahmann</id>
+			</properties>
+		</contributor>
 	</contributors>
 
 	<repositories>
@@ -91,7 +98,7 @@
 		<license.excludes>**/zip.xml</license.excludes>
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles>
-		<mastodon.version>1.0.0-beta-28</mastodon.version>
+		<mastodon.version>1.0.0-beta-30</mastodon.version>
 	</properties>
 
 	<build>
@@ -142,6 +149,15 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+			<!-- Configure the maven-surefire-plugin to use a heap size of 1gb while running tests. -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.1.0</version>
+				<configuration>
+					<argLine>-Xmx1g</argLine>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
