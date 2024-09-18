@@ -100,7 +100,7 @@ public class ColorSchemeDialog
 		public Component getListCellRendererComponent( final JList< ? extends ColorFunction > list, final ColorFunction colorFunction,
 				final int index, final boolean isSelected, final boolean cellHasFocus )
 		{
-			if ( colorFunction instanceof EmptyColorFuntion )
+			if ( colorFunction instanceof EmptyColorFunction )
 			{
 				String name = colorFunction.toString();
 				switch ( name )
@@ -114,13 +114,13 @@ public class ColorSchemeDialog
 				case SEPARATOR:
 					return new JSeparator( SwingConstants.HORIZONTAL );
 				default:
-					// use default renderer
+					// use default entry rendering
 				}
 			}
-			JLabel renderer =
+			JLabel defaultEntry =
 					( JLabel ) defaultRenderer.getListCellRendererComponent( list, colorFunction, index, isSelected, cellHasFocus );
-			renderer.setFont( renderer.getFont().deriveFont( Font.PLAIN ) );
-			return renderer;
+			defaultEntry.setFont( defaultEntry.getFont().deriveFont( Font.PLAIN ) );
+			return defaultEntry;
 		}
 	}
 
