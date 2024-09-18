@@ -1,8 +1,8 @@
 package org.mastodon.blender.csv;
 
-import org.mastodon.mamut.model.Spot;
-
 import java.util.function.Function;
+
+import org.mastodon.mamut.model.Spot;
 
 interface ColorFunction extends Function< Spot, Integer >
 {

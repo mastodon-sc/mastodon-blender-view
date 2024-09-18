@@ -28,6 +28,14 @@
  */
 package org.mastodon.blender.csv;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.mastodon.blender.setup.BlenderSettingsService;
@@ -36,14 +44,6 @@ import org.mastodon.blender.setup.StartBlender;
 import org.mastodon.mamut.ProjectModel;
 import org.mastodon.mamut.model.Model;
 import org.scijava.Context;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Export the Mastodon graph as CSV file such that it can be opened with Blender.

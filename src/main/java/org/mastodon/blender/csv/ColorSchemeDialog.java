@@ -1,7 +1,9 @@
 package org.mastodon.blender.csv;
 
-import org.mastodon.mamut.ProjectModel;
-import org.mastodon.mamut.model.Spot;
+import java.awt.Component;
+import java.awt.Font;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JComboBox;
@@ -11,10 +13,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JSeparator;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
-import java.awt.Component;
-import java.awt.Font;
-import java.util.ArrayList;
-import java.util.List;
+
+import org.mastodon.mamut.ProjectModel;
+import org.mastodon.mamut.model.Spot;
 
 /**
  * A JComboBox for selecting a color scheme.

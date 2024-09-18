@@ -28,6 +28,14 @@
  */
 package org.mastodon.blender.csv;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Collectors;
+
 import org.mastodon.graph.ref.IncomingEdges;
 import org.mastodon.mamut.ProjectModel;
 import org.mastodon.mamut.model.Link;
@@ -40,14 +48,6 @@ import org.mastodon.model.tag.TagSetModel;
 import org.mastodon.ui.coloring.ColoringModelMain;
 import org.mastodon.ui.coloring.feature.FeatureColorMode;
 import org.mastodon.ui.coloring.feature.FeatureColorModeManager;
-
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.stream.Collectors;
 
 /**
  * Utility class to export a {@link Model} to a CSV file.

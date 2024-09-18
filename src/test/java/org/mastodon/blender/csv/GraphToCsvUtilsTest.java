@@ -8,7 +8,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Objects;
 
-import ij.ImagePlus;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
@@ -16,6 +15,7 @@ import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.display.imagej.ImgToVirtualStack;
 import net.imglib2.type.numeric.real.FloatType;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
@@ -29,6 +29,8 @@ import org.mastodon.util.TagHelper;
 import org.mastodon.util.TagSetUtils;
 import org.mastodon.views.bdv.SharedBigDataViewerData;
 import org.scijava.Context;
+
+import ij.ImagePlus;
 
 public class GraphToCsvUtilsTest
 {
