@@ -113,7 +113,7 @@ public class ColorSchemeDialog
 				case SEPARATOR:
 					return new JSeparator( SwingConstants.HORIZONTAL );
 				default:
-					return new JLabel( colorFunction.toString() );
+					// use default renderer
 				}
 			}
 			JLabel renderer =
