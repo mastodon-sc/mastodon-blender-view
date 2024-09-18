@@ -99,7 +99,7 @@ public class ColorSchemeDialog
 		public Component getListCellRendererComponent( final JList< ? extends ColorFunction > list, final ColorFunction colorFunction,
 				final int index, final boolean isSelected, final boolean cellHasFocus )
 		{
-			if ( colorFunction.getGroup() == null )
+			if ( colorFunction instanceof EmptyColorFuntion )
 			{
 				String name = colorFunction.toString();
 				switch ( name )
