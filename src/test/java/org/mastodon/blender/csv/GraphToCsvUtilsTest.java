@@ -36,45 +36,45 @@ public class GraphToCsvUtilsTest
 	public void testWriteCsv() throws IOException
 	{
 		// setup
-		Model model = initializeExampleModel();
-		File mastodonFile = File.createTempFile( "test", ".mastodon" );
+		ProjectModel projectModel = initializeExampleProjectModel();
+		File csvFile = File.createTempFile( "mastodon-graph", ".csv" );
+		// process
+		GraphToCsvUtils.writeCsv( projectModel, csvFile.getAbsolutePath() );
+		// test
+		String content = FileUtils.readFileToString( csvFile, StandardCharsets.UTF_8 );
+		String newLine = System.lineSeparator();
+		String expected =
+				"id, label, timepoint, x, y, z, radius, parent_id, \"tagset, with comma, and \"\"double quotes\"\"\", \"Number of links\""
+						+ newLine
+						+ "0, \"spotA\", 0, 1.0, 2.0, 3.0, 1.0, , #AABBCC, #352A87" + newLine
+						+ "1, \"spot,B\", 1, 3.0, 3.0, 4.0, 2.0, , #112233, #352A87" + newLine;
+		assertEquals( expected, content );
+	}
+
+	private static ProjectModel initializeExampleProjectModel() throws IOException
+	{
+		Model model = new Model();
 		Img< FloatType > image = ArrayImgs.floats( 1, 1, 1 );
+		File mastodonFile = File.createTempFile( "test", ".mastodon" );
 		try (Context context = new Context())
 		{
 			ProjectModel projectModel = wrapAsAppModel( image, model, context, mastodonFile );
-			File csvFile = File.createTempFile( "mastodon-graph", ".csv" );
-			// process
-			GraphToCsvUtils.writeCsv( projectModel, csvFile.getAbsolutePath() );
-			// test
-			String content = FileUtils.readFileToString( csvFile, StandardCharsets.UTF_8 );
-			String newLine = System.lineSeparator();
-			String expected =
-					"id, label, timepoint, x, y, z, radius, parent_id, \"tagset, with comma, and \"\"double quotes\"\"\", \"Number of links\""
-							+ newLine
-							+ "0, \"spotA\", 0, 1.0, 2.0, 3.0, 1.0, , #AABBCC, #352A87" + newLine
-							+ "1, \"spot,B\", 1, 3.0, 3.0, 4.0, 2.0, , #112233, #352A87" + newLine;
-			assertEquals( expected, content );
+			TagSetStructure.TagSet tagSet = TagSetUtils.addNewTagSetToModel( model, "tagset, with comma, and \"double quotes\"",
+					Arrays.asList(
+							Pair.of( "A", 0xaabbcc ),
+							Pair.of( "B", 0x112233 )
+					) );
+			TagHelper a = new TagHelper( model, tagSet, "A" );
+			TagHelper b = new TagHelper( model, tagSet, "B" );
+			ModelGraph graph = model.getGraph();
+			Spot spotA = graph.addVertex().init( 0, new double[] { 1, 2, 3 }, 1 );
+			Spot spotB = graph.addVertex().init( 1, new double[] { 3, 3, 4 }, 2 );
+			spotA.setLabel( "spotA" );
+			spotB.setLabel( "spot,B" );
+			a.tagSpot( spotA );
+			b.tagSpot( spotB );
+			return projectModel;
 		}
-
-	}
-
-	private static Model initializeExampleModel()
-	{
-		Model model = new Model();
-		TagSetStructure.TagSet tagSet = TagSetUtils.addNewTagSetToModel( model, "tagset, with comma, and \"double quotes\"", Arrays.asList(
-				Pair.of( "A", 0xaabbcc ),
-				Pair.of( "B", 0x112233 )
-		) );
-		TagHelper a = new TagHelper( model, tagSet, "A" );
-		TagHelper b = new TagHelper( model, tagSet, "B" );
-		ModelGraph graph = model.getGraph();
-		Spot spotA = graph.addVertex().init( 0, new double[] { 1, 2, 3 }, 1 );
-		Spot spotB = graph.addVertex().init( 1, new double[] { 3, 3, 4 }, 2 );
-		spotA.setLabel( "spotA" );
-		spotB.setLabel( "spot,B" );
-		a.tagSpot( spotA );
-		b.tagSpot( spotB );
-		return model;
 	}
 
 	// TODO: can be removed after https://github.com/mastodon-sc/mastodon/pull/325/ is merged and beta-31 is released
