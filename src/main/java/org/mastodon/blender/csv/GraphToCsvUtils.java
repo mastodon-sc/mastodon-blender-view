@@ -127,7 +127,7 @@ public class GraphToCsvUtils
 	}
 
 
-	static ColoringModelMain< Spot, Link, BranchSpot, BranchLink > createColoringModel( ProjectModel projectModel )
+	private static ColoringModelMain< Spot, Link, BranchSpot, BranchLink > createColoringModel( ProjectModel projectModel )
 	{
 		final FeatureColorModeManager featureColorModeManager = projectModel.getWindowManager().getManager( FeatureColorModeManager.class );
 		final Model model = projectModel.getModel();
@@ -135,7 +135,7 @@ public class GraphToCsvUtils
 				model.getBranchGraph() );
 	}
 
-	static List< ColorFunction > getColorFunctions( ProjectModel projectModel )
+	private static List< ColorFunction > getColorFunctions( ProjectModel projectModel )
 	{
 		List< ColorFunction > colorFunctions = getTagSetColorFunctions( projectModel );
 		colorFunctions.addAll( getFeatureColorFunctions( projectModel ) );
