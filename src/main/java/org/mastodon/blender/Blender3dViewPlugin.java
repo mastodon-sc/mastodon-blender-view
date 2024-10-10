@@ -48,13 +48,14 @@ import org.scijava.ui.behaviour.util.AbstractNamedAction;
 import org.scijava.ui.behaviour.util.Actions;
 import org.scijava.ui.behaviour.util.RunnableAction;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.mastodon.app.ui.ViewMenuBuilder.item;
 import static org.mastodon.app.ui.ViewMenuBuilder.menu;
+import static org.mastodon.app.ui.ViewMenuBuilder.separator;
 
 @Plugin( type = MamutPlugin.class )
 public class Blender3dViewPlugin extends AbstractContextual implements MamutPlugin
@@ -63,15 +64,15 @@ public class Blender3dViewPlugin extends AbstractContextual implements MamutPlug
 	@Parameter
 	private Context context;
 
-	private static final String SHOW_IN_BLENDER = "[blender-3d-view] show in blender";
+	private static final String START_BLENDER_WITH_CSV = "[blender-3d-view] start detached blender with csv";
 
-	private static final String SETUP_BLENDER = "[blender-3d-view] setup blender";
-
-	private static final String BLENDER_SETTINGS = "[blender-3d-view] blender settings";
+	private static final String SHOW_IN_BLENDER = "[blender-3d-view] start linked blender";
 
 	private static final String EXPORT_CSV = "[blender-3d-view] export graph as csv";
 
-	private static final String START_BLENDER_WITH_CSV = "[blender-3d-view] start blender with csv";
+	private static final String SETUP_BLENDER = "[blender-3d-view] setup blender";
+
+	private static final String BLENDER_TEMPLATE_SETTINGS = "[blender-3d-view] configure blender template files";
 
 	private static final String[] NO_KEYS = { "not mapped" };
 
@@ -79,11 +80,11 @@ public class Blender3dViewPlugin extends AbstractContextual implements MamutPlug
 
 	static
 	{
-		menuTexts.put( SHOW_IN_BLENDER, "Interactive Blender Window" );
-		menuTexts.put( SETUP_BLENDER, "Setup Blender Addon ..." );
+		menuTexts.put( START_BLENDER_WITH_CSV, "New Blender View (Advanced Visuals)" );
+		menuTexts.put( SHOW_IN_BLENDER, "New Blender View (Linked to Mastodon)" );
 		menuTexts.put( EXPORT_CSV, "Export CSV for Blender" );
-		menuTexts.put( START_BLENDER_WITH_CSV, "Geometry Nodes Blender Window" );
-		menuTexts.put( BLENDER_SETTINGS, "Configure Blender Template Files" );
+		menuTexts.put( SETUP_BLENDER, "Setup Blender Addon ..." );
+		menuTexts.put( BLENDER_TEMPLATE_SETTINGS, "Configure Blender Template Files" );
 	}
 
 	/*
@@ -100,33 +101,35 @@ public class Blender3dViewPlugin extends AbstractContextual implements MamutPlug
 		@Override
 		public void getCommandDescriptions( final CommandDescriptions descriptions )
 		{
-			descriptions.add( SHOW_IN_BLENDER, NO_KEYS, "Show the spots in a Blender 3D view." );
-			descriptions.add( SETUP_BLENDER, NO_KEYS, "Show a setup window that helps to configure Blender to be used from Mastodon." );
-			descriptions.add( BLENDER_SETTINGS, NO_KEYS, "Define template files to be used for the Mastodon Blender visualizations." );
+			descriptions.add( START_BLENDER_WITH_CSV, NO_KEYS,
+					"Export the graph as CSV and open it with Blender, detached from Mastodon." );
+			descriptions.add( SHOW_IN_BLENDER, NO_KEYS, "Show the spots in a linked Blender 3D view." );
 			descriptions.add( EXPORT_CSV, NO_KEYS, "Export the Graph As CSV" );
-			descriptions.add( START_BLENDER_WITH_CSV, NO_KEYS, "Export the graph as CSV and open it with Blender." );
+			descriptions.add( SETUP_BLENDER, NO_KEYS, "Show a setup window that helps to configure Blender to be used from Mastodon." );
+			descriptions.add( BLENDER_TEMPLATE_SETTINGS, NO_KEYS,
+					"Define template files to be used for the Mastodon Blender visualizations." );
 		}
 	}
 
+	private final AbstractNamedAction startBlenderWithCsv;
+
 	private final AbstractNamedAction showInBlender;
+
+	private final AbstractNamedAction exportCsv;
 
 	private final AbstractNamedAction setupBlender;
 
 	private final AbstractNamedAction blenderSettings;
 
-	private final AbstractNamedAction exportCsv;
-
-	private final AbstractNamedAction startBlenderWithCsv;
-
 	private ProjectModel projectModel;
 
 	public Blender3dViewPlugin()
 	{
-		showInBlender = new RunnableAction( SHOW_IN_BLENDER, this::startBlenderView );
-		setupBlender = new RunnableAction( SETUP_BLENDER, this::showSetup );
-		blenderSettings = new RunnableAction( BLENDER_SETTINGS, this::showBlenderSettings );
-		exportCsv = new RunnableAction( EXPORT_CSV, this::exportCsv );
 		startBlenderWithCsv = new RunnableAction( START_BLENDER_WITH_CSV, this::startBlenderWithCsv );
+		showInBlender = new RunnableAction( SHOW_IN_BLENDER, this::startBlenderView );
+		exportCsv = new RunnableAction( EXPORT_CSV, this::exportCsv );
+		setupBlender = new RunnableAction( SETUP_BLENDER, this::showSetup );
+		blenderSettings = new RunnableAction( BLENDER_TEMPLATE_SETTINGS, this::showBlenderSettings );
 		updateEnabledActions();
 	}
 
@@ -140,19 +143,19 @@ public class Blender3dViewPlugin extends AbstractContextual implements MamutPlug
 	@Override
 	public List< ViewMenuBuilder.MenuItem > getMenuItems()
 	{
-		return Arrays.asList(
-				menu( "Window",
-						menu( "New Blender Window",
+		return Collections.singletonList(
+				menu(
+						"Window",
+						menu(
+								"Blender Views",
+								item( START_BLENDER_WITH_CSV ),
 								item( SHOW_IN_BLENDER ),
-								item( START_BLENDER_WITH_CSV ) ) ),
-				menu( "Plugins",
-						menu( "Blender",
-								menu( "New Blender Window",
-										item( SHOW_IN_BLENDER ),
-										item( START_BLENDER_WITH_CSV ) ),
+								item( EXPORT_CSV ),
+								separator(),
 								item( SETUP_BLENDER ),
-								item( BLENDER_SETTINGS ),
-								item( EXPORT_CSV ) ) ) );
+								item( BLENDER_TEMPLATE_SETTINGS )
+						)
+				) );
 	}
 
 	@Override
@@ -164,18 +167,18 @@ public class Blender3dViewPlugin extends AbstractContextual implements MamutPlug
 	@Override
 	public void installGlobalActions( final Actions actions )
 	{
+		actions.namedAction( startBlenderWithCsv, NO_KEYS );
 		actions.namedAction( showInBlender, NO_KEYS );
+		actions.namedAction( exportCsv, NO_KEYS );
 		actions.namedAction( setupBlender, NO_KEYS );
 		actions.namedAction( blenderSettings, NO_KEYS );
-		actions.namedAction( exportCsv, NO_KEYS );
-		actions.namedAction( startBlenderWithCsv, NO_KEYS );
 	}
 
 	private void updateEnabledActions()
 	{
+		startBlenderWithCsv.setEnabled( projectModel != null );
 		showInBlender.setEnabled( projectModel != null );
 		exportCsv.setEnabled( projectModel != null );
-		startBlenderWithCsv.setEnabled( projectModel  != null );
 	}
 
 	private void startBlenderView()
@@ -193,6 +196,16 @@ public class Blender3dViewPlugin extends AbstractContextual implements MamutPlug
 		}
 	}
 
+	private void startBlenderWithCsv()
+	{
+		StartBlenderWithCsvAction.run( projectModel );
+	}
+
+	private void exportCsv()
+	{
+		ExportGraphAsCsvAction.run( projectModel );
+	}
+
 	private void showSetup()
 	{
 		new Thread(() -> BlenderSetup.showSetup( context ) ).start();
@@ -201,15 +214,5 @@ public class Blender3dViewPlugin extends AbstractContextual implements MamutPlug
 	private void showBlenderSettings()
 	{
 		context.service( CommandService.class ).run( BlenderSettingsCommand.class, true );
-	}
-
-	private void exportCsv()
-	{
-		ExportGraphAsCsvAction.run( projectModel );
-	}
-
-	private void startBlenderWithCsv()
-	{
-		StartBlenderWithCsvAction.run( projectModel );
 	}
 }
