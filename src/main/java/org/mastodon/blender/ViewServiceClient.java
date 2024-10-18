@@ -83,7 +83,7 @@ public class ViewServiceClient
 			String version = ViewServiceGrpc
 					.newBlockingStub( channel )
 					.withWaitForReady()
-					.withDeadlineAfter( 10, TimeUnit.SECONDS )
+					.withDeadlineAfter( 20, TimeUnit.SECONDS )
 					.getVersion( Empty.newBuilder().build() )
 					.getVersion();
 			if ( !version.equals( "0.1.0" ) )

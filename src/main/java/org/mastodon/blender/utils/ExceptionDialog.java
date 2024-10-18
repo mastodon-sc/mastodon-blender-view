@@ -47,6 +47,8 @@ import java.awt.event.MouseEvent;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
+import org.apache.commons.lang.StringEscapeUtils;
+
 public class ExceptionDialog
 {
 
@@ -75,7 +77,10 @@ public class ExceptionDialog
 		final JScrollPane scrollPane = initScrollPane( textArea );
 		final JLabel showDetailsLabel = initShowDetailsLabel( scrollPane );
 		JPanel panel = new JPanel(new MigLayout("insets dialog", "[grow]", "[][][grow]"));
-		panel.add(new JLabel( message ), "wrap");
+		String messageHtml = "<html><body>"
+				+ StringEscapeUtils.escapeHtml( message ).replace( "\n", "<br>" )
+				+ "</body></html>";
+		panel.add(new JLabel( messageHtml ), "wrap");
 		panel.add( showDetailsLabel, "wrap");
 		panel.add(scrollPane, "grow");
 		return panel;
