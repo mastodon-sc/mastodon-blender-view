@@ -33,7 +33,6 @@ import org.mastodon.blender.csv.ExportGraphAsCsvAction;
 import org.mastodon.blender.csv.StartBlenderWithCsvAction;
 import org.mastodon.blender.setup.BlenderSettingsCommand;
 import org.mastodon.blender.setup.BlenderSetup;
-import org.mastodon.blender.utils.BlenderModes;
 import org.mastodon.mamut.KeyConfigScopes;
 import org.mastodon.mamut.ProjectModel;
 import org.mastodon.mamut.plugin.MamutPlugin;
@@ -62,6 +61,10 @@ import static org.mastodon.app.ui.ViewMenuBuilder.separator;
 public class Blender3dViewPlugin extends AbstractContextual implements MamutPlugin
 {
 
+	public static final String ADVANCED_VISUALS = "Advanced Visuals";
+
+	public static final String LINKED_TO_MASTODON = "Linked to Mastodon";
+
 	@Parameter
 	private Context context;
 
@@ -81,8 +84,8 @@ public class Blender3dViewPlugin extends AbstractContextual implements MamutPlug
 
 	static
 	{
-		menuTexts.put( START_BLENDER_WITH_CSV, "New Blender View (" + BlenderModes.ADVANCED_VISUALS + ")" );
-		menuTexts.put( SHOW_IN_BLENDER, "New Blender View (" + BlenderModes.LINKED_TO_MASTODON + ")" );
+		menuTexts.put( START_BLENDER_WITH_CSV, "New Blender View (" + ADVANCED_VISUALS + ")" );
+		menuTexts.put( SHOW_IN_BLENDER, "New Blender View (" + LINKED_TO_MASTODON + ")" );
 		menuTexts.put( EXPORT_CSV, "Export CSV for Blender" );
 		menuTexts.put( SETUP_BLENDER, "Setup Blender Addon ..." );
 		menuTexts.put( BLENDER_TEMPLATE_SETTINGS, "Configure Blender Template Files" );

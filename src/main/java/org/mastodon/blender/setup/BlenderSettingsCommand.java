@@ -37,7 +37,7 @@ import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.commons.io.FileUtils;
-import org.mastodon.blender.utils.BlenderModes;
+import org.mastodon.blender.Blender3dViewPlugin;
 import org.mastodon.ui.util.FileChooser;
 import org.scijava.Cancelable;
 import org.scijava.Initializable;
@@ -63,7 +63,7 @@ public class BlenderSettingsCommand implements Command, Initializable, Cancelabl
 
 	@Parameter( visibility = ItemVisibility.MESSAGE ) // Text that is displayed in the dialog and never changes.
 	private String interactiveDescription =
-			"Blender file that is used as empty template for the \"" + BlenderModes.LINKED_TO_MASTODON + "\":";
+			"Empty Blender template file used for \"" + Blender3dViewPlugin.LINKED_TO_MASTODON + "\" Blender view:";
 
 	@Parameter( label = "Blender File", style = "open, extensions:blend", required = false, persist = false, callback = "customInteractiveTemplateChange" )
 	private File interactiveTemplate = null;
@@ -75,7 +75,7 @@ public class BlenderSettingsCommand implements Command, Initializable, Cancelabl
 	private Button saveDefaultInteractiveTemplate;
 
 	@Parameter( visibility = ItemVisibility.MESSAGE ) // Text that is displayed in the dialog and never changes.
-	private String csvDescription = "Blender file that is used as empty template for \"" + BlenderModes.ADVANCED_VISUALS + "\":";
+	private String csvDescription = "Empty Blender templated file used for \"" + Blender3dViewPlugin.ADVANCED_VISUALS + "\" Blender view:";
 
 	@Parameter( label = "Blender File", style = "open, extensions:blend", required = false, persist = false, callback = "customCsvTemplateChange" )
 	private File csvTemplate = null;
@@ -153,14 +153,14 @@ public class BlenderSettingsCommand implements Command, Initializable, Cancelabl
 	private void saveDefaultInteractiveTemplate()
 	{
 		saveDefaultTempate( BlenderSettingsService.DEFAULT_INTERACTIVE_TEMPLATE,
-				"Save Default " + BlenderModes.LINKED_TO_MASTODON + " Template", "interactive_template.blend" );
+				"Save Default \"" + Blender3dViewPlugin.LINKED_TO_MASTODON + "\" Blender Template", "interactive_template.blend" );
 	}
 
 	@SuppressWarnings( "unused" )
 	private void saveDefaultCsvTemplate()
 	{
 		saveDefaultTempate( BlenderSettingsService.DEFAULT_CSV_TEMPLATE,
-				"Save Default " + BlenderModes.ADVANCED_VISUALS + " Blender Template", "geometry_nodes_template.blend" );
+				"Save Default \"" + Blender3dViewPlugin.ADVANCED_VISUALS + "\" Blender Template", "geometry_nodes_template.blend" );
 	}
 
 	private static void saveDefaultTempate( URL defaultTemplate, String title, String defaultFileName )
