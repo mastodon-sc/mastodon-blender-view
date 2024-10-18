@@ -68,8 +68,10 @@ public class ColorSchemeDialog
 
 	/**
 	 * Show a dialog to let the user select a coloring scheme.
+	 *
 	 * @param projectModel the project model
-	 * @return the name of the selected coloring scheme, or {@code null} if none was selected.
+	 * @return the name of the selected coloring scheme, or an empty string if the user
+	 * selected "no coloring scheme", or {@code null} if the user canceled the dialog.
 	 */
 	public static String showDialog( ProjectModel projectModel )
 	{
@@ -91,8 +93,8 @@ public class ColorSchemeDialog
 			ColorFunction selectedItem = ( ColorFunction ) comboBox.getSelectedItem();
 			if ( selectedItem == null )
 				return null;
-			if ( selectedItem.getGroup() == null )
-				return null;
+			if ( selectedItem instanceof EmptyColorFunction )
+				return "";
 			return selectedItem.toString();
 		}
 		return null;
