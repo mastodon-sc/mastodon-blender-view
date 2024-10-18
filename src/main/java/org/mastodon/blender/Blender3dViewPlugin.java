@@ -61,6 +61,10 @@ import static org.mastodon.app.ui.ViewMenuBuilder.separator;
 public class Blender3dViewPlugin extends AbstractContextual implements MamutPlugin
 {
 
+	public static final String ADVANCED_VISUALS = "Advanced Visuals";
+
+	public static final String LINKED_TO_MASTODON = "Linked to Mastodon";
+
 	@Parameter
 	private Context context;
 
@@ -80,11 +84,11 @@ public class Blender3dViewPlugin extends AbstractContextual implements MamutPlug
 
 	static
 	{
-		menuTexts.put( START_BLENDER_WITH_CSV, "New Blender View (Advanced Visuals)" );
-		menuTexts.put( SHOW_IN_BLENDER, "New Blender View (Linked to Mastodon)" );
+		menuTexts.put( START_BLENDER_WITH_CSV, "New Blender View (" + ADVANCED_VISUALS + ")" );
+		menuTexts.put( SHOW_IN_BLENDER, "New Blender View (" + LINKED_TO_MASTODON + ")" );
 		menuTexts.put( EXPORT_CSV, "Export CSV for Blender" );
-		menuTexts.put( SETUP_BLENDER, "Setup Blender Addon ..." );
-		menuTexts.put( BLENDER_TEMPLATE_SETTINGS, "Configure Blender Template Files" );
+		menuTexts.put( SETUP_BLENDER, "Setup Blender Addon..." );
+		menuTexts.put( BLENDER_TEMPLATE_SETTINGS, "Configure Blender Template Files..." );
 	}
 
 	/*
@@ -150,10 +154,10 @@ public class Blender3dViewPlugin extends AbstractContextual implements MamutPlug
 								"Blender Views",
 								item( START_BLENDER_WITH_CSV ),
 								item( SHOW_IN_BLENDER ),
-								item( EXPORT_CSV ),
 								separator(),
-								item( SETUP_BLENDER ),
-								item( BLENDER_TEMPLATE_SETTINGS )
+								item( EXPORT_CSV ),
+								item( BLENDER_TEMPLATE_SETTINGS ),
+								item( SETUP_BLENDER )
 						)
 				) );
 	}
