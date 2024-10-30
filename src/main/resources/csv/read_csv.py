@@ -93,7 +93,7 @@ def add_attribute(mesh, data, attribute_name, attribute_type='FLOAT', object_typ
 df = read_csv(filename)
 normalize(df)
 
-# create a pandas seriest
+# create a pandas series with the index of the dataframe as the key and the id as the value
 id_to_index = df['id'].reset_index().set_index('id')['index']
 df_edges = df[['parent_id','timepoint']].dropna(subset='parent_id').reset_index()
 df_edges['parent_index'] = df_edges['parent_id'].astype(int).map(id_to_index)
