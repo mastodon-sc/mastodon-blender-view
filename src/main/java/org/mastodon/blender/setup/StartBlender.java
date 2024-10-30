@@ -120,6 +120,7 @@ public class StartBlender
 		joiner.add( String.join( " ", command ) );
 		joiner.add( "=== Blender console output ===" );
 		joiner.add( toStringIfAvailable( process.getInputStream() ) );
+		joiner.add( toStringIfAvailable( process.getErrorStream() ) );
 		joiner.add( "=== Java stack trace ===" );
 		throw new RuntimeException(joiner.toString(), error );
 	}
