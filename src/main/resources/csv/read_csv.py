@@ -30,7 +30,6 @@ import os
 import bpy
 import pandas as pd
 import csv
-import bmesh
 from collections import defaultdict
 
 
@@ -44,7 +43,7 @@ def read_csv(filename):
 
 
 def add_mesh(name, vertices, edges=[], faces=[],  collection_name="Collection"):
-    mesh = bpy.data.meshes.new("mesh")
+    mesh = bpy.data.meshes.new(name)
     mesh.from_pydata(vertices, edges, faces)
     obj = bpy.data.objects.new(mesh.name, mesh)
     bring_object_to_scene(obj, collection_name)
@@ -59,11 +58,6 @@ def bring_object_to_scene(object, collection_name="Collection"):
     bpy.context.view_layer.objects.active = object
 
 
-def extract_vertices(df):
-    df_xyz = df.filter(items=["x","y","z"])
-    return list(df_xyz.itertuples(index=False, name=None))
-
-
 def normalize(df):
     xyz = df[['x','y','z']]
     radius = df['radius']
@@ -74,14 +68,6 @@ def normalize(df):
     radius = radius * factor
     df[['x','y','z']] = xyz
     df['radius'] = radius
-
-
-#filename = '/home/arzt/Datasets/Mette/E1.csv'
-df = read_csv(filename)
-normalize(df)
-df_edges = df.dropna(subset='parent_id').loc[:,['id','parent_id','timepoint']].reset_index()
-edges = list(df_edges.filter(items=["id","parent_id"]).astype(int).itertuples(index=False, name=None))
-mesh = add_mesh("mesh", vertices=extract_vertices(df), edges=edges)
 
 
 def colorStringToInt(s):
@@ -99,25 +85,29 @@ def convert_color(color_code):
     return (red, green, blue)
 
 
-mesh.attributes.new('timepoint', 'FLOAT', 'POINT')
-d = mesh.attributes['timepoint'].data
-for index, t in df['timepoint'].items():
-    d[index].value = t
+def add_attribute(mesh, data, attribute_name, attribute_type='FLOAT', object_type='POINT'):
+    mesh.attributes.new(attribute_name, attribute_type, object_type)
+    mesh.attributes[attribute_name].data.foreach_set('value', data.values)
 
-mesh.attributes.new('radius', 'FLOAT', 'POINT')
-d = mesh.attributes['radius'].data
-for index, r in df['radius'].items():
-    d[index].value = r
 
-mesh.attributes.new('target_timepoint', 'FLOAT', 'EDGE')
-d = mesh.attributes['target_timepoint'].data
-for index, t in df_edges['timepoint'].items():
-    d[index].value = t
+df = read_csv(filename)
+normalize(df)
+
+# create a pandas series with the index of the dataframe as the key and the id as the value
+id_to_index = df['id'].reset_index().set_index('id')['index']
+df_edges = df[['parent_id','timepoint']].dropna(subset='parent_id').reset_index()
+df_edges['parent_index'] = df_edges['parent_id'].astype(int).map(id_to_index)
+edges = df_edges[['parent_index','index']].to_numpy()
+vertices = df[['x', 'y', 'z']].to_numpy()
+mesh = add_mesh("mesh", vertices=vertices, edges=edges)
+
+add_attribute(mesh, df['timepoint'], attribute_name='timepoint')
+add_attribute(mesh, df['radius'], attribute_name='radius')
+add_attribute(mesh, df_edges['timepoint'], attribute_name='target_timepoint', object_type='EDGE')
 
 if tag_set in df.columns:
     mesh.attributes.new('color_vector', 'FLOAT_VECTOR', 'POINT')
+    # mesh.attributes['color_vector'].data.foreach_set('vector', df[tag_set].map(lambda x: convert_color(colorStringToInt(str(x)))))
     d2 = mesh.attributes['color_vector'].data
     for index, color_str in df[tag_set].items():
         d2[index].vector = convert_color(colorStringToInt(str(color_str)))
-
-
