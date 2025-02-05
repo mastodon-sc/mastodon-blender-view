@@ -2,7 +2,7 @@
 
 * [ ] Merge Open Pull Requests
 * [ ] Update license information
-    * [ ] "mvn license:update-file-header" ausführen and commit
+    * [ ] Run "mvn license:update-file-header" and commit
 * [ ] Optional: Copy SNAPSHOT to Fiji with active Mastodon-Dev update site and check menus
 * [ ] Create jar file locally with mvn clean package (compile with Java 8)
     * [ ] Set version number in pom.xml to release version before creating jar file
