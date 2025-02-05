@@ -1,7 +1,9 @@
 # Release
 
 * [ ] Merge Open Pull Requests
+* [ ] Check out the latest master branch
 * [ ] Update license information
+  * [ ] Open command line and navigate to the project root directory
     * [ ] Run "mvn license:update-file-header" and commit
 * [ ] Optional: Copy SNAPSHOT to Fiji with active Mastodon-Dev update site and check menus
 * [ ] Create jar file locally with mvn clean package (compile with Java 8)
