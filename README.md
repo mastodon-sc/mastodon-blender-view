@@ -16,7 +16,10 @@ Please don't confuse it for the social network called Mastodon.)
 
 ## Installation
 
-1. Install [Fiji](https://imagej.net/downloads) and [Blender](https://blender.org/download) on your computer. Make sure to install Blender as a "portable" installation. 
+1. Install [Fiji](https://imagej.net/downloads) and [Blender](https://blender.org/download) on your computer. Make sure
+   to install Blender as a "portable" installation. The plugin has been successfully tested with Blender 3.5, 3.6, 4.0,
+   4.1 and 4.2. It is recommended to use the latest version of Blender. However, the plugin is not guaranteed to work
+   with future versions of Blender.
 2. Next step is to [activate](https://imagej.net/update-sites/following) the "Mastodon-Tomancak" update site in Fiji.
 3. In Mastodon's main menu, you will find an entry ```Plugins > Setup Blender Addon ...```, click it and follow the instructions. 
 
