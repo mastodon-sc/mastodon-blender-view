@@ -65,7 +65,7 @@ public class ViewServiceClient
 	 * Mapping a timepoint to multiple frames in Blender has the advantage
 	 * that the Blender automatically interpolates between the timepoints.
 	 **/
-	private static final int TIME_SCALING_FACTOR = 10;
+	private static final int DEFAULT_TIME_SCALING_FACTOR = 10;
 
 	public static final String URL = "localhost:";
 
@@ -74,6 +74,8 @@ public class ViewServiceClient
 	private final ViewServiceGrpc.ViewServiceStub nonBlockingStub;
 
 	private final Listener listener;
+
+	private final int timeScalingFactor;
 
 	public static void waitForConnection( int port )
 	{
@@ -112,13 +114,21 @@ public class ViewServiceClient
 
 	public ViewServiceClient( final Context context, final Listener listener )
 	{
+		this( context, listener, DEFAULT_TIME_SCALING_FACTOR );
+	}
+
+	public ViewServiceClient( final Context context, final Listener listener, final int timeScalingFactor )
+	{
 		this.listener = listener;
+		this.timeScalingFactor = timeScalingFactor;
 		int port = StartBlender.getFreePort();
-		try {
+		try
+		{
 			StartBlender.startBlender( context, port );
 		}
-		catch( Throwable throwable ) {
-			throw new StartBlenderException(throwable);
+		catch ( Throwable throwable )
+		{
+			throw new StartBlenderException( throwable );
 		}
 		ManagedChannel channel = ManagedChannelBuilder.forTarget( URL + port ).usePlaintext().build();
 		Runtime.getRuntime().addShutdownHook( new Thread( channel::shutdown ) );
@@ -135,7 +145,7 @@ public class ViewServiceClient
 
 	public int receiveTimepoint()
 	{
-		return Math.round( ( float ) blockingStub.getTimePoint( Empty.newBuilder().build() ).getTimePoint() / TIME_SCALING_FACTOR );
+		return Math.round( ( float ) blockingStub.getTimePoint( Empty.newBuilder().build() ).getTimePoint() / timeScalingFactor );
 	}
 
 	public int receiveActiveSpotId()
@@ -169,7 +179,7 @@ public class ViewServiceClient
 	{
 		//System.out.println("Mastodon -> Blender: set time point to " + timePoint);
 		blockingStub.setTimePoint( SetTimePointRequest.newBuilder()
-				.setTimepoint( timePoint * TIME_SCALING_FACTOR )
+				.setTimepoint( timePoint * timeScalingFactor )
 				.build() );
 	}
 
@@ -238,7 +248,7 @@ public class ViewServiceClient
 		request.addCoordinates( point.getFloatPosition( 0 ) );
 		request.addCoordinates( point.getFloatPosition( 1 ) );
 		request.addCoordinates( point.getFloatPosition( 2 ) );
-		request.addTimepoints( spot.getTimepoint() * TIME_SCALING_FACTOR );
+		request.addTimepoints( spot.getTimepoint() * timeScalingFactor );
 	}
 
 	// callback
