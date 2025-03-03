@@ -31,6 +31,7 @@ package org.mastodon.blender;
 import org.mastodon.app.ui.ViewMenuBuilder;
 import org.mastodon.blender.csv.ExportGraphAsCsvAction;
 import org.mastodon.blender.csv.StartBlenderWithCsvAction;
+import org.mastodon.blender.interactive.BlenderInteractiveCommand;
 import org.mastodon.blender.setup.BlenderSettingsCommand;
 import org.mastodon.blender.setup.BlenderSetup;
 import org.mastodon.mamut.KeyConfigScopes;
@@ -187,17 +188,8 @@ public class Blender3dViewPlugin extends AbstractContextual implements MamutPlug
 
 	private void startBlenderView()
 	{
-		if ( projectModel != null )
-		{
-			new Thread(() -> {
-				try {
-					new BlenderController( projectModel );
-				}
-				catch ( StartBlenderException e ) {
-					BlenderSetup.startSetupWithMessage( context, e );
-				}
-			}).start();
-		}
+		context.service( CommandService.class ).run( BlenderInteractiveCommand.class, true, "projectModel", projectModel,
+				"context", projectModel.getContext() );
 	}
 
 	private void startBlenderWithCsv()
