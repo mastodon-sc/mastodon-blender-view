@@ -84,7 +84,8 @@ public class BlenderController
 
 	int known_active_object = -1;
 
-	public BlenderController( ProjectModel projectModel ) {
+	public BlenderController( ProjectModel projectModel, int timeScalingFactor )
+	{
 		this.projectModel = projectModel;
 		this.model = projectModel.getModel();
 		this.groupHandle = projectModel.getGroupManager().createGroupHandle();
@@ -92,7 +93,7 @@ public class BlenderController
 		NavigationHandler<Spot, Link> navigationModel = groupHandle.getModel( projectModel.NAVIGATION );
 		this.focusModel = new AutoNavigateFocusModel<>( projectModel.getFocusModel(), navigationModel );
 		this.timePointModel = groupHandle.getModel( projectModel.TIMEPOINT );
-		this.client = new ViewServiceClient( projectModel.getContext(), new ViewServiceListener() );
+		this.client = new ViewServiceClient( projectModel.getContext(), new ViewServiceListener(), timeScalingFactor );
 		sendCoordinates();
 		sendColors();
 		sendTagSetList();

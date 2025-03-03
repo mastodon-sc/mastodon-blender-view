@@ -45,7 +45,7 @@ public class StartBlenderAndMastodon
 	{
 		copyAddonFromRepoToBlender();
 		ProjectModel projectModel = MastodonUtils.showGui( "/home/arzt/Datasets/DeepLineage/Johannes/2022-07-27_NL46xNL22_eachview_2023-07-04_cleaned.mastodon" );
-		new BlenderController( projectModel );
+		new BlenderController( projectModel, 1 );
 	}
 
 	private static void copyAddonFromRepoToBlender() throws IOException
