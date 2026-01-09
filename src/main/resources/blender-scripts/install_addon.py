@@ -45,8 +45,18 @@ def get_python_path():
     return os.path.abspath(path)
 
 
+# Ensure pip is available, but handle the case where it's already installed
 os.environ.pop("PIP_REQ_TRACKER", None)
-ensurepip.bootstrap()
+try:
+    import pip
+except ImportError:
+    # pip is not installed, bootstrap it
+    try:
+        ensurepip.bootstrap()
+    except Exception as e:
+        # If bootstrap fails, try to continue anyway as pip might be installed
+        # in a way that ensurepip doesn't detect
+        print(f"Warning: ensurepip.bootstrap() failed with: {e}")
 os.environ.pop("PIP_REQ_TRACKER", None)
 
 # install dependencies
