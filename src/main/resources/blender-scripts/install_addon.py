@@ -53,9 +53,9 @@ except ImportError:
     # pip is not installed, bootstrap it
     try:
         ensurepip.bootstrap()
-    except Exception as e:
-        # If bootstrap fails, try to continue anyway as pip might be installed
-        # in a way that ensurepip doesn't detect
+    except (OSError, RuntimeError) as e:
+        # If bootstrap fails (e.g., pip is already installed), try to continue anyway
+        # as pip might be installed in a way that ensurepip doesn't detect
         print(f"Warning: ensurepip.bootstrap() failed with: {e}")
 os.environ.pop("PIP_REQ_TRACKER", None)
 
