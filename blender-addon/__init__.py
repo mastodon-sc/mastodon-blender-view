@@ -37,6 +37,21 @@ bl_info = {
     "category": "3D View"
 }
 
+
+def add_addon_libs_dir():
+    """
+    Add the dependencies of the Mastodon Blender View plugin to the pythons system path.
+    """
+    import sys
+    import os
+    addon_dir = os.path.dirname(__file__)
+    addon_libs_dir = os.path.join(addon_dir, "libs")
+    if addon_libs_dir not in sys.path:
+        sys.path.insert(0, addon_libs_dir)
+
+
+add_addon_libs_dir()
+
 from . import mb_panel
 from . import mb_server
 
