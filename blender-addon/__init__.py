@@ -38,10 +38,8 @@ bl_info = {
 }
 
 
-def add_addon_libs_dir():
-    """
-    Add the dependencies of the Mastodon Blender View plugin to the pythons system path.
-    """
+def _add_dependencies_to_sys_path():
+    """ Add the dependencies of Mastodon Blender View addon to the pythons system path. """
     import sys
     import os
     addon_dir = os.path.dirname(__file__)
@@ -50,7 +48,7 @@ def add_addon_libs_dir():
         sys.path.insert(0, addon_libs_dir)
 
 
-add_addon_libs_dir()
+_add_dependencies_to_sys_path()
 
 from . import mb_panel
 from . import mb_server
