@@ -33,21 +33,72 @@ import bpy
 import sys
 import addon_utils
 
-# install addon
 
-print("start installing mastodon blender view addon...")
-argv = sys.argv
-addon_zip = argv[argv.index('--') + 1]
-bpy.ops.preferences.addon_install(filepath=addon_zip)
-print("mastodon blender view addon installed")
+def main():
+    print("start installing mastodon blender view addon...")
+    install_mastodon_blender_view_addon()
+    print("mastodon blender view addon installed")
+    print("install pip if needed...")
+    install_pip()
+    print("pip is installed")
+    addon_dir = get_mastodon_blender_view_addon_dir()
+    print(f"Installation directory of the Mastodon Blender View addon: {addon_dir}")
+    install_dependencies(packages=['grpcio', 'bidict', 'grpcio-tools', 'pandas'], target=os.path.join(addon_dir, "libs"))
+    import_dependencies()
+    print("dependencies installed")
+    compile_grpc_protocol(addon_dir)
+    print("google RPC code compiled")
 
-# install pip
 
-os.environ.pop("PIP_REQ_TRACKER", None)
-ensurepip.bootstrap()
-os.environ.pop("PIP_REQ_TRACKER", None)
+def install_mastodon_blender_view_addon():
+    argv = sys.argv
+    addon_zip = argv[argv.index('--') + 1]
+    bpy.ops.preferences.addon_install(filepath=addon_zip)
 
-# get python path
+
+def install_pip():
+    os.environ.pop("PIP_REQ_TRACKER", None)
+    ensurepip.bootstrap()
+    os.environ.pop("PIP_REQ_TRACKER", None)
+
+
+def get_mastodon_blender_view_addon_dir() -> str:
+    filename_init_py = [m.__file__ for m in addon_utils.modules() if m.__name__ == "mastodon_blender_view"][0]
+    addon_dir = os.path.dirname(filename_init_py)
+    return addon_dir
+
+
+def install_dependencies(packages: list[str], target: str):
+    print(f"Install dependencies into folder: {target}")
+
+    subprocess.check_call([get_python_path(), "-m", "pip", "install", "--target", target, *packages])
+
+    if target not in sys.path:  # add addon libs dir to system path
+        sys.path.insert(0, target)
+
+
+def import_dependencies():
+    import bidict
+    import grpc
+    import google.protobuf
+    import pandas
+
+
+def compile_grpc_protocol(addon_dir):
+    cmd = [get_python_path(), '-m', 'grpc_tools.protoc', '-I.', '--python_out=.', '--grpc_python_out=.',
+           'mastodon_blender_view/mastodon-blender-view.proto']
+    cwd = os.path.dirname(addon_dir)
+    env = os.environ.copy()
+    addon_libs_dir = os.path.join(addon_dir, "libs")
+    env["PYTHONPATH"] = addon_libs_dir + os.pathsep + env.get("PYTHONPATH") if "PYTHONPATH" in env else addon_libs_dir
+    subprocess.check_output(cmd, cwd=cwd, env=env)
+
+    try:
+        from mastodon_blender_view import mastodon_blender_view_pb2
+        from mastodon_blender_view import mastodon_blender_view_pb2_grpc
+    except ModuleNotFoundError:
+        raise Exception("installing google RPC generated code failed")
+
 
 def get_python_path():
     try:
@@ -58,45 +109,5 @@ def get_python_path():
         path = sys.executable
     return os.path.abspath(path)
 
-python_path = get_python_path()
 
-print(f"Blender python binary: {python_path}")
-
-# get installation path of "mastodon_blender_view" folder
-
-filename_init_py = [m.__file__ for m in addon_utils.modules() if m.__name__ == "mastodon_blender_view"][0]
-addon_dir = os.path.dirname(filename_init_py)
-print(f"Installation directory of the Blender Mastodon plugin: {addon_dir}")
-
-# install dependencies
-
-addon_libs_dir = os.path.join(addon_dir, "libs")
-print(f"Install dependencies into folder: {addon_libs_dir}")
-
-packages = ['grpcio', 'bidict', 'grpcio-tools', 'pandas']
-subprocess.check_call([python_path, "-m", "pip", "install", "--target", addon_libs_dir, *packages])
-
-if addon_libs_dir not in sys.path: # add addon libs dir to system path
-    sys.path.insert(0, addon_libs_dir)
-
-import bidict
-import grpc
-import google.protobuf
-import pandas
-
-print("dependencies installed")
-
-# install google rpc protocol
-cmd = [python_path, '-m', 'grpc_tools.protoc', '-I.', '--python_out=.', '--grpc_python_out=.', 'mastodon_blender_view/mastodon-blender-view.proto']
-cwd = path.dirname(addon_dir)
-env = os.environ.copy()
-env["PYTHONPATH"] = addon_libs_dir + os.pathsep + env.get("PYTHONPATH") if "PYTHONPATH" in env else addon_libs_dir
-subprocess.check_output(cmd, cwd=os.cwd, env=env )
-
-try:
-    from mastodon_blender_view import mastodon_blender_view_pb2
-    from mastodon_blender_view import mastodon_blender_view_pb2_grpc
-except ModuleNotFoundError:
-    raise Exception("installing google RPC generated code failed")
-
-print("google RPC code compiled")
+main()
