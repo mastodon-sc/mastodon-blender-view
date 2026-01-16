@@ -32,6 +32,8 @@ import subprocess
 import bpy
 import sys
 import addon_utils
+from pathlib import Path
+import site
 
 # install pip
 
@@ -44,6 +46,13 @@ def get_python_path():
         path = sys.executable
     return os.path.abspath(path)
 
+def get_target_flags():
+    # On Windows pip will sometimes install dependencies to the wrong folder when not setting the target flag.
+    # See: https://github.com/mastodon-sc/mastodon-blender-view/pull/36
+    for path in site.getsitepackages():
+        if "site-packages" in path:
+            return ["--target", path]
+    return []
 
 os.environ.pop("PIP_REQ_TRACKER", None)
 ensurepip.bootstrap()
@@ -52,8 +61,10 @@ os.environ.pop("PIP_REQ_TRACKER", None)
 # install dependencies
 
 python_path = get_python_path()
-packages = {'grpcio', 'bidict', 'grpcio-tools', 'pandas'}
-subprocess.check_output([python_path, '-m', 'pip', 'install', *packages])
+target_flags = get_target_flags()
+
+packages = ['grpcio', 'bidict', 'grpcio-tools', 'pandas']
+subprocess.check_output([python_path, '-m', 'pip', 'install', *target_flags, *packages])
 
 # test if dependencies are installed
 
