@@ -28,6 +28,9 @@
 ###
 import os
 import bpy
+
+bpy.ops.preferences.addon_enable(module='mastodon_blender_view') # "pandas" can only be imported after enabling the addon
+
 import pandas as pd
 import csv
 from collections import defaultdict
