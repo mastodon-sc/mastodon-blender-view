@@ -35,16 +35,19 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
 
 public class BlenderSetupUtils
 {
 
 	public static boolean verifyBlenderBinary( Path blenderPath )
 	{
-		try {
-			String output = runPythonWithinBlender( blenderPath,
-					"print('Blender started from within Mastodon.')" );
-			return output.contains( "Blender started from within Mastodon." );
+		try
+		{
+			String expectOutput = "Blender started from within Mastodon.";
+			String python = "print('" + expectOutput + "')";
+			return runPythonWithinBlender( blenderPath, python, expectOutput );
 		}
 		catch ( Throwable e ) {
 			return false;
@@ -58,16 +61,23 @@ public class BlenderSetupUtils
 		Path pythonScript = tmpDir.resolve( "install_addon.py" );
 		FileUtils.copyURLToFile( BlenderSetupUtils.class.getResource( "/mastodon_blender_view.zip" ), addonZip.toFile() );
 		FileUtils.copyURLToFile( BlenderSetupUtils.class.getResource( "/blender-scripts/install_addon.py" ), pythonScript.toFile() );
-		String output = runCommandGetOutput( blenderPath.toString(), //
+		Result result = runCommand( blenderPath.toString(), //
 				"--background", //
 				"--python", pythonScript.toAbsolutePath().toString(), //
 				"--", addonZip.toAbsolutePath().toString() ); //
-		if ( !output.contains( "dependencies installed" ) )
-			throw new RuntimeException( "Installation of the dependencies for the mastodon_blender_view addon failed:\n" + output );
-		if ( !output.contains( "mastodon blender view addon installed" ) )
-			throw new RuntimeException( "Installation of the mastodon_blender_view addon failed:\n" + output );
-		if ( !output.contains( "google RPC code compiled" ))
-			throw new RuntimeException( "Installation of the mastodon_blender_view addon failed:\n" + output );
+
+		if ( result.exitCode != 0 )
+			throw new RuntimeException( "Installation failed.\n" + result );
+
+		if ( !result.stdout.contains( "dependencies installed" ) )
+			throw new RuntimeException( "Installation of the dependencies for the mastodon_blender_view addon failed:\n" + result );
+
+		if ( !result.stdout.contains( "mastodon blender view addon installed" ) )
+			throw new RuntimeException( "Installation of the mastodon_blender_view addon failed:\n" + result );
+
+		if ( !result.stdout.contains( "google RPC code compiled" ) )
+			throw new RuntimeException( "Installation of the mastodon_blender_view addon failed:\n" + result );
+
 		Files.delete( pythonScript );
 		Files.delete( addonZip );
 		Files.delete( tmpDir );
@@ -75,15 +85,19 @@ public class BlenderSetupUtils
 
 	public static void uninstallAddon( Path blenderPath )
 	{
-		String python = "import bpy; bpy.ops.preferences.addon_remove(module='mastodon_blender_view')";
-		String output = runPythonWithinBlender( blenderPath, python );
+		String python = "import bpy; " + //
+				"bpy.ops.preferences.addon_remove(module='mastodon_blender_view'); " + //
+				"print('uninstall completed');";
+		runPythonWithinBlender( blenderPath, python, "uninstall completed" );
 	}
 
 	public static boolean isMastodonAddonInstalled( Path blenderPath )
 	{
-		String python = "import addon_utils; print([module.__name__ for module in addon_utils.modules()])";
-		String output = runPythonWithinBlender( blenderPath, python );
-		return output.contains( "'mastodon_blender_view'" );
+		String python = "import addon_utils; " + //
+                "print([module.__name__ for module in addon_utils.modules()])";
+		String expectedOutput = "'mastodon_blender_view'";
+		boolean success = runPythonWithinBlender( blenderPath, python, expectedOutput );
+		return success;
 	}
 
 	public static void runAddonTest( Path blenderPath )
@@ -106,19 +120,22 @@ public class BlenderSetupUtils
 		process.waitFor();
 	}
 
-	private static String runPythonWithinBlender( Path blenderPath, String python )
+	private static boolean runPythonWithinBlender( Path blenderPath, String python, String expectedOutput )
 	{
-		return runCommandGetOutput( blenderPath.toString(), "--background", "--python-expr", python );
+		Result result = runCommand( blenderPath.toString(), "--background", "--python-expr", python );
+		return result.exitCode == 0 && result.stdout.contains( expectedOutput );
 	}
 
-	private static String runCommandGetOutput( String... command )
+	private static Result runCommand( String... command )
 	{
 		try
 		{
 			Process process = new ProcessBuilder( command ).start();
-			String output = IOUtils.toString( process.getInputStream(), StandardCharsets.UTF_8 );
 			process.waitFor();
-			return output;
+			String output = IOUtils.toString( process.getInputStream(), StandardCharsets.UTF_8 );
+			String error = IOUtils.toString( process.getErrorStream(), StandardCharsets.UTF_8 );
+			int exitCode = process.exitValue();
+			return new Result( Arrays.asList( command ), output, error, exitCode );
 		}
 		catch ( IOException | InterruptedException e )
 		{
@@ -126,4 +143,44 @@ public class BlenderSetupUtils
 		}
 	}
 
+	public static class Result
+	{
+
+		private final List< String > command;
+
+		private final String stdout;
+
+		private final String stderr;
+
+		private final int exitCode;
+
+		public Result( List< String > command, String stdout, String stderr,
+				int exitCode )
+		{
+			this.command = command;
+			this.stdout = stdout;
+			this.stderr = stderr;
+			this.exitCode = exitCode;
+		}
+
+		@Override
+		public String toString()
+		{
+			final StringBuilder s = new StringBuilder();
+			s.append( "Command:\n    " ).append( command.get( 0 ) );
+			for ( int i = 1; i < command.size(); i++ )
+				s.append( " " ).append( addQuotes( command.get( i ) ) );
+			s.append( "\n\n" );
+            s.append( "Exit Code:\n    " ).append( exitCode ).append("\n\n");
+			s.append( "Command Output:\n\n" ).append( stdout ).append("\n\n");
+			s.append( "Commend Error:\n\n" ).append( stderr ).append("\n\n");
+			return s.toString();
+		}
+
+        static String addQuotes(String value)
+        {
+            boolean simple = value.matches("[a-zA-Z0-9_-]+");
+            return simple ? value : "'" + value + "'";
+        }
+	}
 }

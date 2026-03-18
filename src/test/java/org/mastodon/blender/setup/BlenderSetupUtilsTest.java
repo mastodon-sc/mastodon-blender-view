@@ -34,7 +34,9 @@ import org.junit.Test;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -61,4 +63,39 @@ public class BlenderSetupUtilsTest
 		BlenderSetupUtils.installAddon( blenderBinaryPath );
 		BlenderSetupUtils.runAddonTest( blenderBinaryPath );
 	}
+
+    @Test
+    public void testResultToString() {
+        BlenderSetupUtils.Result result = new BlenderSetupUtils.Result(Arrays.asList("test", "--if", "/works well/"),
+                "Hello World!",
+                "ERROR\nString",
+                42);
+        String string = result.toString();
+        String expected = "Command:\n" +
+                "    test --if '/works well/'\n" +
+                "\n" +
+                "Exit Code:\n" +
+                "    42\n" +
+                "\n" +
+                "Command Output:\n" +
+                "\n" +
+                "Hello World!\n" +
+                "\n" +
+                "Commend Error:\n" +
+                "\n" +
+                "ERROR\n" +
+                "String\n\n";
+        assertEquals(expected, string);
+    }
+
+    @Test
+    public void testAddQuotes()
+    {
+        assertEquals("noquotes", BlenderSetupUtils.Result.addQuotes("noquotes") );
+        assertEquals("--no-quotes", BlenderSetupUtils.Result.addQuotes("--no-quotes") );
+        assertEquals("'$needs-quotes'", BlenderSetupUtils.Result.addQuotes("$needs-quotes") );
+        assertEquals("'needs quotes'", BlenderSetupUtils.Result.addQuotes("needs quotes") );
+    }
 }
+
+
