@@ -53,7 +53,7 @@ os.environ.pop("PIP_REQ_TRACKER", None)
 
 python_path = get_python_path()
 packages = {'grpcio', 'bidict', 'grpcio-tools', 'pandas'}
-subprocess.check_output([python_path, '-m', 'pip', 'install', *packages])
+subprocess.run([python_path, '-m', 'pip', 'install', *packages], check=True)
 
 # test if dependencies are installed
 
@@ -77,7 +77,8 @@ print("mastodon blender view addon installed")
 
 filename_init_py = [m.__file__ for m in addon_utils.modules() if m.__name__ == "mastodon_blender_view"][0]
 addon_dir = os.path.dirname(filename_init_py)
-subprocess.check_output([python_path, '-m', 'grpc_tools.protoc', '-I.', '--python_out=.', '--grpc_python_out=.', 'mastodon_blender_view/mastodon-blender-view.proto'], cwd=os.path.dirname(addon_dir))
+command = [python_path, '-m', 'grpc_tools.protoc', '-I.', '--python_out=.', '--grpc_python_out=.', 'mastodon_blender_view/mastodon-blender-view.proto']
+subprocess.run(command, cwd=os.path.dirname(addon_dir), check=True)
 
 try:
     from mastodon_blender_view import mastodon_blender_view_pb2
