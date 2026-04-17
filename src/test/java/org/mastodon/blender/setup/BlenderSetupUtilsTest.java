@@ -40,13 +40,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-@Ignore
 public class BlenderSetupUtilsTest
 {
 	// TODO, improve tests
 
 	private final Path blenderBinaryPath = Paths.get("/home/arzt/Applications/blender-3.3.1-linux-x64/blender");
 
+	@Ignore("Test requires a Blender installation.")
 	@Test
 	public void testInstallAddon() throws IOException
 	{
@@ -56,6 +56,7 @@ public class BlenderSetupUtilsTest
 		assertTrue( BlenderSetupUtils.isMastodonAddonInstalled( blenderBinaryPath ) );
 	}
 
+	@Ignore("Test requires a Blender installation.")
 	@Test
 	public void testAddon()
 			throws IOException, InterruptedException
@@ -81,7 +82,7 @@ public class BlenderSetupUtilsTest
                 "\n" +
                 "Hello World!\n" +
                 "\n" +
-                "Commend Error:\n" +
+                "Command Error:\n" +
                 "\n" +
                 "ERROR\n" +
                 "String\n\n";
