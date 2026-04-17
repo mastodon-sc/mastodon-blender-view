@@ -67,16 +67,16 @@ public class BlenderSetupUtils
 				"--", addonZip.toAbsolutePath().toString() ); //
 
 		if ( result.exitCode != 0 )
-			throw new RuntimeException( "Installation failed.\n" + result );
+			throw new RuntimeException( "Installation failed.\n\n" + result );
 
 		if ( !result.stdout.contains( "dependencies installed" ) )
-			throw new RuntimeException( "Installation of the dependencies for the mastodon_blender_view addon failed:\n" + result );
+			throw new RuntimeException( "Installation of the dependencies for the mastodon_blender_view addon failed:\n\n" + result );
 
 		if ( !result.stdout.contains( "mastodon blender view addon installed" ) )
-			throw new RuntimeException( "Installation of the mastodon_blender_view addon failed:\n" + result );
+			throw new RuntimeException( "Installation of the mastodon_blender_view addon failed:\n\n" + result );
 
 		if ( !result.stdout.contains( "google RPC code compiled" ) )
-			throw new RuntimeException( "Installation of the mastodon_blender_view addon failed:\n" + result );
+			throw new RuntimeException( "Installation of the mastodon_blender_view addon failed:\n\n" + result );
 
 		Files.delete( pythonScript );
 		Files.delete( addonZip );
@@ -173,7 +173,7 @@ public class BlenderSetupUtils
 			s.append( "\n\n" );
             s.append( "Exit Code:\n    " ).append( exitCode ).append("\n\n");
 			s.append( "Command Output:\n\n" ).append( stdout ).append("\n\n");
-			s.append( "Commend Error:\n\n" ).append( stderr ).append("\n\n");
+			s.append( "Command Error:\n\n" ).append( stderr ).append("\n\n");
 			return s.toString();
 		}
 
