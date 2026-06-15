@@ -24,7 +24,35 @@ Please don't confuse it for the social network called Mastodon.)
 3. In Mastodon's main menu, you will find an entry ```Plugins > Setup Blender Addon ...```, click it and follow the instructions. 
 
 That's it, the Mastodon Blender View is ready to be used. Simply click: ```Window > New Blender Window```.
-   
+
+#### Troubleshooting: Python packages installed in the wrong location
+
+The installation routine installs a set of Python packages into Blender's bundled Python, located at
+`<Blender installation folder>/Contents/Resources/5.*/python/lib/python3.1*/site-packages`.
+
+On some systems with a pre-existing Python installation, these packages are instead installed into the user's local
+site-packages directory at `<user home directory>/.local/lib/python3.1*/site-packages`. When this happens, Blender
+cannot find the packages and the installation does not succeed.
+
+If you run into this, you can fix it manually by copying the following folders and files from
+`<user home directory>/.local/lib/python3.1*/site-packages` to
+`<Blender installation folder>/Contents/Resources/5.*/python/lib/python3.1*/site-packages`:
+
+* `bidict`
+* `bidict-*.dist-info`
+* `dateutil`
+* `google`
+* `grpc`
+* `grpc_tools`
+* `grpcio_tools-*.dist-info`
+* `grpcio-*.dist-info`
+* `pandas`
+* `pandas-*.dist-info`
+* `protobuf-*.dist-info`
+* `python_dateutil-*.dist-info`
+* `six-*.dist-info`
+* `six.py`
+
 ## Usage
 
 #### Quick Start
