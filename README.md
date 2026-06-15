@@ -59,6 +59,12 @@ Now the active time points and the active spot are synchronized between Blender 
 
 ## Project Details
 
+#### Tutorials
+
+* [Visualizing Cell Trajectories from Mastodon in Blender](https://artsnscience.eu/mastodon-blender-cell-trajectories/) —
+  a step-by-step tutorial by Samuel Pantze on turning Mastodon's exported tracking data into polished, artistic
+  3D renders using Blender's Geometry Nodes and Shader Nodes.
+
 #### Status
 
 The project is currently under development and at a prototype stage.
